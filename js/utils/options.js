@@ -13,7 +13,7 @@ function getStartOptions() {
 		showStory: true,
 		forceOneTab: false,
 		oldStyle: false,
-		tooltipForcing: true,
+		forceTooltips: true,
 	}
 }
 
