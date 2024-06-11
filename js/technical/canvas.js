@@ -1,12 +1,14 @@
-var canvas;
-var ctx;
+/** @type {HTMLCanvasElement} */
+let canvas;
+/** @type {CanvasRenderingContext2D} */
+let ctx;
 
-window.addEventListener("resize", (_=>resizeCanvas()));
+window.addEventListener("resize", (_ => resizeCanvas()));
 
 function retrieveCanvasData() {
 	let treeCanv = document.getElementById("treeCanvas")
 	let treeTab = document.getElementById("treeTab")
-	if (treeCanv===undefined||treeCanv===null) return false;
+	if (treeCanv === undefined || treeCanv === null) return false;
 	canvas = treeCanv;
 	ctx = canvas.getContext("2d");
 	return true;
@@ -15,24 +17,34 @@ function retrieveCanvasData() {
 function resizeCanvas() {
 	if (!retrieveCanvasData()) return
 	canvas.width = 0;
-    canvas.height = 0;
-	canvas.width  = window.innerWidth;
+	canvas.height = 0;
+	canvas.width = window.innerWidth;
 	canvas.height = window.innerHeight;
-		drawTree();
+	drawTree();
 }
 
-
+/**
+ * @type {{
+ * 	1: string,
+ * 	2: string,
+ * 	3: string,
+ * 	color: string,
+ * 	points: string,
+ * 	locked: string,
+ * 	background: string,
+ * 	background_tooltip: string,
+ * }|undefined}
+ */
 var colors_theme
 
 function drawTree() {
 	if (!retrieveCanvasData()) return;
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
-	for (layer in layers){
-		if (tmp[layer].layerShown == true && tmp[layer].branches){
-			for (branch in tmp[layer].branches)
-				{
-					drawTreeBranch(layer, tmp[layer].branches[branch])
-				}
+	for (const layer in layers) {
+		if (tmp[layer].layerShown == true && tmp[layer].branches) {
+			for (const branch in tmp[layer].branches) {
+				drawTreeBranch(layer, tmp[layer].branches[branch])
+			}
 		}
 		drawComponentBranches(layer, tmp[layer].upgrades, "upgrade-")
 		drawComponentBranches(layer, tmp[layer].buyables, "buyable-")
@@ -42,10 +54,9 @@ function drawTree() {
 }
 
 function drawComponentBranches(layer, data, prefix) {
-	for(id in data) {
+	for (const id in data) {
 		if (data[id].branches) {
-			for (branch in data[id].branches)
-			{
+			for (const branch in data[id].branches) {
 				drawTreeBranch(id, data[id].branches[branch], prefix + layer + "-")
 			}
 
@@ -58,13 +69,13 @@ function drawTreeBranch(num1, data, prefix) { // taken from Antimatter Dimension
 	let num2 = data
 	let color_id = 1
 	let width = 15
-	if (Array.isArray(data)){
+	if (Array.isArray(data)) {
 		num2 = data[0]
 		color_id = data[1]
 		width = data[2] || width
 	}
 
-	if(typeof(color_id) == "number")
+	if (typeof (color_id) == "number")
 		color_id = colors_theme[color_id]
 	if (prefix) {
 		num1 = prefix + num1
@@ -74,15 +85,15 @@ function drawTreeBranch(num1, data, prefix) { // taken from Antimatter Dimension
 		return
 
 	let start = document.getElementById(num1).getBoundingClientRect();
-    let end = document.getElementById(num2).getBoundingClientRect();
-    let x1 = start.left + (start.width / 2) + document.body.scrollLeft;
-    let y1 = start.top + (start.height / 2) + document.body.scrollTop;
-    let x2 = end.left + (end.width / 2) + document.body.scrollLeft;
-    let y2 = end.top + (end.height / 2) + document.body.scrollTop;
-    ctx.lineWidth = width;
-    ctx.beginPath();
-    ctx.strokeStyle = color_id
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
+	let end = document.getElementById(num2).getBoundingClientRect();
+	let x1 = start.left + (start.width / 2) + document.body.scrollLeft;
+	let y1 = start.top + (start.height / 2) + document.body.scrollTop;
+	let x2 = end.left + (end.width / 2) + document.body.scrollLeft;
+	let y2 = end.top + (end.height / 2) + document.body.scrollTop;
+	ctx.lineWidth = width;
+	ctx.beginPath();
+	ctx.strokeStyle = color_id
+	ctx.moveTo(x1, y1);
+	ctx.lineTo(x2, y2);
+	ctx.stroke();
 }

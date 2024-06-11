@@ -6,7 +6,7 @@ This guide assumes you have already gone through the [getting started guide](get
 
 Open mod.js. This is where you define things that are for the mod in general as opposed to layer-specific. For now, modInfo, you can set the mod name and author name, and also the points name, which changes what the game calls your basic points (but they're still referred to as `player.points` in the code). **Be sure that you set a mod id as well**.
 
-One suggestion: When you're testing your mod, you should turn off offline progress in the in-game settings, and don't leave the game running when you aren't using it. You could unintentionally balance your game with large timewalls caused by this extra time. 
+One suggestion: When you're testing your mod, you should turn off offline progress in the in-game settings, and don't leave the game running when you aren't using it. You could unintentionally balance your game with large timewalls caused by this extra time.
 
 ## Making a layer
 
@@ -52,21 +52,21 @@ Reload the page, and an upgrade will appear in the layer's tab! It will just be 
 
 Reload the page, and the upgrade will appear, fully formed! But it won't have any effect when you buy it! To impliment a boost, we need to go to the place where it is calculated. In this case, point gain is calculated in getPointGen in mod.js, so let's head over there.
 
-It's time to explain Decimals. Decimals are a special way of handling numbers over the normal Javascript limit. They are handled in a very different way. To perform any operations, instead of doing x = x + y, you have to do x = x.add(y). x has to be a Decimal, but y can be either a Decimal or Number (regular javascript number). A more detailed description is in [!general-info.md](/docs/!general-info.md)
+It's time to explain Decimals. Decimals are a special way of handling numbers over the normal Javascript limit. They are handled in a very different way. To perform any operations, instead of doing x = x + y, you have to do x = x.add(y). x has to be a Decimal, but y can be either a Decimal or Number (regular javascript number). A more detailed description is in [!general-info.md](/documentation/!general-info.md)
 
 With that knowledge in hand, what we need to do is check if the player has the upgrade, and then boost point gain if so. We can do that by inserting this line between gain being defined and returned:
+
 ```js
 if (hasUpgrade('p', 11)) gain = gain.times(2)
 ```
 
 Refresh the page again, and it should work! You are gaining 2 points per second!
 
-
 ## Upgraded upgrades
 
-Now that you know how to make a simple upgrade, let's make a more interesting one, that scales its effect based on your prestige points! 
+Now that you know how to make a simple upgrade, let's make a more interesting one, that scales its effect based on your prestige points!
 
-Copying things is often the easiest way to do things, so copy upgrade 11 and paste it afterwards. Replace the 11 with a 12, and change the name and description as you see fit, and bump the cost up to 2. Now, let's add an effect. effect is a function that calculates the bonus from an upgrade, and effectDisplay lets you display the effect. 
+Copying things is often the easiest way to do things, so copy upgrade 11 and paste it afterwards. Replace the 11 with a 12, and change the name and description as you see fit, and bump the cost up to 2. Now, let's add an effect. effect is a function that calculates the bonus from an upgrade, and effectDisplay lets you display the effect.
 
 ```js
     effect() {
@@ -77,7 +77,7 @@ Copying things is often the easiest way to do things, so copy upgrade 11 and pas
 
 this.layer and this.id are automatically set to the layer that the upgrade is in, and the id of the upgrade (in this case "12"). Using them makes it much easier to reuse code. You can also see that player[this.layer].points gets the prestige currency amount for this layer.
 
-Now, in mod.js, under the last line you added, you can apply the effect with 
+Now, in mod.js, under the last line you added, you can apply the effect with
 
 ```js
     if (hasUpgrade('p', 12)) gain = gain.times(upgradeEffect('p', 12))

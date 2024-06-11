@@ -40,7 +40,7 @@ microtabs: {
 
 Normal subtabs and microtab subtabs both use the same features:
 
-# Features:
+# Features
 
 - content: The tab layout code for the subtab, in [the tab layout format](custom-tab-layouts.md).
 
@@ -57,3 +57,5 @@ Normal subtabs and microtab subtabs both use the same features:
 
 - embedLayer: **SIGNIFICANT**, the id of another layer. If you have this, it will override "content", "style" and "shouldNotify",
                 instead displaying the entire layer in the subtab.
+
+- name: **optional**, specifies the text shown in the tab's button

@@ -6,7 +6,7 @@ var systemComponents = {
 				<div v-for="tab in Object.keys(data)">
 					<button v-if="data[tab].unlocked == undefined || data[tab].unlocked" v-bind:class="{tabButton: true, notify: subtabShouldNotify(layer, name, tab), resetNotify: subtabResetNotify(layer, name, tab)}"
 					v-bind:style="[{'border-color': tmp[layer].color}, (subtabShouldNotify(layer, name, tab) ? {'box-shadow': 'var(--hqProperty2a), 0 0 20px '  + (data[tab].glowColor || defaultGlow)} : {}), tmp[layer].componentStyles['tab-button'], data[tab].buttonStyle]"
-						v-on:click="function(){player.subtabs[layer][name] = tab; updateTabFormats(); needCanvasUpdate = true;}">{{tab}}</button>
+						v-on:click="function(){player.subtabs[layer][name] = tab; updateTabFormats(); needCanvasUpdate = true;}">{{data[tab].name == undefined ? tab : data[tab].name}}</button>
 				</div>
 			</div>
 		`
@@ -63,7 +63,6 @@ var systemComponents = {
 		`
 	},
 
-	
 	'layer-tab': {
 		props: ['layer', 'back', 'spacing', 'embedded'],
 		template: `<div v-bind:style="[tmp[layer].style ? tmp[layer].style : {}, (tmp[layer].tabFormat && !Array.isArray(tmp[layer].tabFormat)) ? tmp[layer].tabFormat[player.subtabs[layer].mainTabs].style : {}]" class="noBackground">
@@ -103,7 +102,7 @@ var systemComponents = {
 	},
 
 	'overlay-head': {
-		template: `			
+		template: `
 		<div class="overlayThing" style="padding-bottom:7px; width: 90%; z-index: 1000; position: relative">
 		<span v-if="player.devSpeed && player.devSpeed != 1" class="overlayThing">
 			<br>Dev Speed: {{format(player.devSpeed)}}x<br>
@@ -112,25 +111,20 @@ var systemComponents = {
 			<br>Offline Time: {{formatTime(player.offTime.remain)}}<br>
 		</span>
 		<br>
-		<span v-if="player.points.lt('1e1000')"  class="overlayThing">You have </span>
-		<h2  class="overlayThing" id="points">{{format(player.points)}}</h2>
-		<span v-if="player.points.lt('1e1e6')"  class="overlayThing"> {{modInfo.pointsName}}</span>
-		<br>
-		<span v-if="canGenPoints()"  class="overlayThing">({{tmp.other.oompsMag != 0 ? format(tmp.other.oomps) + " OOM" + (tmp.other.oompsMag < 0 ? "^OOM" : tmp.other.oompsMag > 1 ? "^" + tmp.other.oompsMag : "") + "s" : formatSmall(getPointGen())}}/sec)</span>
 		<div v-for="thing in tmp.displayThings" class="overlayThing"><span v-if="thing" v-html="thing"></span></div>
 	</div>
 	`
-    },
+	},
 
-    'info-tab': {
-        template: `
+	'info-tab': {
+		template: `
         <div>
         <h2>{{modInfo.name}}</h2>
         <br>
         <h3>{{VERSION.withName}}</h3>
         <span v-if="modInfo.author">
             <br>
-            Made by {{modInfo.author}}	
+            Made by {{modInfo.author}}
         </span>
         <br>
         The Modding Tree <a v-bind:href="'https://github.com/Acamaeda/The-Modding-Tree/blob/master/changelog.md'" target="_blank" class="link" v-bind:style = "{'font-size': '14px', 'display': 'inline'}" >{{TMT_VERSION.tmtNum}}</a> by Acamaeda and FlamemasterNXF
@@ -143,13 +137,17 @@ var systemComponents = {
         <a class="link" href="http://discord.gg/wwQfgPa" target="_blank" v-bind:style="{'font-size': '16px'}">Main Prestige Tree server</a><br>
 		<br><br>
         Time Played: {{ formatTime(player.timePlayed) }}<br><br>
+        Tip: All clickables can be held (for carpal tunnel prevention)<br><br>
         <h3>Hotkeys</h3><br>
-        <span v-for="key in hotkeys" v-if="player[key.layer].unlocked && tmp[key.layer].hotkeys[key.id].unlocked"><br>{{key.description}}</span></div>
+		<span v-for="keys in layered_hotkeys">
+		<span v-for="key in keys" v-if="player[key.layer].unlocked && tmp[key.layer].hotkeys[key.id].unlocked"><br>{{run(key.description)}}</span>
+		</span>
+		</div>
     `
-    },
+	},
 
-    'options-tab': {
-        template: `
+	'options-tab': {
+		template: `
         <table>
             <tr>
                 <td><button class="opt" onclick="save()">Save</button></td>
@@ -159,39 +157,48 @@ var systemComponents = {
             <tr>
                 <td><button class="opt" onclick="exportSave()">Export to clipboard</button></td>
                 <td><button class="opt" onclick="importSave()">Import</button></td>
-                <td><button class="opt" onclick="toggleOpt('offlineProd')">Offline Prod: {{ options.offlineProd?"ON":"OFF" }}</button></td>
+                <td>
+					<label class="opt" for="importfromfile" style="display:flex;align-items:center;">Import from file</label>
+					<input id="importfromfile" type="file" onchange="importFromFile()" style="display:none;" />
+				</td>
             </tr>
-            <tr>
+			<tr>
+                <td><button class="opt" onclick="toggleOpt('offlineProd')">Offline Prod: {{ options.offlineProd?"ON":"OFF" }}</button></td>
                 <td><button class="opt" onclick="switchTheme()">Theme: {{ getThemeName() }}</button></td>
                 <td><button class="opt" onclick="adjustMSDisp()">Show Milestones: {{ MS_DISPLAYS[MS_SETTINGS.indexOf(options.msDisplay)]}}</button></td>
-                <td><button class="opt" onclick="toggleOpt('hqTree')">High-Quality Tree: {{ options.hqTree?"ON":"OFF" }}</button></td>
-            </tr>
+			</tr>
             <tr>
+                <td><button class="opt" onclick="toggleOpt('hqTree')">High-Quality Tree: {{ options.hqTree?"ON":"OFF" }}</button></td>
                 <td><button class="opt" onclick="toggleOpt('hideChallenges')">Completed Challenges: {{ options.hideChallenges?"HIDDEN":"SHOWN" }}</button></td>
                 <td><button class="opt" onclick="toggleOpt('forceOneTab'); needsCanvasUpdate = true">Single-Tab Mode: {{ options.forceOneTab?"ALWAYS":"AUTO" }}</button></td>
-				<td><button class="opt" onclick="toggleOpt('forceTooltips'); needsCanvasUpdate = true">Shift-Click to Toggle Tooltips: {{ options.forceTooltips?"ON":"OFF" }}</button></td>
-				</tr> 
-			<tr>
-                <td><button class="opt" onclick="toggleOpt('hideMilestonePopups')">Show Milestone Popups: {{ formatOption(!options.hideMilestonePopups) }}</button></td>
             </tr>
+            <tr>
+				<td><button class="opt" onclick="toggleOpt('hideMilestonePopups')">Show Milestone Popups: {{ options.hideMilestonePopups?"NO":"YES" }}</button></td>
+				<td><button class="opt" onclick="toggleOpt('forceTooltips'); needsCanvasUpdate = true">Shift-Click to Toggle Tooltips: {{ options.forceTooltips?"ON":"OFF" }}</button></td>
+				<td><button class="opt" onclick="shiftDown = !shiftDown">Force Shift on: {{ shiftDown?"ON":"OFF" }}</button></td>
+			</tr>
+			<tr>
+                <td><button class="opt" onclick="toggleOpt('noRNG'); needsCanvasUpdate = true">Disable Luck: {{ options.noRNG?"ON":"OFF" }}</button></td>
+                <td><button v-if="tmp.c.layerShown" class="opt" onclick="changeLootChance(); needsCanvasUpdate = true">Fractional Chance Mode: {{ CHANCE_MODE[options.chanceMode] }}</button></td>
+			</tr>
         </table>`
-    },
+	},
 
-    'back-button': {
-        template: `
+	'back-button': {
+		template: `
         <button v-bind:class="back" onclick="goBack()">←</button>
         `
-    },
+	},
 
 
-	'tooltip' : {
+	'tooltip': {
 		props: ['text'],
 		template: `<div class="tooltip" v-html="text"></div>
 		`
 	},
 
 	'node-mark': {
-		props: {'layer': {}, data: {}, offset: {default: 0}, scale: {default: 1}},
+		props: { 'layer': {}, data: {}, offset: { default: 0 }, scale: { default: 1 } },
 		template: `<div v-if='data'>
 			<div v-if='data === true' class='star' v-bind:style='{position: "absolute", left: (offset-10) + "px", top: (offset-10) + "px", transform: "scale( " + scale||1 + ", " + scale||1 + ")"}'></div>
 			<img v-else class='mark' v-bind:style='{position: "absolute", left: (offset-22) + "px", top: (offset-15) + "px", transform: "scale( " + scale||1 + ", " + scale||1 + ")"}' v-bind:src="data"></div>
@@ -201,7 +208,7 @@ var systemComponents = {
 
 	'particle': {
 		props: ['data', 'index'],
-		template: `<div><div class='particle instant' v-bind:style="[constructParticleStyle(data), data.style]" 
+		template: `<div><div class='particle instant' v-bind:style="[constructParticleStyle(data), data.style]"
 			v-on:click="run(data.onClick, data)"  v-on:mouseenter="run(data.onMouseEnter, data)" v-on:mouseleave="run(data.onMouseLeave, data)" ><span v-html="data.text"></span>
 		</div>
 		<svg version="2" v-if="data.color">

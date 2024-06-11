@@ -55,6 +55,8 @@ These are the existing components, but you can create more in [components.js](/j
 - drop-down: Lets the user input a value with a dropdown menu. The argument a 2-element array: [name, options].
     The name is the name of the variable in player[layer] that the input is for, and options is an array of strings for options you can use.
 
+- drop-down-double: Same as `drop-down`, but each option is also an array with the first entry being the value and the second being the display.
+
 - upgrades, milestones, challenges, achievements, buyables, clickables: Displays the layers upgrades/challenges/etc, as appropriate. The argument is optional, and is a the list of rows this component should include, if it doesn't have all of them.
 
 - microtabs: Display a set of subtabs for an area. The argument is the name of the set of microtabs in the "microtabs" feature.
@@ -75,6 +77,31 @@ These are the existing components, but you can create more in [components.js](/j
 - layer-proxy: Lets you use components from another layer. The argument is a pair, `[layer, data]`, consisting of the id of the layer to proxy from, and the tabFormat for the components to show.
     (Note: you cannot use a microtab within a layer proxy)
 
+- layer-table: Lets you create a table with the color of the layer. The first argument may be a layer id to use a different color. The next one is the headers (in plain text). Following arguments are further tab layouts per row, per cell. Meaning:
+
+    ```js
+    content: [
+        ['layer-table', [
+            // Optional
+            other_layer_id,
+            // Required
+            [['header 1', 'header 2', '...etc']],
+            [['display-text', 'foo'], ['display-text', 'bar'], ['display-text', 'baz']], // row 1
+            [['clickable', 11], ['clickables', 2],], // other components also work!
+            etc...
+        ]]
+    ],
+    ```
+
+- tile: Lets you create a standalone tile. The second parameter contains the tile data.
+  - text: Text to display
+  - tooltip: Tooltip to display when the tile is hovered
+  - style: Style of the tile
+  - canClick: A function that returns true if the tile is clickable. Defaults to true
+  - onClick: Function to run when the tile is clicked
+  - onHold: Function to run when the tile is held
+
+- dynabar: Lets you create a dynamic bar straight from tabFormat. It has the same properties as a normal bar. (Except, of course, for layer and id)
 
 The rest of the components are sub-components. They can be used just like other components, but are typically part of another component.
 

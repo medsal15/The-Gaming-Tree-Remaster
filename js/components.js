@@ -9,13 +9,24 @@ function loadVue() {
 		`
 	})
 
-// data = a function returning the content (actually HTML)
+	// data = a function returning the content (actually HTML)
 	Vue.component('raw-html', {
-			props: ['layer', 'data'],
-			template: `
+		props: ['layer', 'data'],
+		template: `
 				<span class="instant"  v-html="data"></span>
 			`
-		})
+	})
+
+	// data = a function returning the content (actually HTML)
+	Vue.component('display-text-tooltip', {
+		props: ['layer', 'data'],
+		template: `
+			<div class="tooltipBox">
+				<span class="instant" v-html="data[0]"></span>
+				<tooltip :text="data[1]"></tooltip>
+			</div>
+		`
+	})
 
 	// Blank space, data = optional height in px or pair with width and height in px
 	Vue.component('blank', {
@@ -36,12 +47,12 @@ function loadVue() {
 			<img class="instant" v-bind:src= "data" v-bind:alt= "data">
 		`
 	})
-		
+
 	// data = an array of Components to be displayed in a row
 	Vue.component('row', {
 		props: ['layer', 'data'],
 		computed: {
-			key() {return this.$vnode.key}
+			key() { return this.$vnode.key }
 		},
 		template: `
 		<div class="upgTable instant">
@@ -60,7 +71,7 @@ function loadVue() {
 	Vue.component('column', {
 		props: ['layer', 'data'],
 		computed: {
-			key() {return this.$vnode.key}
+			key() { return this.$vnode.key }
 		},
 		template: `
 		<div class="upgTable instant">
@@ -79,7 +90,7 @@ function loadVue() {
 	Vue.component('layer-proxy', {
 		props: ['layer', 'data'],
 		computed: {
-			key() {return this.$vnode.key}
+			key() { return this.$vnode.key }
 		},
 		template: `
 		<div>
@@ -87,6 +98,31 @@ function loadVue() {
 		</div>
 		`
 	})
+
+	Vue.component('layer-table', {
+		props: ['layer', 'data'],
+		computed: {
+			key() { return this.$vnode.key },
+			lay() { return Array.isArray(this.data[0]) ? this.layer : this.data[0]; },
+			headers() { return Array.isArray(this.data[0]) ? this.data[0] : this.data[1]; },
+			rows() { return Array.isArray(this.data) ? Array.isArray(this.data[0]) ? this.data.slice(1) : this.data.slice(2) : []; },
+		},
+		template: `
+		<div>
+			<table class="layer-table" v-bind:style="{'--color': tmp[lay]?.color}">
+				<tr>
+					<th v-for="head in headers" v-html="head"></th>
+				</tr>
+				<tr v-for="row in rows">
+					<td v-for="cell in row">
+						<column :layer="layer" :data="cell" :key="key + 'col'"></column>
+					</td>
+				</tr>
+			</table>
+		</div>
+		`,
+	});
+
 	Vue.component('infobox', {
 		props: ['layer', 'data'],
 		template: `
@@ -107,10 +143,10 @@ function loadVue() {
 	// Data = width in px, by default fills the full area
 	Vue.component('h-line', {
 		props: ['layer', 'data'],
-			template:`
+		template: `
 				<hr class="instant" v-bind:style="data ? {'width': data} : {}" class="hl">
 			`
-		})
+	})
 
 	// Data = height in px, by default is bad
 	Vue.component('v-line', {
@@ -140,7 +176,7 @@ function loadVue() {
 		<div v-if="tmp[layer].challenges && tmp[layer].challenges[data]!== undefined && tmp[layer].challenges[data].unlocked && !(options.hideChallenges && maxedChallenge(layer, [data]) && !inChallenge(layer, [data]))"
 			v-bind:class="['challenge', challengeStyle(layer, data), player[layer].activeChallenge === data ? 'resetNotify' : '']" v-bind:style="tmp[layer].challenges[data].style">
 			<br><h3 v-html="tmp[layer].challenges[data].name"></h3><br><br>
-			<button v-bind:class="{ longUpg: true, can: true, [layer]: true }" v-bind:style="{'background-color': tmp[layer].color}" v-on:click="startChallenge(layer, data)">{{challengeButtonText(layer, data)}}</button><br><br>
+			<button v-bind:class="{ longUpg: true, can: true, [layer]: true }" v-bind:style="[{'background-color': tmp[layer].color}, run(tmp[layer].challenges[data].buttonStyle)]" v-on:click="startChallenge(layer, data)">{{challengeButtonText(layer, data)}}</button><br><br>
 			<span v-if="layers[layer].challenges[data].fullDisplay" v-html="run(layers[layer].challenges[data].fullDisplay, layers[layer].challenges[data])"></span>
 			<span v-else>
 				<span v-html="tmp[layer].challenges[data].challengeDescription"></span><br>
@@ -178,8 +214,9 @@ function loadVue() {
 			<span v-else>
 				<span v-if= "tmp[layer].upgrades[data].title"><h3 v-html="tmp[layer].upgrades[data].title"></h3><br></span>
 				<span v-html="tmp[layer].upgrades[data].description"></span>
-				<span v-if="layers[layer].upgrades[data].effectDisplay"><br>Currently: <span v-html="run(layers[layer].upgrades[data].effectDisplay, layers[layer].upgrades[data])"></span></span>
-				<br><br>Cost: {{ formatWhole(tmp[layer].upgrades[data].cost) }} {{(tmp[layer].upgrades[data].currencyDisplayName ? tmp[layer].upgrades[data].currencyDisplayName : tmp[layer].resource)}}
+				<span v-if="layers[layer].upgrades[data].effectDisplay && run(layers[layer].upgrades[data].effectDisplay, layers[layer].upgrades[data])"><br>Currently: <span v-html="run(layers[layer].upgrades[data].effectDisplay, layers[layer].upgrades[data])"></span></span>
+				<br><br><span v-if="tmp[layer].upgrades[data].costDisplay" v-html="tmp[layer].upgrades[data].costDisplay"></span>
+				<span v-else>Cost: {{ formatWhole(tmp[layer].upgrades[data].cost) }} {{(tmp[layer].upgrades[data].currencyDisplayName ? tmp[layer].upgrades[data].currencyDisplayName : tmp[layer].resource)}}</span>
 			</span>
 			<tooltip v-if="tmp[layer].upgrades[data].tooltip" :text="tmp[layer].upgrades[data].tooltip"></tooltip>
 
@@ -229,7 +266,6 @@ function loadVue() {
 			v-html="prestigeButtonText(layer)" v-on:click="doReset(layer)">
 		</button>
 		`
-	
 	})
 
 	// Displays the main resource for the layer
@@ -271,6 +307,7 @@ function loadVue() {
 
 	Vue.component('buyable', {
 		props: ['layer', 'data'],
+		//! style was inline, see if it affects anything
 		template: `
 		<div v-if="tmp[layer].buyables && tmp[layer].buyables[data]!== undefined && tmp[layer].buyables[data].unlocked" style="display: grid">
 			<button v-bind:class="{ buyable: true, tooltipBox: true, can: tmp[layer].buyables[data].canBuy, locked: !tmp[layer].buyables[data].canBuy, bought: player[layer].buyables[data].gte(tmp[layer].buyables[data].purchaseLimit)}"
@@ -287,20 +324,21 @@ function loadVue() {
 			<sell-all :layer="layer" :data="data" v-bind:style="tmp[layer].componentStyles['sell-all']" v-if="(tmp[layer].buyables[data].sellAll)&& !(tmp[layer].buyables[data].canSellAll !== undefined && tmp[layer].buyables[data].canSellAll == false)"></sell-all>
 		</div>
 		`,
-		data() { return { interval: false, time: 0,}},
+		data() { return { interval: false, time: 0, } },
 		methods: {
 			start() {
 				if (!this.interval) {
-					this.interval = setInterval((function() {
-						if(this.time >= 5)
+					this.interval = setInterval((function () {
+						if (this.time >= 5)
 							buyBuyable(this.layer, this.data)
-						this.time = this.time+1
-					}).bind(this), 50)}
+						this.time = this.time + 1
+					}).bind(this), 50)
+				}
 			},
 			stop() {
 				clearInterval(this.interval)
 				this.interval = false
-			  	this.time = 0
+				this.time = 0
 			}
 		},
 	})
@@ -314,7 +352,6 @@ function loadVue() {
 			</div>
 			`
 	})
-	
 	Vue.component('clickables', {
 		props: ['layer', 'data'],
 		template: `
@@ -334,8 +371,8 @@ function loadVue() {
 	Vue.component('clickable', {
 		props: ['layer', 'data'],
 		template: `
-		<button 
-			v-if="tmp[layer].clickables && tmp[layer].clickables[data]!== undefined && tmp[layer].clickables[data].unlocked" 
+		<button
+			v-if="tmp[layer].clickables && tmp[layer].clickables[data]!== undefined && tmp[layer].clickables[data].unlocked"
 			v-bind:class="{ upg: true, tooltipBox: true, can: tmp[layer].clickables[data].canClick, locked: !tmp[layer].clickables[data].canClick}"
 			v-bind:style="[tmp[layer].clickables[data].canClick ? {'background-color': tmp[layer].color} : {}, tmp[layer].clickables[data].style]"
 			v-on:click="if(!interval) clickClickable(layer, data)" :id='"clickable-" + layer + "-" + data' @mousedown="start" @mouseleave="stop" @mouseup="stop" @touchstart="start" @touchend="stop" @touchcancel="stop">
@@ -346,22 +383,23 @@ function loadVue() {
 
 		</button>
 		`,
-		data() { return { interval: false, time: 0,}},
+		data() { return { interval: false, time: 0, } },
 		methods: {
 			start() {
 				if (!this.interval && layers[this.layer].clickables[this.data].onHold) {
-					this.interval = setInterval((function() {
+					this.interval = setInterval((function () {
 						let c = layers[this.layer].clickables[this.data]
-						if(this.time >= 5 && run(c.canClick, c)) {
+						if (this.time >= 5 && run(c.canClick, c)) {
 							run(c.onHold, c)
-						}	
-						this.time = this.time+1
-					}).bind(this), 50)}
+						}
+						this.time = this.time + 1
+					}).bind(this), 50)
+				}
 			},
 			stop() {
 				clearInterval(this.interval)
 				this.interval = false
-			  	this.time = 0
+				this.time = 0
 			}
 		},
 	})
@@ -394,8 +432,8 @@ function loadVue() {
 	Vue.component('gridable', {
 		props: ['layer', 'data'],
 		template: `
-		<button 
-		v-if="tmp[layer].grid && player[layer].grid[data]!== undefined && run(layers[layer].grid.getUnlocked, layers[layer].grid, data)" 
+		<button
+		v-if="tmp[layer].grid && player[layer].grid[data]!== undefined && run(layers[layer].grid.getUnlocked, layers[layer].grid, data)"
 		v-bind:class="{ tile: true, can: canClick, locked: !canClick, tooltipBox: true,}"
 		v-bind:style="[canClick ? {'background-color': tmp[layer].color} : {}, gridRun(layer, 'getStyle', player[this.layer].grid[this.data], this.data)]"
 		v-on:click="clickGrid(layer, data)"  @mousedown="start" @mouseleave="stop" @mouseup="stop" @touchstart="start" @touchend="stop" @touchcancel="stop">
@@ -405,24 +443,27 @@ function loadVue() {
 
 		</button>
 		`,
-		data() { return { interval: false, time: 0,}},
+		data() { return { interval: false, time: 0, } },
 		computed: {
 			canClick() {
-				return gridRun(this.layer, 'getCanClick', player[this.layer].grid[this.data], this.data)}
+				return gridRun(this.layer, 'getCanClick', player[this.layer].grid[this.data], this.data)
+			}
 		},
 		methods: {
 			start() {
 				if (!this.interval && layers[this.layer].grid.onHold) {
-					this.interval = setInterval((function() {
-						if(this.time >= 5 && gridRun(this.layer, 'getCanClick', player[this.layer].grid[this.data], this.data)) {
-							gridRun(this.layer, 'onHold', player[this.layer].grid[this.data], this.data)						}	
-						this.time = this.time+1
-					}).bind(this), 50)}
+					this.interval = setInterval((function () {
+						if (this.time >= 5 && gridRun(this.layer, 'getCanClick', player[this.layer].grid[this.data], this.data)) {
+							gridRun(this.layer, 'onHold', player[this.layer].grid[this.data], this.data)
+						}
+						this.time = this.time + 1
+					}).bind(this), 50)
+				}
 			},
 			stop() {
 				clearInterval(this.interval)
 				this.interval = false
-			  	this.time = 0
+				this.time = 0
 			}
 		},
 	})
@@ -431,7 +472,7 @@ function loadVue() {
 	Vue.component('microtabs', {
 		props: ['layer', 'data'],
 		computed: {
-			currentTab() {return player.subtabs[layer][data]}
+			currentTab() { return player.subtabs[layer][data] }
 		},
 		template: `
 		<div v-if="tmp[layer].microtabs" :style="{'border-style': 'solid'}">
@@ -450,7 +491,7 @@ function loadVue() {
 	Vue.component('bar', {
 		props: ['layer', 'data'],
 		computed: {
-			style() {return constructBarStyle(this.layer, this.data)}
+			style() { return constructBarStyle(tmp[this.layer].bars[this.data]); }
 		},
 		template: `
 		<div v-if="tmp[layer].bars && tmp[layer].bars[data].unlocked" v-bind:style="{'position': 'relative'}"><div v-bind:style="[tmp[layer].bars[data].style, style.dims, {'display': 'table'}]">
@@ -498,7 +539,7 @@ function loadVue() {
 	Vue.component('tree', {
 		props: ['layer', 'data'],
 		computed: {
-			key() {return this.$vnode.key}
+			key() { return this.$vnode.key }
 		},
 		template: `<div>
 		<span class="upgRow" v-for="(row, r) in data"><table>
@@ -515,7 +556,7 @@ function loadVue() {
 	Vue.component('upgrade-tree', {
 		props: ['layer', 'data'],
 		computed: {
-			key() {return this.$vnode.key}
+			key() { return this.$vnode.key }
 		},
 		template: `<thing-tree :layer="layer" :data = "data" :type = "'upgrade'"></thing-tree>`
 	})
@@ -524,7 +565,7 @@ function loadVue() {
 	Vue.component('buyable-tree', {
 		props: ['layer', 'data'],
 		computed: {
-			key() {return this.$vnode.key}
+			key() { return this.$vnode.key }
 		},
 		template: `<thing-tree :layer="layer" :data = "data" :type = "'buyable'"></thing-tree>`
 	})
@@ -533,7 +574,7 @@ function loadVue() {
 	Vue.component('clickable-tree', {
 		props: ['layer', 'data'],
 		computed: {
-			key() {return this.$vnode.key}
+			key() { return this.$vnode.key }
 		},
 		template: `<thing-tree :layer="layer" :data = "data" :type = "'clickable'"></thing-tree>`
 	})
@@ -541,7 +582,7 @@ function loadVue() {
 	Vue.component('thing-tree', {
 		props: ['layer', 'data', 'type'],
 		computed: {
-			key() {return this.$vnode.key}
+			key() { return this.$vnode.key }
 		},
 		template: `<div>
 		<span class="upgRow" v-for="(row, r) in data"><table>
@@ -581,6 +622,73 @@ function loadVue() {
 			</select>
 		`
 	})
+
+	Vue.component('drop-down-double', {
+		props: ['layer', 'data'],
+		template: `
+			<select v-model="player[layer][data[0]]">
+				<option v-for="item in data[1]" v-bind:value="item[0]">{{item[1]}}</option>
+			</select>
+		`
+	});
+
+	Vue.component('tile', {
+		props: ['layer', 'data'],
+		template: `
+			<button
+			v-bind:class="{tile: true, can: canClick, locked: !canClick, tooltipBox: true,}"
+			v-bind:style="[canClick ? {'background-color': tmp[layer].color} : {}, this.data.style ?? {}]"
+			v-on:click="onClick()"  @mousedown="start" @mouseleave="stop" @mouseup="stop" @touchstart="start" @touchend="stop" @touchcancel="stop">
+				<span v-html="data.text"></span>
+				<tooltip v-if="data.tooltip" :text="data.tooltip"></tooltip>
+			</button>
+		`,
+		computed: {
+			canClick() { return this.data.canClick ? this.data.canClick() : true; },
+		},
+		data() { return { interval: false, time: 0, } },
+		methods: {
+			start() {
+				if (!this.interval && this.data.onHold) {
+					this.interval = setInterval((function () {
+						if (this.time >= 5 && this.data.canClick) {
+							this.data.onHold();
+						}
+						this.time = this.time + 1
+					}).bind(this), 50)
+				}
+			},
+			stop() {
+				clearInterval(this.interval)
+				this.interval = false
+				this.time = 0
+			},
+			onClick() {
+				if (this.data.canClick && !this.data.canClick()) return;
+				if (this.data.onClick) this.data.onClick();
+			},
+		},
+	});
+
+	Vue.component('dynabar', {
+		props: ['layer', 'data'],
+		computed: {
+			style() { return constructBarStyle(this.data); },
+		},
+		template: `
+		<div v-bind:style="{'position':'relative'}">
+			<div v-bind:style="[style.dims, {'display':'table'}]">
+				<div class="overlayTextContainer barBorder" v-bind:style="[data.borderStyle, style.dims]">
+					<span class="overlayText" v-bind:style="[data.textStyle]" v-html="run(data.display, data)"></span>
+				</div>
+				<div class="barBG barBorder" v-bind:style="[data.baseStyle, data.borderStyle, style.dims]">
+					<div class="fill" v-bind:style="[data.fillStyle, style.fillDims]"></div>
+				</div>
+			</div>
+		</div>
+		`,
+	});
+
 	// These are for buyables, data is the id of the corresponding buyable
 	Vue.component('sell-one', {
 		props: ['layer', 'data'],
@@ -662,4 +770,3 @@ function loadVue() {
 	})
 }
 
- 

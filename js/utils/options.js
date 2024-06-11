@@ -1,10 +1,12 @@
 // ************ Options ************
 
+/** @type {ReturnType<typeof getStartOptions>} */
 let options = {}
 
 function getStartOptions() {
 	return {
 		autosave: true,
+		/** @type {MS_DISPLAYS[number]} */
 		msDisplay: "always",
 		theme: "default",
 		hqTree: false,
@@ -15,6 +17,9 @@ function getStartOptions() {
 		oldStyle: false,
 		forceTooltips: true,
 		hideMilestonePopups: false,
+		/** @type {keyof typeof CHANCE_MODE} */
+		chanceMode: 'NEVER',
+		noRNG: false,
 	}
 }
 
@@ -44,9 +49,10 @@ function changeTreeQuality() {
 }
 function toggleAuto(toggle) {
 	Vue.set(player[toggle[0]], [toggle[1]], !player[toggle[0]][toggle[1]]);
-	needCanvasUpdate=true
+	needCanvasUpdate = true
 }
 
+/** @type {['ALL','LAST, AUTO, INCOMPLETE','AUTOMATION, INCOMPLETE','INCOMPLETE','NONE']} */
 const MS_DISPLAYS = ["ALL", "LAST, AUTO, INCOMPLETE", "AUTOMATION, INCOMPLETE", "INCOMPLETE", "NONE"];
 
 const MS_SETTINGS = ["always", "last", "automation", "incomplete", "never"];
@@ -55,25 +61,31 @@ function adjustMSDisp() {
 	options.msDisplay = MS_SETTINGS[(MS_SETTINGS.indexOf(options.msDisplay) + 1) % 5];
 }
 function milestoneShown(layer, id) {
-	complete = player[layer].milestones.includes(id);
-	auto = layers[layer].milestones[id].toggles;
+	const complete = player[layer].milestones.includes(id);
+	const auto = layers[layer].milestones[id].toggles;
 
 	switch (options.msDisplay) {
 		case "always":
 			return true;
-			break;
 		case "last":
 			return (auto) || !complete || player[layer].lastMilestone === id;
-			break;
 		case "automation":
 			return (auto) || !complete;
-			break;
 		case "incomplete":
 			return !complete;
-			break;
 		case "never":
 			return false;
-			break;
 	}
 	return false;
+}
+
+const CHANCE_MODE = {
+	'NEVER': 'never',
+	'LESS_HALF': 'below 50%',
+	'NOT_GUARANTEED': 'below 100%',
+};
+
+function changeLootChance() {
+	const modes = Object.keys(CHANCE_MODE);
+	options.chanceMode = modes[(modes.indexOf(options.chanceMode) + 1) % modes.length];
 }

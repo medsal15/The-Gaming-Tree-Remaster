@@ -1,6 +1,6 @@
 // Load files
 
-for (file in modInfo.modFiles) {
+for (const file in modInfo.modFiles) {
     let script = document.createElement("script");
     script.setAttribute("src", "js/" + modInfo.modFiles[file]);
     script.setAttribute("async", "false");

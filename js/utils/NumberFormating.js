@@ -26,7 +26,7 @@ function commaFormat(num, precision) {
 function regularFormat(num, precision) {
     if (num === null || num === undefined) return "NaN"
     if (num.mag < 0.0001) return (0).toFixed(precision)
-    if (num.mag < 0.1 && precision !==0) precision = Math.max(precision, 4)
+    if (num.mag < 0.1 && precision !== 0) precision = Math.max(precision, 4)
     return num.toStringWithDecimalPlaces(precision)
 }
 
@@ -34,12 +34,21 @@ function fixValue(x, y = 0) {
     return x || new Decimal(y)
 }
 
+/**
+ * @param {{[k: string|number|symbol]: DecimalSource}} x
+ * @returns {Decimal}
+ */
 function sumValues(x) {
-    x = Object.values(x)
-    if (!x[0]) return decimalZero
-    return x.reduce((a, b) => Decimal.add(a, b))
+    x = Object.values(x);
+    return x.reduce((a, b) => Decimal.add(a, b), decimalZero);
 }
 
+/**
+ * @param {DecimalSource} decimal
+ * @param {number} [precision]
+ * @param {boolean} [small]
+ * @returns {string}
+ */
 function format(decimal, precision = 2, small) {
     small = small || modInfo.allowSmall
     decimal = new Decimal(decimal)
@@ -63,15 +72,16 @@ function format(decimal, precision = 2, small) {
 
     decimal = invertOOM(decimal)
     let val = ""
-    if (decimal.lt("1e1000")){
+    if (decimal.lt("1e1000")) {
         val = exponentialFormat(decimal, precision)
         return val.replace(/([^(?:e|F)]*)$/, '-$1')
     }
-    else   
+    else
         return format(decimal, precision) + "⁻¹"
 
 }
 
+/** @param {DecimalSource} decimal */
 function formatWhole(decimal) {
     decimal = new Decimal(decimal)
     if (decimal.gte(1e9)) return format(decimal, 2)
@@ -79,6 +89,7 @@ function formatWhole(decimal) {
     return format(decimal, 0)
 }
 
+/** @param {number} s */
 function formatTime(s) {
     if (s < 60) return format(s) + "s"
     else if (s < 3600) return formatWhole(Math.floor(s / 60)) + "m " + format(s % 60) + "s"
@@ -97,11 +108,11 @@ function toPlaces(x, precision, maxAccepted) {
 }
 
 // Will also display very small numbers
-function formatSmall(x, precision=2) { 
-    return format(x, precision, true)    
+function formatSmall(x, precision = 2) {
+    return format(x, precision, true)
 }
 
-function invertOOM(x){
+function invertOOM(x) {
     let e = x.log10().ceil()
     let m = x.div(Decimal.pow(10, e))
     e = e.neg()
