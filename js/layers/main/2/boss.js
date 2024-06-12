@@ -37,7 +37,7 @@ addLayer('b', {
             shown: false,
         };
     },
-    layerShown() { return player.b.shown || D.gt(tmp.xp.kill.total, 250); },
+    layerShown() { return player.b.shown || (player.l.unlocked && player.c.shown); },
     tabFormat: {
         'Bosses': {
             content: [
@@ -57,8 +57,14 @@ addLayer('b', {
             name: 'The Slime King',
             challengeDescription: 'Double slime health and XP',
             goalDescription: 'Kill 250 slimes',
-            rewardDescription: 'Slimes grow stronger, XP upgrades stay unlocked, unlock goblins, a boss and a miniboss (Not Implemented)',
-            onEnter() { player.b.shown = true; },
+            rewardDescription: `Slimes are weaker,\
+                all XP upgrades stay unlocked,\
+                unlock skeletons, a boss and a miniboss (Not Implemented)`,
+            onEnter() {
+                player.b.shown = true;
+                reset_items(tmp.b.row);
+            },
+            onComplete() { reset_items(tmp.b.row); },
             canComplete() { return D.gte(tmp.xp.kill.total, 250); },
             buttonStyle() {
                 return {
@@ -68,6 +74,7 @@ addLayer('b', {
             color: '#BB2222',
             progress() { return D.div(tmp.xp.kill.total, 250); },
             bar_text() { return `${formatWhole(tmp.xp.kill.total)} / ${formatWhole(250)}`; },
+            unlocked() { return D.gte(tmp.xp.kill.total, 333) || inChallenge(this.layer, this.id) || hasChallenge(this.layer, this.id); },
         },
         //#endregion Bosses
         //#region Minibosses
@@ -82,13 +89,19 @@ addLayer('b', {
             height: 80,
             progress() {
                 const chal = activeChallenge('b');
-                if (!chal) return 0;
+                if (!chal) {
+                    if (!tmp.b.challenges[11].unlocked) return D.div(tmp.xp.kill.total, 333);
+                    return 0
+                };
 
                 return tmp.b.challenges[chal].progress;
             },
             display() {
                 const chal = activeChallenge('b');
-                if (!chal) return 'Not in a challenge';
+                if (!chal) {
+                    if (!tmp.b.challenges[11].unlocked) return `${formatWhole(tmp.xp.kill.total)} / ${formatWhole(333)} slimes killed`;
+                    return 'Not in a challenge'
+                };
 
                 return tmp.b.challenges[chal].bar_text;
             },
@@ -96,6 +109,8 @@ addLayer('b', {
                 'background-color'() {
                     const chal = activeChallenge('b');
                     if (chal) return tmp.b.challenges[chal].color;
+
+                    return tmp.b.color;
                 },
                 'color'() {
                     const chal = activeChallenge('b');

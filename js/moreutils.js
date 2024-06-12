@@ -476,7 +476,7 @@ function compendium_content(item) {
  */
 function crafting_default_amount(recipe, amount) {
     if (amount && D.gt(amount, 0)) return D(amount);
-    if (D.gt(player.c.recipes[recipe].time_left, 0)) return player.c.recipes[recipe].making;
+    if (D.gt(player.c.recipes[recipe].time, 0)) return player.c.recipes[recipe].making;
     if (D.gt(player.c.recipes[recipe].target, 0)) return player.c.recipes[recipe].target;
     return D.dOne;
 }
@@ -520,16 +520,11 @@ function crafting_show_recipe(recipe) {
         'blank',
     ];
     if (D.gt(trecipe.duration, 0)) {
+        let display;
         if (shiftDown) {
             display = `[${trecipe.formulas.duration}]`;
         } else {
-            if (D.gt(precipe.time_left, 0)) {
-                display = formatTime(D.minus(trecipe.duration, precipe.time_left));
-            } else {
-                display = formatTime(0);
-            }
-
-            display += `/ ${formatTime(trecipe.duration)}`;
+            display = `${formatTime(precipe.time)} / ${formatTime(trecipe.duration)}`;
         }
         list.push([
             'dynabar',
@@ -540,7 +535,7 @@ function crafting_show_recipe(recipe) {
                 display,
                 progress() {
                     if (D.lte(precipe.making, 0)) return 0;
-                    return D.div(D.minus(trecipe.duration, precipe.time_left), trecipe.duration);
+                    return D.div(precipe.time, trecipe.duration);
                 },
                 fillStyle: { 'background-color': tmp.c.color },
             },
@@ -579,7 +574,7 @@ function crafting_show_recipe(recipe) {
                 onClick() {
                     gain_items(trecipe.consumes.map(([item, amount]) => [item, amount.neg()]));
                     precipe.making = precipe.target;
-                    precipe.time_left = trecipe.duration ?? D.dZero;
+                    precipe.time = D.dZero;
                     precipe.crafted = D.add(precipe.crafted, precipe.target);
                 },
                 style: {

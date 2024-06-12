@@ -103,14 +103,14 @@ addLayer('l', {
                 if (!shiftDown) {
                     return 'Levels boost XP gain';
                 }
-                let formula = 'levels / 10 + 1';
+                let formula = 'levels / 8 + 1';
 
                 return `Formula: ${formula}`;
             },
             effect() {
                 let base = player.l.points;
                 if (hasUpgrade('l', 32)) base = base.add(upgradeEffect('l', 32));
-                return D.div(base, 10).add(1);
+                return D.div(base, 8).add(1);
             },
             effectDisplay() { return `*${upgradeEffect(this.layer, this.id)}`; },
             currencyDisplayName: 'skill points',

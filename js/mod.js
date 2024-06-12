@@ -22,15 +22,27 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: 'R0.1',
-	name: 'RRewrite',
-	beta: false,
-}
+	/**
+	 * The mod's version number, displayed at the top right of the tree tab.
+	 */
+	num: 'R0.2',
+	/**
+	 * The version's name, displayed alongside the number in the info tab.
+	 */
+	name: 'idk yet this is future mes problem',
+	beta: true,
+};
 
 let changelog = `<h1>Changelog:</h1><br>
-<h3>v0.1</h3><br>
-- Rewrote XP, Level, Loot, and Boss.<br>
-- Update endgame: Enter the first boss fight.`;
+	<h3>v0.2</h3><br>
+		- Lowered slime health scaling.<br>
+		- Corrected a few grammar mistakes.<br>
+		- Nerfed the costs of some crafting recipes.<br>
+		- ???<br>
+		- Update endgame: ???<br>
+	<h3>v0.1</h3><br>
+		- Rewrote XP, Level, Loot, and Boss.<br>
+		- Update endgame: Enter the first boss fight.`;
 
 let winText = `Congratulations! You have finished the current content in the game. Look forward for more.`;
 
@@ -74,13 +86,13 @@ var displayThings = [
 		const chal = activeChallenge('b');
 		if (!chal) return '';
 
-		return `You are in challenge ${resourceColor(tmp.b.challenges[chal].color, tmp.b.challenges[chal].name)}`;
+		return `You are in ${resourceColor(tmp.b.color, tmp.b.name)} challenge ${resourceColor(tmp.b.challenges[chal].color, tmp.b.challenges[chal].name)}`;
 	},
 ];
 
 // Determines when the game "ends"
 function isEndgame() {
-	return inChallenge('b', 12);
+	return false;
 }
 
 

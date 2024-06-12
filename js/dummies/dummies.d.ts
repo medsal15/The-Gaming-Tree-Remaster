@@ -1980,7 +1980,7 @@ type Player = {
             [id: string]: {
                 target: Decimal
                 making: Decimal
-                time_left: Decimal
+                time: Decimal
                 /** Total times crafted */
                 crafted: Decimal
             }
