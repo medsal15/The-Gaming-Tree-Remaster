@@ -23,7 +23,7 @@ addLayer('c', {
             recipes: Object.fromEntries(Object.keys(layers.c.recipes).map(r => [r, {
                 target: D.dOne,
                 making: D.dZero,
-                time_left: D.dZero,
+                time: D.dZero,
                 crafted: D.dZero,
             }])),
             hide_cat: [],
@@ -67,7 +67,7 @@ addLayer('c', {
             display() {
                 let chance = '', cost = '';
                 if (shiftDown) {
-                    chance = '[(level - 1) / 10 + 1]';
+                    chance = '[(level - 1) / 5 + 1]';
                     cost = '[200 * 2 ^ level]';
                 } else {
                     chance = formatWhole(buyableEffect(this.layer, this.id));
@@ -82,7 +82,7 @@ addLayer('c', {
             },
             effect(x) {
                 if (D.lte(x, 0)) return D.dZero;
-                return D.minus(x, 1).div(10).add(1);
+                return D.minus(x, 1).div(5).add(1);
             },
             cost(x) { return D.pow(2, x).times(200); },
             canAfford() { return D.gte(tmp.xp.kill.total, tmp[this.layer].buyables[this.id].cost); },
@@ -170,8 +170,8 @@ addLayer('c', {
                     total = crafting_default_all_time(this.id, all_time);
 
                 return [
-                    ['slime_goo', D.sumGeometricSeries(count, 15, 2, total)],
-                    ['slime_core', D.sumGeometricSeries(count, 1, 1.5, total)],
+                    ['slime_goo', D.sumGeometricSeries(count, 15, 1.75, total)],
+                    ['slime_core', D.sumGeometricSeries(count, 1, 1.25, total)],
                 ];
             },
             produces(amount) {
@@ -191,8 +191,8 @@ addLayer('c', {
             },
             formulas: {
                 consumes: {
-                    'slime_goo': '15 * (2 ^ (amount + crafted) - 2 ^ (crafted))',
-                    'slime_core': '1.5 ^ (amount + crafted) - 1.5 ^ (crafted)',
+                    'slime_goo': '15 * (1.75 ^ (amount + crafted) - 1.75 ^ crafted)',
+                    'slime_core': '1.25 ^ (amount + crafted) - 1.25 ^ crafted',
                 },
                 produces: {
                     'slime_crystal': 'amount',
@@ -210,8 +210,8 @@ addLayer('c', {
                     total = crafting_default_all_time(this.id, all_time);
 
                 return [
-                    ['slime_goo', D.sumGeometricSeries(count, 25, 2, total)],
-                    ['slime_core_shard', D.sumGeometricSeries(count, 5, 1.75, total)],
+                    ['slime_goo', D.sumGeometricSeries(count, 25, 1.75, total)],
+                    ['slime_core_shard', D.sumGeometricSeries(count, 5, 1.5, total)],
                 ];
             },
             produces(amount) {
@@ -231,8 +231,8 @@ addLayer('c', {
             },
             formulas: {
                 consumes: {
-                    'slime_goo': '25 * (2 ^ (amount + crafted) - 2 ^ (crafted))',
-                    'slime_core_shard': '5 * (1.75 ^ (amount + crafted) - 1.75 ^ (crafted))',
+                    'slime_goo': '25 * (1.75 ^ (amount + crafted) - 1.75 ^ crafted)',
+                    'slime_core_shard': '5 * (1.5 ^ (amount + crafted) - 1.5 ^ crafted)',
                 },
                 produces: {
                     'slime_page': 'amount',
@@ -250,9 +250,9 @@ addLayer('c', {
                     total = crafting_default_all_time(this.id, all_time);
 
                 return [
-                    ['slime_goo', D.sumGeometricSeries(count, 20, 2, total)],
-                    ['slime_core_shard', D.sumGeometricSeries(count, 5, 1.75, total)],
-                    ['slime_core', D.sumGeometricSeries(count, 1, 1.5, total)],
+                    ['slime_goo', D.sumGeometricSeries(count, 20, 1.75, total)],
+                    ['slime_core_shard', D.sumGeometricSeries(count, 5, 1.5, total)],
+                    ['slime_core', D.sumGeometricSeries(count, 1, 1.25, total)],
                 ];
             },
             produces(amount) {
@@ -272,9 +272,9 @@ addLayer('c', {
             },
             formulas: {
                 consumes: {
-                    'slime_goo': '20 * (2 ^ (amount + crafted) - 2 ^ (crafted))',
-                    'slime_core_shard': '5 * (1.75 ^ (amount + crafted) - 1.75 ^ (crafted))',
-                    'slime_core': '1.5 ^ (amount + crafted) - 1.5 ^ (crafted)',
+                    'slime_goo': '20 * (1.75 ^ (amount + crafted) - 1.75 ^ crafted)',
+                    'slime_core_shard': '5 * (1.5 ^ (amount + crafted) - 1.5 ^ crafted)',
+                    'slime_core': '1.25 ^ (amount + crafted) - 1.25 ^ crafted',
                 },
                 produces: {
                     'slime_pocket': 'amount',
@@ -292,9 +292,9 @@ addLayer('c', {
                     total = crafting_default_all_time(this.id, all_time);
 
                 return [
-                    ['slime_core_shard', D.sumGeometricSeries(count, 12, 1.75, total)],
-                    ['slime_core', D.sumGeometricSeries(count, 6, 1.5, total)],
-                    ['dense_slime_core', D.sumGeometricSeries(count, 1, 1.25, total)],
+                    ['slime_core_shard', D.sumGeometricSeries(count, 12, 1.5, total)],
+                    ['slime_core', D.sumGeometricSeries(count, 6, 1.25, total)],
+                    ['dense_slime_core', D.sumGeometricSeries(count, 1, 1.125, total)],
                 ];
             },
             produces(amount) {
@@ -314,9 +314,9 @@ addLayer('c', {
             },
             formulas: {
                 consumes: {
-                    'slime_core_shard': '12 * (1.75 ^ (amount + crafted) - 1.75 ^ (crafted))',
-                    'slime_core': '6 * (1.5 ^ (amount + crafted) - 1.5 ^ (crafted))',
-                    'dense_slime_core': '1.25 ^ (amount + crafted) - 1.25 ^ (crafted)',
+                    'slime_core_shard': '12 * (1.5 ^ (amount + crafted) - 1.5 ^ crafted)',
+                    'slime_core': '6 * (1.25 ^ (amount + crafted) - 1.25 ^ crafted)',
+                    'dense_slime_core': '1.125 ^ (amount + crafted) - 1.125 ^ crafted',
                 },
                 produces: {
                     'slime_dice': 'amount',
@@ -389,18 +389,19 @@ addLayer('c', {
     },
     automate() {
         Object.entries(player.c.recipes).forEach(([id, craft]) => {
-            if (D.gt(craft.making, 0) && D.lte(craft.time_left, 0)) {
-                const trecipe = tmp.c.recipes[id];
+            const trecipe = tmp.c.recipes[id];
+            if (D.gt(craft.making, 0) && D.gte(craft.time, trecipe.duration)) {
                 gain_items(trecipe.produces);
                 craft.making = D.dZero;
-                craft.time_left = D.dZero;
+                craft.time = D.dZero;
             }
         });
     },
     update(diff) {
-        Object.values(player.c.recipes).forEach(craft => {
-            if (D.gt(craft.making, 0) && D.gt(craft.time_left, 0)) {
-                craft.time_left = D.minus(craft.time_left, diff);
+        Object.entries(player.c.recipes).forEach(([id, craft]) => {
+            const trecipe = tmp.c.recipes[id];
+            if (D.gt(craft.making, 0) && D.lt(craft.time, trecipe.duration)) {
+                craft.time = D.add(craft.time, diff);
             }
         });
     },

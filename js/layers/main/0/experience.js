@@ -581,11 +581,13 @@ addLayer('xp', {
             health(level) {
                 let l = D(level ?? tmp?.xp?.monsters[this.id].level);
 
-                const level_mult = D.minus(l, 1).pow_base(2);
+                const level_mult = D.minus(l, 1).pow_base(1.5);
 
                 let health = D.times(level_mult, 10).times(tmp.xp?.modifiers.health.mult ?? 1);
 
-                if (inChallenge('b', 11) || hasChallenge('b', 11)) health = health.times(2);
+                if (inChallenge('b', 11)) health = health.times(2);
+
+                if (hasChallenge('b', 11)) health = health.div(2);
 
                 return health;
             },
@@ -651,6 +653,7 @@ addLayer('xp', {
                 let mult = D.dOne;
 
                 if (hasUpgrade('xp', 12)) mult = mult.times(upgradeEffect('xp', 12));
+                if (hasUpgrade('xp', 23)) mult = mult.times(upgradeEffect('xp', 23));
                 if (hasUpgrade('xp', 33)) mult = mult.times(upgradeEffect('xp', 33));
 
                 if (hasUpgrade('l', 11)) mult = mult.times(upgradeEffect('l', 11));

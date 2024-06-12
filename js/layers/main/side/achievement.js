@@ -256,10 +256,10 @@ addLayer('ach', {
             onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Secret Completed!', 3, tmp.c.color); },
             style() {
                 if (hasAchievement(this.layer, this.id)) return {
-                    'background-color': tmp.l.color,
+                    'background-color': tmp.c.color,
                 };
             },
-            unlocked() { return player.l.unlocked; },
+            unlocked() { return player.c.shown; },
         },
         //#endregion Secret
     },

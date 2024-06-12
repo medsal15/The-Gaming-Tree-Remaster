@@ -33,7 +33,7 @@ function hasAchievement(layer, id) {
  * @returns {boolean}
  */
 function hasChallenge(layer, id) {
-	return player && !!((player[layer].challenges[id]) && !tmp[layer].deactivated)
+	return player && !!((player[layer]?.challenges[id]) && !tmp[layer]?.deactivated)
 }
 
 /**

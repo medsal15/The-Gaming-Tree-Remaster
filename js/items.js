@@ -29,7 +29,7 @@ const item_list = {
             if (inChallenge('b', 11)) {
                 return `A chunk of orange goo.<br>
                     Feels warm to the touch.<br>
-                    Not it tastes spicy, and is hard to chew.`;
+                    It tastes spicy, and is hard to chew.`;
             }
             return `A chunk of green goo.<br>
                 Feels weird to the touch.<br>
@@ -215,11 +215,11 @@ const item_list = {
                     level = player.l.unlocked ? ` and divides level cost by ${format(effect.level)}` : '';
                 return `Multiplies ${type} health by ${format(effect.health)}${level}`;
             }
-            let formula_health = '.95 ^ amount',
+            let formula_health = '0.95 ^ amount',
                 formula_level = '1.05 ^ amount';
 
             if (inChallenge('b', 11) || hasChallenge('b', 11)) {
-                formula_health = '.925 ^ amount';
+                formula_health = '0.925 ^ amount';
                 formula_level = '1.075 ^ amount';
             }
 
@@ -286,7 +286,7 @@ const item_list = {
     'slime_dice': {
         id: null,
         color() { return tmp.xp.monsters.slime.color; },
-        name: 'slime dice',
+        name: 'slime die',
         grid: [1, 3],
         icon() {
             if (inChallenge('b', 11)) return [1, 7];
@@ -308,7 +308,7 @@ const item_list = {
             amount ??= player.items[this.id].amount;
 
             if (!shiftDown) {
-                return `Multiplies drop chance by ${item_effect(this.id)}`;
+                return `Multiplies drop chance by ${format(item_effect(this.id))}`;
             }
             let formula = 'amount / 20 + 1';
 

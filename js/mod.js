@@ -65,18 +65,24 @@ let VERSION = {
 	/**
 	 * The mod's version number, displayed at the top right of the tree tab.
 	 */
-	num: 'R0.1',
+	num: 'R0.2',
 	/**
 	 * The version's name, displayed alongside the number in the info tab.
 	 */
-	name: 'RRewrite',
-	beta: false,
+	name: 'idk yet this is future mes problem',
+	beta: true,
 };
 
 /**
  * HTML displayed in the changelog tab
  */
 let changelog = `<h1>Changelog:</h1><br>
+	<h3>v0.2</h3><br>
+		- Lowered slime health scaling.<br>
+		- Corrected a few grammar mistakes.<br>
+		- Nerfed the costs of some crafting recipes.<br>
+		- ???<br>
+		- Update endgame: ???<br>
 	<h3>v0.1</h3><br>
 		- Rewrote XP, Level, Loot, and Boss.<br>
 		- Update endgame: Enter the first boss fight.`;
@@ -129,7 +135,7 @@ var displayThings = [
 		const chal = activeChallenge('b');
 		if (!chal) return '';
 
-		return `You are in challenge ${resourceColor(tmp.b.challenges[chal].color, tmp.b.challenges[chal].name)}`;
+		return `You are in ${resourceColor(tmp.b.color, tmp.b.name)} challenge ${resourceColor(tmp.b.challenges[chal].color, tmp.b.challenges[chal].name)}`;
 	},
 ];
 
@@ -139,7 +145,7 @@ var displayThings = [
  * @returns {Boolean}
  */
 function isEndgame() {
-	return inChallenge('b', 11);
+	return false;
 }
 
 
