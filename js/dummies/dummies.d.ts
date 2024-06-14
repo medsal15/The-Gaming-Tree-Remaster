@@ -1803,7 +1803,7 @@ type drop_types = 'kill' | 'crafting' | 'mining';
 type monsters = 'slime' | 'skeleton';
 type ores = 'stone' | 'copper' | 'tin';
 
-type recipe_category = 'materials' |
+type recipe_category = 'materials' | 'craftable' |
     'mining' |
     'slime' | 'skeleton';
 

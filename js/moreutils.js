@@ -350,7 +350,7 @@ function random_ore() {
 function mining_guide_content(ore) {
     const tore = tmp.m.ores[ore];
 
-    if (!(tore.unlocked ?? true)) return [];
+    if (!tore || !(tore.unlocked ?? true)) return [];
 
     const sum = Object.values(tmp.m?.ores ?? {})
         .filter(ore => (ore.unlocked ?? true) && D.gt(ore.weight, 0))
@@ -554,12 +554,13 @@ function crafting_default_all_time(recipe, all_time) {
  * @returns {TabFormatEntries<'c'>[]}
  */
 function crafting_show_recipe(recipe) {
-    const trecipe = tmp.c.recipes[recipe];
+    const trecipe = tmp.c.recipes[recipe],
+        precipe = player.c.recipes[recipe];
     if (!(trecipe.unlocked ?? true)) return [];
     if (trecipe.category.some(cat => player.c.hide_cat.includes(cat))) return [];
+    if (player.c.hide_cat.includes('craftable') && !crafting_can(recipe, D.dOne) && D.lte(precipe.making, 0)) return [];
 
-    const precipe = player.c.recipes[recipe],
-        craft = D.gt(precipe.making, 0) ? `<br>Crafting ${formatWhole(precipe.making)}` : '',
+    const craft = D.gt(precipe.making, 0) ? `<br>Crafting ${formatWhole(precipe.making)}` : '',
         total = trecipe.static ? `<br>Crafted ${formatWhole(precipe.crafted)}` : '';
 
     /** @type {TabFormatEntries<'c'>[]} */
@@ -655,6 +656,13 @@ function crafting_show_recipe(recipe) {
  * Checks whether a recipe can run
  *
  * @param {string} recipe
+ * @param {Decimal} amount
  * @returns {boolean}
  */
-function crafting_can(recipe) { return tmp.c.recipes[recipe].consumes.every(([item, amount]) => D.gte(player.items[item].amount, amount)); }
+function crafting_can(recipe, amount) {
+    /** @type {[items, Decimal][]} */
+    let items = [];
+    if (!amount) items = tmp.c.recipes[recipe].consumes;
+    else items = layers.c.recipes[recipe].consumes(amount);
+    return items.every(([item, amount]) => D.gte(player.items[item].amount, amount));
+}

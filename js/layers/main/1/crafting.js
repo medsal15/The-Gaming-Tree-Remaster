@@ -841,6 +841,27 @@ addLayer('c', {
     },
     clickables: {
         11: {
+            title: 'Uncraftable',
+            display() { return player.c.hide_cat.includes('craftable') ? 'Hidden' : 'Visible'; },
+            onClick() {
+                if (player.c.hide_cat.includes('craftable')) {
+                    const i = player.c.hide_cat.indexOf('craftable');
+                    player.c.hide_cat.splice(i, 1);
+                } else {
+                    player.c.hide_cat.push('craftable');
+                }
+            },
+            canClick: true,
+            style() {
+                return {
+                    'background-color': player.c.hide_cat.includes('craftable') ? '#CC5555' : '#55CC55',
+                    'width': '120px',
+                    'height': '100px',
+                    'min-height': 'unset',
+                };
+            },
+        },
+        12: {
             title: 'Materials',
             display() { return player.c.hide_cat.includes('materials') ? 'Hidden' : 'Visible'; },
             onClick() {
@@ -861,7 +882,7 @@ addLayer('c', {
                 };
             },
         },
-        12: {
+        13: {
             title: 'Mining',
             display() { return player.c.hide_cat.includes('mining') ? 'Hidden' : 'Visible'; },
             onClick() {
@@ -883,7 +904,7 @@ addLayer('c', {
             },
             unlocked() { return tmp.m.layerShown; },
         },
-        13: {
+        14: {
             title: 'Slime',
             display() { return player.c.hide_cat.includes('slime') ? 'Hidden' : 'Visible'; },
             onClick() {
@@ -904,7 +925,7 @@ addLayer('c', {
                 };
             },
         },
-        14: {
+        15: {
             title: 'Skeleton',
             display() { return player.c.hide_cat.includes('skeleton') ? 'Hidden' : 'Visible'; },
             onClick() {

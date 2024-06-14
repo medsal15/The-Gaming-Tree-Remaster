@@ -135,7 +135,7 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.slime.color; },
         name: 'slime crystal',
-        grid: [1, 0],
+        grid: [0, 4],
         icon() {
             if (inChallenge('b', 11)) return [1, 4];
             return [1, 0];
@@ -184,7 +184,7 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.slime.color; },
         name: 'slime page',
-        grid: [1, 1],
+        grid: [0, 5],
         icon() {
             if (inChallenge('b', 11)) return [1, 5];
             return [1, 1];
@@ -240,8 +240,7 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.slime.color; },
         name: 'slime pocket',
-        grid: [1, 2],
-        icon: [1, 2],
+        grid: [0, 6],
         icon() {
             if (inChallenge('b', 11)) return [1, 6];
             return [1, 2];
@@ -288,7 +287,7 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.slime.color; },
         name: 'slime die',
-        grid: [1, 3],
+        grid: [0, 7],
         icon() {
             if (inChallenge('b', 11)) return [1, 7];
             return [1, 3];
@@ -336,7 +335,7 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.skeleton.color; },
         name: 'bone',
-        grid: [2, 0],
+        grid: [1, 0],
         icon: [2, 0],
         row: 1,
         sources: {
@@ -361,7 +360,7 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.skeleton.color; },
         name: 'rib',
-        grid: [2, 1],
+        grid: [1, 1],
         icon: [2, 1],
         row: 1,
         sources: {
@@ -386,7 +385,7 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.skeleton.color; },
         name: 'skull',
-        grid: [2, 2],
+        grid: [1, 2],
         icon: [2, 2],
         row: 1,
         sources: {
@@ -412,7 +411,7 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.skeleton.color; },
         name: 'glowing skull',
-        grid: [2, 3],
+        grid: [1, 3],
         icon() {
             if (inChallenge('b', 11)) return [2, 7];
             return [2, 3];
@@ -437,7 +436,7 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.skeleton.color; },
         name: 'bone shiv',
-        grid: [3, 0],
+        grid: [1, 4],
         icon() {
             if (inChallenge('b', 11)) return [3, 4];
             return [3, 0];
@@ -485,7 +484,7 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.skeleton.color; },
         name: 'bone pick',
-        grid: [3, 1],
+        grid: [1, 5],
         icon: [3, 1],
         row: 1,
         effect(amount) {
@@ -526,7 +525,7 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.skeleton.color; },
         name: 'jaw grabber',
-        grid: [3, 2],
+        grid: [1, 6],
         icon: [3, 2],
         row: 1,
         effect(amount) {
@@ -556,7 +555,7 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.skeleton.color; },
         name: 'crystal skull',
-        grid: [3, 3],
+        grid: [1, 7],
         icon() {
             if (inChallenge('b', 11)) return [3, 7];
             return [3, 3];
@@ -615,7 +614,7 @@ const item_list = {
         id: null,
         color: '#DDDDEE',
         name: 'rock',
-        grid: [4, 0],
+        grid: [2, 0],
         icon: [4, 0],
         row: 0,
         sources: {
@@ -647,7 +646,7 @@ const item_list = {
         id: null,
         color: '#FFAA22',
         name: 'copper ore',
-        grid: [4, 1],
+        grid: [2, 1],
         icon: [4, 1],
         row: 0,
         sources: {
@@ -671,7 +670,7 @@ const item_list = {
         id: null,
         color: '#DDEEFF',
         name: 'tin ore',
-        grid: [4, 2],
+        grid: [2, 2],
         icon: [4, 2],
         row: 0,
         sources: {
@@ -695,7 +694,7 @@ const item_list = {
         id: null,
         color: '#BB7744',
         name: 'bronze blend',
-        grid: [4, 3],
+        grid: [2, 3],
         icon: [4, 3],
         row: 1,
         sources: {
@@ -709,7 +708,7 @@ const item_list = {
         id: null,
         color: '#DDDDEE',
         name: 'rock club',
-        grid: [5, 0],
+        grid: [2, 4],
         icon: [5, 0],
         row: 1,
         effect(amount) {
@@ -740,7 +739,7 @@ const item_list = {
         id: null,
         color: '#FFAA22',
         name: 'copper pick',
-        grid: [5, 1],
+        grid: [2, 5],
         icon: [5, 1],
         row: 1,
         effect(amount) {
@@ -778,8 +777,11 @@ const item_list = {
         id: null,
         color: '#DDEEFF',
         name: 'tin belt',
-        grid: [5, 2],
-        icon: [5, 2],
+        grid: [2, 6],
+        icon() {
+            if (inChallenge('b', 11)) return [5, 6];
+            return [5, 2];
+        },
         row: 1,
         effect(amount) {
             amount ??= player.items[this.id].amount;
@@ -813,7 +815,7 @@ const item_list = {
         id: null,
         color: '#BB7744',
         name: 'bronze cart',
-        grid: [5, 3],
+        grid: [2, 7],
         icon: [5, 3],
         row: 1,
         effect(amount) {

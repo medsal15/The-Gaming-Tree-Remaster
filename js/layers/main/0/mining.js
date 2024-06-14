@@ -344,7 +344,7 @@ addLayer('m', {
                 return `Formula: ${formula}`;
             },
             effect() { return D.add(player.items.rock.amount, 10).log10(); },
-            effectDisplay() { return `/${formatWhole(upgradeEffect(this.layer, this.id))}`; },
+            effectDisplay() { return `/${format(upgradeEffect(this.layer, this.id))}`; },
             item: 'rock',
             cost: D(250),
             canAfford() { return D.gte(player.items[this.item].amount, tmp[this.layer].upgrades[this.id].cost); },
@@ -495,7 +495,7 @@ addLayer('m', {
             weight() {
                 let weight = D(15);
 
-                if (hasUpgrade('m', 21)) weight = weight.div(upgradeEffect('m', 21));
+                if (hasUpgrade('m', 21)) weight = weight.div(upgradeEffect('m', 21).stone);
 
                 return weight;
             },
@@ -777,7 +777,7 @@ addLayer('m', {
         const current = player.m.current;
         if (D.lte(current.health, 0)) {
             if (current.ore) {
-                player.m.ores[current.ore].broken = D.add(player.m.ores[current.ore].broken);
+                player.m.ores[current.ore].broken = D.add(player.m.ores[current.ore].broken, 1);
                 const drops = get_source_drops(`mining:${current.ore}:break`),
                     data = player.m.ores[current.ore],
                     equal = drops.length == data.last_drops.length &&
