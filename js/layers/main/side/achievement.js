@@ -225,6 +225,69 @@ addLayer('ach', {
             },
             unlocked() { return player.c.shown; },
         },
+        61: {
+            name: 'The Big One',
+            tooltip: 'Fight the Slime King',
+            done() { return inChallenge('b', 11) || hasChallenge('b', 11); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.b.color); },
+            style() {
+                if (hasAchievement(this.layer, this.id)) return {
+                    'background-color': tmp.b.color,
+                };
+            },
+            unlocked() { return player.b.shown; },
+        },
+        62: {
+            name: `You're Boned`,
+            tooltip: 'Get a bone',
+            done() { return D.gt(player.items.bone.amount, 0); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.xp.color); },
+            style() {
+                if (hasAchievement(this.layer, this.id)) return {
+                    'background-color': tmp.xp.color,
+                };
+            },
+            unlocked() { return player.b.shown; },
+        },
+        63: {
+            name: 'Skull Issue',
+            tooltip: 'Get a skull',
+            done() { return D.gt(player.items.skull.amount, 0); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.xp.color); },
+            style() {
+                if (hasAchievement(this.layer, this.id)) return {
+                    'background-color': tmp.xp.color,
+                };
+            },
+            unlocked() { return player.b.shown; },
+        },
+        64: {
+            name: '6 Feet Under',
+            tooltip: 'Get a pick<br>Reward: Mining damage is always at least 1',
+            effect() { return D.dOne; },
+            done() { return D.gt(player.items.bone_pick.amount, 0); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.xp.color); },
+            style() {
+                if (hasAchievement(this.layer, this.id)) return {
+                    'background-color': tmp.xp.color,
+                };
+            },
+            unlocked() { return player.b.shown; },
+        },
+        65: {
+            name: 'Reality Check Through The Skull',
+            tooltip: 'Get a crystal skull<br>Reward: Double enemy damage',
+            effect() { return D.dTwo; },
+            done() { return D.gt(player.items.crystal_skull.amount, 0); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.xp.color); },
+            style() {
+                if (hasAchievement(this.layer, this.id)) return {
+                    'background-color': tmp.xp.color,
+                };
+            },
+            unlocked() { return player.b.shown; },
+        },
+        //todo mining achievements
         //#endregion Normal
         //#region Secret
         41: {
@@ -267,7 +330,7 @@ addLayer('ach', {
     categories: {
         normal: {
             color() { return tmp.ach.color; },
-            rows: [1, 2, 3],
+            rows: [1, 2, 3, 6],
             visible() {
                 return Object.values(tmp.ach.achievements)
                     .filter(ach => typeof ach == 'object' && this.rows.includes(Math.floor(ach.id / 10)) && (ach.unlocked ?? true));

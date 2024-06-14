@@ -269,11 +269,11 @@ function doReset(layer, force = false) {
 
 	player.points = decimalZero;
 
-	for (let x = row; x >= 0; x--) rowReset(x, layer)
+	reset_items(row);
+	for (let x = row; x >= 0; x--) { rowReset(x, layer) }
 	for (const r in OTHER_LAYERS) {
 		rowReset(r, layer)
 	}
-	reset_items(row);
 
 	player[layer].resetTime = 0
 
