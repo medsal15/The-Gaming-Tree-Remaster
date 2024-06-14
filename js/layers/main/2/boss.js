@@ -6,6 +6,7 @@ addLayer('b', {
     type: 'none',
     name: 'boss',
     color: '#CC5555',
+    symbol: 'B',
     hotkeys: [
         {
             key: 'B',

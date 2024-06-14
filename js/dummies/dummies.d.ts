@@ -1780,8 +1780,6 @@ declare class Item<I> {
         readonly id: I
         /** Chance-based source (0.5 has a 50% chance) */
         chance?: Computable<{ [key in drop_sources]: Decimal }>
-        /** Chance-based source, unaffected by chance multipliers */
-        fixed?: Computable<{ [key in drop_sources]: Decimal }>
         /** Produced per second by another layer */
         per_second?: Computable<{ [key in drop_sources]: Decimal }>
         /** Total produced every second */
@@ -1793,13 +1791,21 @@ declare class Item<I> {
     effectDescription(amount?: DecimalSource): string
 }
 
-type monsters = 'slime';
 type items = 'slime_goo' | 'slime_core_shard' | 'slime_core' | 'dense_slime_core' |
-    'slime_crystal' | 'slime_page' | 'slime_pocket' | 'slime_dice';
-type drop_sources = `kill:${drop_subs}`;
-type drop_types = 'kill' | 'crafting';
+    'slime_crystal' | 'slime_page' | 'slime_pocket' | 'slime_dice' |
+    'bone' | 'rib' | 'skull' | 'glowing_skull' |
+    'bone_shiv' | 'bone_pick' | 'jaw_grabber' | 'crystal_skull' |
+    'rock' | 'copper_ore' | 'tin_ore' | 'bronze_blend' |
+    'rock_club' | 'copper_pick' | 'tin_belt' | 'bronze_cart';
+type drop_sources = `kill:${monsters}` | 'crafting:' | `mining:${ores}` | `mining:${ores}:break`;
+type drop_types = 'kill' | 'crafting' | 'mining';
+
+type monsters = 'slime' | 'skeleton';
+type ores = 'stone' | 'copper' | 'tin';
+
 type recipe_category = 'materials' |
-    'slime';
+    'mining' |
+    'slime' | 'skeleton';
 
 type Layers = {
     // Side
@@ -1866,6 +1872,43 @@ type Layers = {
                 mult(): Decimal
             }
         }
+    }
+    m: Layer<'m'> & {
+        upgrades: { [id: string]: CurrencyUpgrade<Player['items'][items], 'm'> & { item: items } }
+        ores: { [ore in ores]: {
+            private _id: ore | null
+            readonly id: ore
+            name: string
+            /** Position of the ore in the ore spritesheet */
+            position: Computable<[number, number]>
+            health: Computable<Decimal>
+            /** Damage on attack */
+            damage(): Decimal
+            /** Passive damage per second */
+            damage_per_second(): Decimal
+            lore: Computable<string>
+            unlocked?(): boolean
+            weight: Computable<Decimal>
+            color: Computable<string>
+        } }
+        modifiers: {
+            damage: {
+                base(): Decimal
+                mult(): Decimal
+                total(): Decimal
+                min(): Decimal
+            }
+            health: {
+                mult(): Decimal
+            }
+            gain: {
+                mult(): Decimal
+                break_mult(): Decimal
+            }
+            oxidizing(): Decimal
+        }
+        minerals: items[]
+        ore_list: ores[]
     }
     // Row 1
     l: Layer<'l'> & {
@@ -1968,6 +2011,20 @@ type Player = {
         monsters: { [monster in monsters]: {
             kills: Decimal
             health: Decimal
+            last_drops: [items, Decimal][]
+            last_drops_times: Decimal
+        } }
+    }
+    m: LayerData & {
+        current: {
+            ore: ores | ''
+            /** noRNG only */
+            progress: Decimal
+            health: Decimal
+        }
+        lore: ores
+        ores: { [ore in ores]: {
+            broken: Decimal
             last_drops: [items, Decimal][]
             last_drops_times: Decimal
         } }

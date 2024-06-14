@@ -14,6 +14,7 @@ addLayer('l', {
     name: 'level',
     resource: 'levels',
     color: '#11BBCC',
+    symbol: 'L',
     startData() {
         return {
             unlocked: false,
@@ -282,6 +283,8 @@ addLayer('l', {
     },
     gainMult() {
         let mult = D.dOne;
+
+        if (hasUpgrade('m', 31)) mult = mult.div(upgradeEffect('m', 31));
 
         mult = mult.div(item_effect('slime_page').level);
 

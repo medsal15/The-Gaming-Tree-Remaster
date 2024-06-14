@@ -2,6 +2,7 @@
  * @type {{[id in items]: Item<id>}}
  */
 const item_list = {
+    // Slime
     'slime_goo': {
         id: null,
         color() { return tmp.xp.monsters.slime.color; },
@@ -330,8 +331,525 @@ const item_list = {
                 You feel lucky when holding it...`;
         },
     },
+    // Skeleton
+    'bone': {
+        id: null,
+        color() { return tmp.xp.monsters.skeleton.color; },
+        name: 'bone',
+        grid: [2, 0],
+        icon: [2, 0],
+        row: 1,
+        sources: {
+            chance() {
+                if (D.lte(tmp.c.chance_multiplier, 0)) return {};
+
+                let chance = D(1 / 3);
+
+                chance = chance.times(tmp.c.chance_multiplier);
+
+                return {
+                    'kill:skeleton': chance,
+                };
+            },
+        },
+        unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
+        lore: `A straight white bone.<br>
+            Somehow clean, even after its owner was torn apart.<br>
+            Could be used as a handle for tools.`,
+    },
+    'rib': {
+        id: null,
+        color() { return tmp.xp.monsters.skeleton.color; },
+        name: 'rib',
+        grid: [2, 1],
+        icon: [2, 1],
+        row: 1,
+        sources: {
+            chance() {
+                if (D.lte(tmp.c.chance_multiplier, 0)) return {};
+
+                let chance = D(1 / 16);
+
+                chance = chance.times(tmp.c.chance_multiplier);
+
+                return {
+                    'kill:skeleton': chance,
+                };
+            },
+        },
+        unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
+        lore: `A curved white bone.<br>
+            Before being removed, it used to protect important organs.<br>
+            Cannot be used as a boomerang, sadly.`,
+    },
+    'skull': {
+        id: null,
+        color() { return tmp.xp.monsters.skeleton.color; },
+        name: 'skull',
+        grid: [2, 2],
+        icon: [2, 2],
+        row: 1,
+        sources: {
+            chance() {
+                if (D.lte(tmp.c.chance_multiplier, 0)) return {};
+
+                let chance = D(1 / 125);
+
+                chance = chance.times(tmp.c.chance_multiplier);
+
+                return {
+                    'kill:skeleton': chance,
+                };
+            },
+            other: ['crafting'],
+        },
+        unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
+        lore: `The head of a skeleton.<br>
+            You can use your hand to make it speak.<br>
+            If only you knew how to make skull chalices...`,
+    },
+    'glowing_skull': {
+        id: null,
+        color() { return tmp.xp.monsters.skeleton.color; },
+        name: 'glowing skull',
+        grid: [2, 3],
+        icon() {
+            if (inChallenge('b', 11)) return [2, 7];
+            return [2, 3];
+        },
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
+        lore() {
+            if (inChallenge('b', 11)) {
+                return `A red glowing skull.<br>
+                    Its sockets have a warm orange glow.<br>
+                    Feels like its eyes are judging you.`;
+            }
+            return `A green glowing skull.<br>
+                Its sockets have a dull green glow.<br>
+                Feels like its eyes are watching you.`
+        },
+    },
+    'bone_shiv': {
+        id: null,
+        color() { return tmp.xp.monsters.skeleton.color; },
+        name: 'bone shiv',
+        grid: [3, 0],
+        icon() {
+            if (inChallenge('b', 11)) return [3, 4];
+            return [3, 0];
+        },
+        row: 1,
+        effect(amount) {
+            amount ??= player.items[this.id].amount;
+
+            let div = 10;
+
+            if (inChallenge('b', 11) || hasChallenge('b', 11)) {
+                div = 9;
+            }
+
+            return D.div(amount, div).add(1);
+        },
+        effectDescription(amount) {
+            amount ??= player.items[this.id].amount;
+
+            if (!shiftDown) {
+                return `Multiplies damage by ${format(item_effect(this.id))}`;
+            }
+            let formula = 'amount / 10 + 1';
+
+            if (inChallenge('b', 11) || hasChallenge('b', 11)) {
+                formula = 'amount / 9 + 1';
+            }
+
+            return `Formula: ${formula}`;
+        },
+        sources: {
+            other: ['crafting'],
+        },
+        unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
+        lore() {
+            if (inChallenge('b', 11)) {
+                return `A small orange knife.<br>
+                    The slime flowing through the bone almost looks like blood...`;
+            }
+            return `A small green knife.<br>
+                The shard feels sharp enough to cut through anything.`;
+        },
+    },
+    'bone_pick': {
+        id: null,
+        color() { return tmp.xp.monsters.skeleton.color; },
+        name: 'bone pick',
+        grid: [3, 1],
+        icon: [3, 1],
+        row: 1,
+        effect(amount) {
+            amount ??= player.items[this.id].amount;
+
+            let mining,
+                damage = D.div(amount, 10);
+
+            if (D.lte(amount, 0)) mining = D.dZero;
+            else {
+                mining = D.minus(amount, 1).div(10).add(1);
+            }
+
+            return { mining, damage };
+        },
+        effectDescription(amount) {
+            amount ??= player.items[this.id].amount;
+
+            if (!shiftDown) {
+                const effect = item_effect(this.id);
+                return `Increases mining damage by ${format(effect.mining)}\
+                    and attack damage by ${format(effect.damage)}`;
+            }
+            let formula_mining = '(amount - 1) / 10 + 1',
+                formula_damage = 'amount / 10';
+
+            return `Mining formula: ${formula_mining}<br>Damage formula: ${formula_damage}`;
+        },
+        sources: {
+            other: ['crafting'],
+        },
+        unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
+        lore: `A crude pick made of bones.<br>
+            Good for attacking enemies and rocks. Mostly rocks.<br>
+            Now that you think about it, these rocks look suspicious...`,
+    },
+    'jaw_grabber': {
+        id: null,
+        color() { return tmp.xp.monsters.skeleton.color; },
+        name: 'jaw grabber',
+        grid: [3, 2],
+        icon: [3, 2],
+        row: 1,
+        effect(amount) {
+            amount ??= player.items[this.id].amount;
+
+            return D.div(amount, 20).add(1);
+        },
+        effectDescription(amount) {
+            amount ??= player.items[this.id].amount;
+
+            if (!shiftDown) {
+                return `Multiplies drop chance by ${format(item_effect(this.id))}`;
+            }
+            let formula = 'amount / 20 + 1';
+
+            return `Formula: ${formula}`;
+        },
+        sources: {
+            other: ['crafting'],
+        },
+        unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
+        lore: `A fancy pair of jaws on a stick.<br>
+            Can be used to stealthily grab enemy loot without them noticing.<br>
+            Clacks when you miss.`,
+    },
+    'crystal_skull': {
+        id: null,
+        color() { return tmp.xp.monsters.skeleton.color; },
+        name: 'crystal skull',
+        grid: [3, 3],
+        icon() {
+            if (inChallenge('b', 11)) return [3, 7];
+            return [3, 3];
+        },
+        row: 1,
+        effect(amount) {
+            amount ??= player.items[this.id].amount;
+
+            let cap_div = 7.5,
+                mult_base = 1.1;
+
+            if (inChallenge('b', 11) || hasChallenge('b', 11)) {
+                cap_div = 5;
+                mult_base = 1.125;
+            }
+
+            return {
+                cap: D.div(amount, cap_div).add(1),
+                mult: D.pow(mult_base, amount),
+            };
+        },
+        effectDescription(amount) {
+            amount ??= player.items[this.id].amount;
+
+            if (!shiftDown) {
+                const effect = item_effect(this.id);
+                return `Multiplies XP gain by ${format(effect.mult)} and XP cap by ${format(effect.cap)}`;
+            }
+            let formula_cap = 'amount / 7.5 + 1',
+                formula_mult = '1.1 ^ amount';
+
+            if (inChallenge('b', 11) || hasChallenge('b', 11)) {
+                formula_cap = 'amount / 5 + 1';
+                formula_mult = '1.125 ^ amount';
+            }
+
+            return `Multiplier formula: ${formula_mult}<br>Cap formula: ${formula_cap}`;
+        },
+        sources: {
+            other: ['crafting'],
+        },
+        unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
+        lore() {
+            if (inChallenge('b', 11)) {
+                return `A red crystal skull.<br>
+                    Feels like its eyes- wait. Why are there 4?<br>
+                    It judges your sins.`;
+            }
+            return `A green crystal skull.<br>
+                Feels like its eyes- wait. Why are there 4?<br>
+                It knows.`
+        },
+    },
+    // Mining
+    'rock': {
+        id: null,
+        color: '#DDDDEE',
+        name: 'rock',
+        grid: [4, 0],
+        icon: [4, 0],
+        row: 0,
+        sources: {
+            chance() {
+                if (!tmp.m.layerShown) return {};
+
+                let hit = tmp.m.modifiers.gain.mult,
+                    destroy = tmp.m.modifiers.gain.break_mult;
+
+                /** @type {{ [key in drop_sources]: Decimal }} */
+                const chance = {
+                    'mining:stone': hit,
+                    'mining:stone:break': destroy,
+                };
+
+                if (hasUpgrade('m', 12)) {
+                    const sub = upgradeEffect('m', 12);
+                    chance['mining:copper'] = sub;
+                    chance['mining:tin'] = sub;
+                }
+
+                return chance;
+            },
+        },
+        lore: `A simple piece of stone.`,
+        unlocked() { return tmp.m.layerShown; },
+    },
+    'copper_ore': {
+        id: null,
+        color: '#FFAA22',
+        name: 'copper ore',
+        grid: [4, 1],
+        icon: [4, 1],
+        row: 0,
+        sources: {
+            chance() {
+                if (!tmp.m.layerShown) return {};
+
+                let hit = tmp.m.modifiers.gain.mult,
+                    destroy = tmp.m.modifiers.gain.break_mult;
+
+                return {
+                    'mining:copper': hit,
+                    'mining:copper:break': destroy,
+                };
+            },
+        },
+        lore: `A piece of orange ore.<br>\
+            Turns teal over the course of time.`,
+        unlocked() { return tmp.m.layerShown; },
+    },
+    'tin_ore': {
+        id: null,
+        color: '#DDEEFF',
+        name: 'tin ore',
+        grid: [4, 2],
+        icon: [4, 2],
+        row: 0,
+        sources: {
+            chance() {
+                if (!tmp.m.layerShown) return {};
+
+                let hit = tmp.m.modifiers.gain.mult,
+                    destroy = tmp.m.modifiers.gain.break_mult;
+
+                return {
+                    'mining:tin': hit,
+                    'mining:tin:break': destroy,
+                };
+            },
+        },
+        lore: `A piece of light yellow ore.<br>\
+            Not very useful for tool making...`,
+        unlocked() { return tmp.m.layerShown; },
+    },
+    'bronze_blend': {
+        id: null,
+        color: '#BB7744',
+        name: 'bronze blend',
+        grid: [4, 3],
+        icon: [4, 3],
+        row: 1,
+        sources: {
+            other: ['crafting:',],
+        },
+        lore: `A crude blend of copper and tin.<br>
+            Not very useful...`,
+        unlocked() { return tmp.m.layerShown; },
+    },
+    'rock_club': {
+        id: null,
+        color: '#DDDDEE',
+        name: 'rock club',
+        grid: [5, 0],
+        icon: [5, 0],
+        row: 1,
+        effect(amount) {
+            amount ??= player.items[this.id].amount;
+
+            let div = 15;
+
+            return D.div(amount, div).add(1);
+        },
+        effectDescription(amount) {
+            amount ??= player.items[this.id].amount;
+
+            if (!shiftDown) {
+                return `Multiplies damage by ${format(item_effect(this.id))}`;
+            }
+            let formula = 'amount / 15 + 1';
+
+            return `Formula: ${formula}`;
+        },
+        sources: {
+            other: ['crafting:'],
+        },
+        lore: `A large rock stuck to a bone.<br>
+            Makes whack-a-mole harder due to its weight.`,
+        unlocked() { return tmp.m.layerShown; },
+    },
+    'copper_pick': {
+        id: null,
+        color: '#FFAA22',
+        name: 'copper pick',
+        grid: [5, 1],
+        icon: [5, 1],
+        row: 1,
+        effect(amount) {
+            amount ??= player.items[this.id].amount;
+
+            // Oxidize
+            amount = D.times(amount, tmp.m.modifiers.oxidizing);
+
+            let mining = D.div(amount, 7.5).add(1),
+                health = D.div(amount, 5).add(1);
+
+            return { mining, health };
+        },
+        effectDescription(amount) {
+            amount ??= player.items[this.id].amount;
+
+            if (!shiftDown) {
+                const effect = item_effect(this.id);
+                return `Multiplies mining damage by ${format(effect.mining)}\
+                    and ore health by ${format(effect.health)}`;
+            }
+            let formula_mining = 'amount / 7.5 + 1',
+                formula_health = 'amount / 5 + 1';
+
+            return `Mining formula: ${formula_mining}<br>Health formula: ${formula_health}`;
+        },
+        sources: {
+            other: ['crafting:'],
+        },
+        lore: `A crude pick made of ore.<br>
+            Loses efficiency over time due to oxydizing.`,
+        unlocked() { return tmp.m.layerShown; },
+    },
+    'tin_belt': {
+        id: null,
+        color: '#DDEEFF',
+        name: 'tin belt',
+        grid: [5, 2],
+        icon: [5, 2],
+        row: 1,
+        effect(amount) {
+            amount ??= player.items[this.id].amount;
+
+            let mining = D.div(amount, 20).add(1),
+                speed = D.div(amount, 5).add(1);
+
+            return { mining, speed };
+        },
+        effectDescription(amount) {
+            amount ??= player.items[this.id].amount;
+
+            if (!shiftDown) {
+                const effect = item_effect(this.id);
+                return `Multiplies mining drops by ${format(effect.mining)}\
+                    and crafting speed by ${format(effect.speed)}`;
+            }
+            let formula_mining = 'amount / 20 + 1',
+                formula_speed = 'amount / 5 + 1';
+
+            return `Mining formula: ${formula_mining}<br>Speed formula: ${formula_speed}`;
+        },
+        sources: {
+            other: ['crafting:'],
+        },
+        lore: `A crude conveyor belt made of tin.<br>
+            The sticky goo allows it to move things around, but covers them too.`,
+        unlocked() { return tmp.m.layerShown; },
+    },
+    'bronze_cart': {
+        id: null,
+        color: '#BB7744',
+        name: 'bronze cart',
+        grid: [5, 3],
+        icon: [5, 3],
+        row: 1,
+        effect(amount) {
+            amount ??= player.items[this.id].amount;
+
+            let mining = D.div(amount, 15).add(1),
+                drop = D.div(amount, 15).add(1);
+
+            return { mining, drop };
+        },
+        effectDescription(amount) {
+            amount ??= player.items[this.id].amount;
+
+            if (!shiftDown) {
+                const effect = item_effect(this.id);
+                return `Multiplies mining drops by ${format(effect.mining)}\
+                    and item drops by ${format(effect.drop)}`;
+            }
+            let formula_mining = 'amount / 15 + 1',
+                formula_drop = 'amount / 15 + 1';
+
+            return `Mining formula: ${formula_mining}<br>Drop formula: ${formula_drop}`;
+        },
+        sources: {
+            other: ['crafting:',],
+        },
+        lore: `A hauling cart made of bronze.<br>
+            Faster on rails.`,
+        unlocked() { return tmp.m.layerShown; },
+    },
 };
 
+const ITEM_SIZES = {
+    width: 8,
+    height: 6,
+};
 /**
  * @type {{[row in Layer['row']]: items[]}}
  */
@@ -343,7 +861,14 @@ const ROW_ITEMS = {};
 function reset_items(row) {
     if (isNaN(row)) return;
 
-    for (let r in ROW_ITEMS) {
+    const rows = Object.keys(ROW_ITEMS)
+        // Ignore side rows and equal/above reset row
+        .filter(irow => !isNaN(irow) && irow < row)
+        .map(n => +n)
+        // Sort from highest to lowest
+        .sort((a, b) => b - a);
+
+    for (let r of rows) {
         if (isNaN(r) || r >= row) continue;
 
         ROW_ITEMS[r].forEach(item => {
@@ -410,6 +935,10 @@ function item_tile(item) {
     };
 }
 
+function item_tile_unknown() {
+    //todo
+}
+
 
 /**
  * @param {[items, DecimalSource][]|items} item
@@ -427,13 +956,17 @@ function gain_items(item, amount) {
  * @param {drop_sources} source
  */
 function source_name(source) {
-    /** @type {[drop_types, string]} */
-    const [type, sub] = source.split(':');
+    /** @type {[drop_types, string[]]} */
+    const [type, ...sub] = source.split(':');
     switch (type) {
         case 'kill':
-            return tmp.xp.monsters[sub].name;
+            return tmp.xp.monsters[sub[0]].name;
         case 'crafting':
             return 'crafting';
+        case 'mining':
+            let text = 'mining';
+            if (sub[1] == 'break') text = 'breaking';
+            return `${text} ${tmp.m.ores[sub[0]].name}`;
     }
 }
 /**
@@ -444,20 +977,17 @@ function source_name(source) {
  * @param {drop_sources} source
  * @returns {{
  *  chances: {[item in items]: Decimal}
- *  fixed: {[item in items]: Decimal}
  * }}
  */
 function source_drops(source) {
     const items = {
         chances: {},
-        fixed: {},
     };
 
     Object.values(tmp.items).forEach(item => {
         if (!('sources' in item)) return;
 
         if ('chance' in item.sources && source in item.sources.chance) items.chances[item.id] = item.sources.chance[source];
-        if ('fixed' in item.sources && source in item.sources.fixed) items.fixed[item.id] = item.sources.fixed[source];
     });
 
     return items;
@@ -489,14 +1019,6 @@ function get_source_drops(source, chance_multiplier = D.dOne) {
         items = source_drops(source);
 
     Object.entries(items.chances).forEach(/**@param{[items, Decimal]}*/([item, chance]) => {
-        const rchance = D.times(chance, chance_multiplier);
-        if (rchance.gte(1) || options.noRNG) {
-            add_to_results(item, chance);
-        } else {
-            to_roll.push([item, chance]);
-        }
-    });
-    Object.entries(items.fixed).forEach(/**@param{[items, Decimal]}*/([item, chance]) => {
         const rchance = D.times(chance, chance_multiplier);
         if (rchance.gte(1) || options.noRNG) {
             add_to_results(item, chance);

@@ -1,13 +1,5 @@
 const UI_SIZES = {
-    width: 2,
-    height: 2,
-};
-const MONSTER_SIZES = {
-    width: 1,
-    height: 2,
-};
-const ITEM_SIZES = {
-    width: 8,
+    width: 3,
     height: 2,
 };
 /**
@@ -190,26 +182,6 @@ function powerRound(decimal, pow) {
     return base.times(mult);
 }
 /**
- * Returns the average of 2 or more hex colors
- *
- * @param {...string} colors
- * @returns {string}
- */
-function colors_average(...colors) {
-    if (!colors.length) return '#000000';
-    if (colors.length == 1) return colors[0];
-
-    return '#' + colors.map(color => Array.from({ length: 3 }, (_, i) => {
-        const hex = color.slice(i * 2 + 1, (i + 1) * 2 + 1),
-            val = parseInt(hex, 16);
-
-        return val / color.length;
-    }))
-        .reduce(([pr, pg, pb], [cr, cg, cb]) => [pr + cr, pg + cg, pb + cb], [0, 0, 0])
-        .map(num => Math.floor(num).toString(16).padStart(2, '0'))
-        .join('');
-}
-/**
  * Converts hsl to rgb
  *
  * @param {number} hue Contained within [0,1]
@@ -249,6 +221,27 @@ function hue_to_rgb(p, q, t) {
     return p;
 }
 /**
+ * Given a color, returns either black or white, depending on which one is furthest
+ *
+ * @param {string} color
+ */
+function rgb_opposite_bw(color) {
+    const sum = rgb_split(color).map(n => n / 256 / 3)
+        .reduce((a, b) => a + b, 0);
+
+    if (sum > .5) return '#000000';
+    return '#FFFFFF';
+}
+/**
+ * Splits a hex color into its red, green, and blue values
+ *
+ * @param {string} color
+ * @returns {[number, number, number]}
+ */
+function rgb_split(color) {
+    return Array.from({ length: 3 }, (_, i) => parseInt(color.slice(i * 2 + 1, i * 2 + 3), 16));
+}
+/**
  * Generates a random alphabetical string
  *
  * @param {number} length
@@ -256,21 +249,6 @@ function hue_to_rgb(p, q, t) {
  */
 function random_string_alpha(length) {
     return Array.from({ length }, () => String.fromCharCode(Math.floor(Math.random() * 26) + 65)).join('');
-}
-/**
- * Given a color, returns either black or white, depending on which one is furthest
- *
- * @param {string} color
- */
-function rgb_opposite_bw(color) {
-    const sum = Array.from({ length: 3 }, (_, i) => {
-        const pair = color.slice(i * 2 + 1, i * 2 + 3),
-            num = parseInt(pair, 16);
-        return num / 256 / 3;
-    }).reduce((a, b) => a + b, 0);
-
-    if (sum > .5) return '#000000';
-    return '#FFFFFF';
 }
 
 // Layer methods
@@ -293,8 +271,8 @@ function bestiary_content(monster) {
                     <img src="./resources/images/enemies.png"
                         style="width: ${MONSTER_SIZES.width * 100}%;
                             height: ${MONSTER_SIZES.height * 100}%;
-                            margin-left: ${-240 * tmp.xp.monsters[monster].position[0]}px;
-                            margin-top: ${-240 * tmp.xp.monsters[monster].position[1]}px;
+                            margin-left: ${-240 * tmonst.position[0]}px;
+                            margin-top: ${-240 * tmonst.position[1]}px;
                             image-rendering: crisp-edges;"/>
                 </div>`
         ],
@@ -304,13 +282,15 @@ function bestiary_content(monster) {
         ['display-text', `Killed ${resourceColor(tmp.xp.kill.color, formatWhole(player.xp.monsters[monster].kills))} times`],
         ['display-text', `Gives ${resourceColor(tmp.xp.color, format(tmonst.experience))} XP on kill`],
         'blank',
+        ['display-text', `Health: ${format(player.xp.monsters[monster].health)} / ${format(tmonst.health)}`],
+        'blank',
     ];
 
     /** @type {TabFormatEntries<'xp'>[]} */
     const upgrade_lines = [];
     if (hasUpgrade('xp', 32)) upgrade_lines.push([
         'display-text',
-        `${resourceColor(tmp.xp.color, capitalize(tmp.xp.upgrades[32].title))} effect: *${format(upgradeEffect('xp', 32).slime)} XP`
+        `${resourceColor(tmp.xp.color, capitalize(tmp.xp.upgrades[32].title))} effect: *${format(upgradeEffect('xp', 32)[monster])} XP`
     ]);
 
     if (upgrade_lines.length > 0) lines.push(...upgrade_lines, 'blank');
@@ -322,10 +302,8 @@ function bestiary_content(monster) {
 
         Object.entries(drops.chances)
             .forEach(/**@param{[items,Decimal]}*/([item, chance]) => list.push(`${tmp.items[item].name} (${format_chance(chance)})`));
-        Object.entries(drops.fixed)
-            .forEach(/**@param{[items,Decimal]}*/([item, chance]) => list.push(`${tmp.items[item].name} (${format_chance(chance)})`));
 
-        lines.push(['display-text', `Drops: ${listFormat.format(list)}`], 'blank');
+        if (list.length) lines.push(['display-text', `Drops: ${listFormat.format(list)}`], 'blank');
     }
 
     // Add the lore at the end
@@ -335,6 +313,88 @@ function bestiary_content(monster) {
 
     return lines;
 }
+
+/**
+ * Returns a random ore
+ *
+ * @returns {ores}
+ */
+function random_ore() {
+    /** @type {[ores, Decimal][]} */
+    const weights = Object.values(tmp.m?.ores ?? {})
+        .filter(ore => (ore.unlocked ?? true) && D.gt(ore.weight, 0))
+        .map(ore => [ore.id, ore.weight]),
+        sum = weights.reduce((sum, [, weight]) => D.add(sum, weight), D.dZero);
+    if (!weights.length) return 'stone';
+    let target, ore = weights[0][0];
+    if (options.noRNG) {
+        target = player.m.current.progress;
+        player.m.current.progress = D.add(player.m.current.progress, 1);
+        if (D.gt(player.m.current.progress, sum)) player.m.current.progress = D.minus(player.m.current.progress, sum);
+    } else {
+        target = D.times(sum, Math.random());
+    }
+    while (D.gt(target, 0)) {
+        let weight;
+        [ore, weight] = weights.pop();
+        target = D.minus(target, weight);
+    }
+    return ore;
+}
+/**
+ * Returns the content for lore in the mining tabFormat
+ *
+ * @param {ores} ore
+ * @returns {TabFormatEntries<'c'>[]}
+ */
+function mining_guide_content(ore) {
+    const tore = tmp.m.ores[ore];
+
+    if (!(tore.unlocked ?? true)) return [];
+
+    const sum = Object.values(tmp.m?.ores ?? {})
+        .filter(ore => (ore.unlocked ?? true) && D.gt(ore.weight, 0))
+        .map(ore => [ore.id, ore.weight])
+        .reduce((sum, [, weight]) => D.add(sum, weight), D.dZero),
+        /** @type {TabFormatEntries<'c'>[]} */
+        lines = [
+            [
+                'raw-html',
+                `<div style="width: 240px; height: 240px; overflow: hidden">
+                    <img src="./resources/images/ores.png"
+                        style="width: ${ORE_SIZES.width * 100}%;
+                            height: ${ORE_SIZES.height * 100}%;
+                            margin-left: ${-240 * tore.position[0]}px;
+                            margin-top: ${-240 * tore.position[1]}px;
+                            image-rendering: crisp-edges;"/>
+                </div>`
+            ],
+            ['display-text', capitalize(tore.name)],
+            'blank',
+            ['display-text', `Mined ${resourceColor(tore.color, formatWhole(player.m.ores[ore].broken))} times`],
+            'blank',
+            ['display-text', `Health: ${format(tore.health)}`],
+            ['display-text', `Chance to find: ${format_chance(D.div(tore.weight, sum))}`],
+            'blank',
+        ];
+
+    // Add drops
+    const hit = Object.entries(source_drops(`mining:${ore}`).chances)
+        .map(/**@param{[items,Decimal]}*/([item, chance]) => `${tmp.items[item].name} (${format_chance(chance)})`),
+        destroy = Object.entries(source_drops(`mining:${ore}:break`).chances)
+            .map(/**@param{[items,Decimal]}*/([item, chance]) => `${tmp.items[item].name} (${format_chance(chance)})`);
+
+    if (hit.length) lines.push(['display-text', `Drops on hit: ${listFormat.format(hit)}`]);
+    if (destroy.length) lines.push(['display-text', `Drops on break: ${listFormat.format(hit)}`]);
+
+    if (hit.length || destroy.length) lines.push('blank');
+
+    // Add lore
+    lines.push(['display-text', tore.lore]);
+
+    return lines;
+}
+
 /**
  * Returns the content for the inventory tab in the Crafting tabFormat
  * @returns {TabFormatEntries<'c'>[]}
@@ -361,15 +421,11 @@ function inventory() {
         if ('sources' in itemp) {
             const {
                 chance = {},
-                fixed = {},
                 per_second = {},
                 other = [],
             } = itemp.sources;
 
             if (Object.entries(chance).length) tooltip_lines.push(...Object.entries(chance)
-                .map(/**@param{[string,Decimal]}*/([source, chance]) =>
-                    `${capitalize(source_name(source))}: ${format_chance(chance)}`));
-            if (Object.entries(fixed).length) tooltip_lines.push(...Object.entries(fixed)
                 .map(/**@param{[string,Decimal]}*/([source, chance]) =>
                     `${capitalize(source_name(source))}: ${format_chance(chance)}`));
             if (Object.entries(per_second).length) tooltip_lines.push(...Object.entries(per_second)

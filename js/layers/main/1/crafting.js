@@ -6,6 +6,7 @@ addLayer('c', {
     type: 'none',
     name: 'crafting',
     color: '#CC8811',
+    symbol: 'C',
     hotkeys: [{
         key: 'C',
         description: 'Shift + C: Display crafting layer',
@@ -31,7 +32,7 @@ addLayer('c', {
         };
     },
     layerShown() { return hasUpgrade('xp', 33) || player.c.shown; },
-    branches: ['xp'],
+    branches: ['xp', 'm'],
     tabFormat: {
         'Crafting': {
             content: [
@@ -61,7 +62,6 @@ addLayer('c', {
         },
     },
     buyables: {
-        //todo why is shift breaking the display?
         11: {
             title() { return `Looting ${formatWhole(getBuyableAmount(this.layer, this.id))}`; },
             display() {
@@ -100,12 +100,15 @@ addLayer('c', {
         if (hasAchievement('ach', 34)) mult = mult.add(achievementEffect('ach', 34));
 
         mult = mult.times(item_effect('slime_dice'));
+        mult = mult.times(item_effect('jaw_grabber'));
+        mult = mult.times(item_effect('bronze_cart').drop);
 
         if (hasUpgrade('l', 32)) mult = mult.times(upgradeEffect('l', 32));
 
         return mult;
     },
     recipes: {
+        // Materials
         slime_core: {
             _id: null,
             get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
@@ -120,7 +123,11 @@ addLayer('c', {
             produces(amount) {
                 const count = crafting_default_amount(this.id, amount);
 
-                return [['slime_core', D.times(count, 2)]];
+                let mult = D.dTwo;
+
+                if (hasUpgrade('m', 34)) mult = mult.add(upgradeEffect('m', 34).craft);
+
+                return [['slime_core', D.times(count, mult)]];
             },
             formulas: {
                 consumes: {
@@ -128,7 +135,13 @@ addLayer('c', {
                     'slime_core_shard': '3 * amount',
                 },
                 produces: {
-                    'slime_core': 'amount * 2',
+                    'slime_core'() {
+                        let mult = D.dTwo;
+
+                        if (hasUpgrade('m', 34)) mult = mult.add(upgradeEffect('m', 34).craft);
+
+                        return `amount * ${formatWhole(mult)}`;
+                    },
                 },
             },
             category: ['materials', 'slime',],
@@ -148,7 +161,11 @@ addLayer('c', {
             produces(amount) {
                 const count = crafting_default_amount(this.id, amount);
 
-                return [['dense_slime_core', count]];
+                let mult = D.dOne;
+
+                if (hasUpgrade('m', 34)) mult = mult.add(upgradeEffect('m', 34).craft);
+
+                return [['dense_slime_core', D.times(count, mult)]];
             },
             formulas: {
                 consumes: {
@@ -157,11 +174,152 @@ addLayer('c', {
                     'slime_core': '2 * amount',
                 },
                 produces: {
-                    'dense_slime_core': 'amount',
+                    'dense_slime_core'() {
+                        let mult = D.dOne,
+                            text = 'amount';
+
+                        if (hasUpgrade('m', 34)) mult = mult.add(upgradeEffect('m', 34).craft);
+
+                        if (mult.gt(1)) text += ` * ${formatWhole(mult)}`;
+
+                        return text;
+                    },
                 },
             },
             category: ['materials', 'slime',],
         },
+        skull: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['bone', D.times(5, count)],
+                    ['rib', D.times(2, count)],
+                ];
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                let mult = D.dOne;
+
+                if (hasUpgrade('m', 34)) mult = mult.add(upgradeEffect('m', 34).craft);
+
+                return [['skull', D.times(count, mult)]];
+            },
+            formulas: {
+                consumes: {
+                    'slime_goo': '5 * amount',
+                    'slime_core_shard': '2 * amount',
+                },
+                produces: {
+                    'slime_core'() {
+                        let mult = D.dOne,
+                            text = 'amount';
+
+                        if (hasUpgrade('m', 34)) mult = mult.add(upgradeEffect('m', 34).craft);
+
+                        if (mult.gt(1)) text += ` * ${formatWhole(mult)}`;
+
+                        return text;
+                    },
+                },
+            },
+            category: ['materials', 'skeleton',],
+            unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
+        },
+        glowing_skull: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['dense_slime_core', count],
+                    ['skull', count],
+                ];
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                let mult = D.dOne;
+
+                if (hasUpgrade('m', 34)) mult = mult.add(upgradeEffect('m', 34).craft);
+
+                return [['glowing_skull', D.times(count, mult)]];
+            },
+            formulas: {
+                consumes: {
+                    'skull': 'amount',
+                    'dense_slime_core': 'amount',
+                },
+                produces: {
+                    'glowing_skull'() {
+                        let mult = D.dOne,
+                            text = 'amount';
+
+                        if (hasUpgrade('m', 34)) mult = mult.add(upgradeEffect('m', 34).craft);
+
+                        if (mult.gt(1)) text += ` * ${formatWhole(mult)}`;
+
+                        return text;
+                    },
+                },
+            },
+            category: ['materials', 'skeleton', 'slime',],
+            unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
+        },
+        bronze_blend: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['copper_ore', D.times(count, 9)],
+                    ['tin_ore', D.times(count, 3)],
+                ];
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                let mult = D.dOne;
+
+                if (hasUpgrade('m', 34)) mult = mult.add(upgradeEffect('m', 34).craft);
+
+                return [['bronze_blend', D.times(count, mult)]];
+            },
+            duration() {
+                let time = D.dOne;
+
+                time = time.div(tmp.c.crafting.speed);
+
+                return time;
+            },
+            formulas: {
+                consumes: {
+                    'copper_ore': 'amount * 9',
+                    'tin_ore': 'amount * 3',
+                },
+                produces: {
+                    'bronze_blend'() {
+                        let mult = D.dOne,
+                            text = 'amount';
+
+                        if (hasUpgrade('m', 34)) mult = mult.add(upgradeEffect('m', 34).craft);
+
+                        if (mult.gt(1)) text += ` * ${formatWhole(mult)}`;
+
+                        return text;
+                    },
+                },
+                duration: '1 second',
+            },
+            category: ['materials', 'mining',],
+            unlocked() { return tmp.m.layerShown; },
+        },
+        // Slime
         slime_crystal: {
             _id: null,
             get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
@@ -326,6 +484,340 @@ addLayer('c', {
             static: true,
             category: ['slime',],
         },
+        // Skeleton
+        bone_shiv: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    total = crafting_default_all_time(this.id, all_time);
+
+                return [
+                    ['slime_core_shard', D.sumGeometricSeries(count, 5, 1.5, total)],
+                    ['bone', D.sumGeometricSeries(count, 5, 1.75, total)],
+                ];
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [['bone_shiv', count]];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    total = crafting_default_all_time(this.id, all_time);
+
+                let time = D.times(count, 2).add(total).div(5).add(10);
+
+                time = time.div(tmp.c.crafting.speed);
+
+                return time;
+            },
+            formulas: {
+                consumes: {
+                    'slime_core_shard': '5 * (1.5 ^ (amount + crafted) - 1.5 ^ crafted)',
+                    'bone': '5 * (1.75 ^ (amount + crafted) - 1.75 ^ crafted)',
+                },
+                produces: {
+                    'bone_shiv': 'amount',
+                },
+                duration: '10 + (amount * 2 + crafted) / 5 seconds',
+            },
+            static: true,
+            category: ['slime', 'skeleton',],
+            unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
+        },
+        bone_pick: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    total = crafting_default_all_time(this.id, all_time);
+
+                return [
+                    ['bone', D.sumGeometricSeries(count, 10, 1.75, total)],
+                    ['rib', D.sumGeometricSeries(count, 5, 1.5, total)],
+                ];
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [['bone_pick', count]];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    total = crafting_default_all_time(this.id, all_time);
+
+                let time = D.times(count, 2).add(total).div(2.5).add(20);
+
+                time = time.div(tmp.c.crafting.speed);
+
+                return time;
+            },
+            formulas: {
+                consumes: {
+                    'bone': '10 * (1.75 ^ (amount + crafted) - 1.75 ^ crafted)',
+                    'rib': '5 * (1.5 ^ (amount + crafted) - 1.5 ^ crafted)',
+                },
+                produces: {
+                    'bone_pick': 'amount',
+                },
+                duration: '20 + (amount * 2 + crafted) / 2.5 seconds',
+            },
+            static: true,
+            category: ['skeleton',],
+            unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
+        },
+        jaw_grabber: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    total = crafting_default_all_time(this.id, all_time);
+
+                return [
+                    ['bone', D.sumGeometricSeries(count, 5, 1.75, total)],
+                    ['rib', D.sumGeometricSeries(count, 3, 1.5, total)],
+                    ['skull', D.sumGeometricSeries(count, 1, 1.25, total)],
+                ];
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [['jaw_grabber', count]];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    total = crafting_default_all_time(this.id, all_time);
+
+                let time = D.times(count, 2).add(total).div(1.5).add(40);
+
+                time = time.div(tmp.c.crafting.speed);
+
+                return time;
+            },
+            formulas: {
+                consumes: {
+                    'bone': '5 * (1.75 ^ (amount + crafted) - 1.75 ^ crafted)',
+                    'rib': '3 * (1.5 ^ (amount + crafted) - 1.5 ^ crafted)',
+                    'skull': '1.25 ^ (amount + crafted) - 1.25 ^ crafted',
+                },
+                produces: {
+                    'jaw_grabber': 'amount',
+                },
+                duration: '40 + (amount * 2 + crafted) / 1.5 seconds',
+            },
+            static: true,
+            category: ['skeleton',],
+            unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
+        },
+        crystal_skull: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    total = crafting_default_all_time(this.id, all_time);
+
+                return [
+                    ['slime_crystal', D.sumGeometricSeries(count, 1, 1.1, total)],
+                    ['glowing_skull', D.sumGeometricSeries(count, 1, 1.125, total)],
+                ];
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [['crystal_skull', count]];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    total = crafting_default_all_time(this.id, all_time);
+
+                let time = D.times(count, 2).add(total).times(15).add(50);
+
+                time = time.div(tmp.c.crafting.speed);
+
+                return time;
+            },
+            formulas: {
+                consumes: {
+                    'glowing_skull': '1.125 ^ (amount + crafted) - 1.125 ^ crafted',
+                    'slime_crystal': '1.1 ^ (amount + crafted) - 1.1 ^ crafted',
+                },
+                produces: {
+                    'crystal_skull': 'amount',
+                },
+                duration: '50 + (amount * 2 + crafted) * 15 seconds',
+            },
+            static: true,
+            category: ['skeleton', 'slime',],
+            unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
+        },
+        // Mining
+        rock_club: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    total = crafting_default_all_time(this.id, all_time);
+
+                return [
+                    ['bone', D.sumGeometricSeries(count, 3, 1.75, total)],
+                    ['rock', D.sumGeometricSeries(count, 10, 1.75, total)],
+                ];
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [['rock_club', count]];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    total = crafting_default_all_time(this.id, all_time);
+
+                let time = D.times(count, 2).add(total).div(2.5).add(10);
+
+                time = time.div(tmp.c.crafting.speed);
+
+                return time;
+            },
+            formulas: {
+                consumes: {
+                    'bone': '3 * (1.75 ^ (amount + crafted) - 1.75 ^ crafted)',
+                    'rock': '10 * (1.75 ^ (amount + crafted) - 1.75 ^ crafted)',
+                },
+                produces: {
+                    'rock_club': 'amount',
+                },
+                duration: '10 + (amount * 2 + crafted) / 2.5 seconds',
+            },
+            static: true,
+            category: ['mining', 'skeleton',],
+            unlocked() { return tmp.m.layerShown; },
+        },
+        copper_pick: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    total = crafting_default_all_time(this.id, all_time);
+
+                return [
+                    ['bone', D.sumGeometricSeries(count, 5, 1.75, total)],
+                    ['copper_ore', D.sumGeometricSeries(count, 10, 1.5, total)],
+                ];
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [['copper_pick', count]];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    total = crafting_default_all_time(this.id, all_time);
+
+                let time = D.times(count, 2).add(total).div(1.25).add(30);
+
+                time = time.div(tmp.c.crafting.speed);
+
+                return time;
+            },
+            formulas: {
+                consumes: {
+                    'bone': '10 * (1.75 ^ (amount + crafted) - 1.75 ^ crafted)',
+                    'rib': '5 * (1.5 ^ (amount + crafted) - 1.5 ^ crafted)',
+                },
+                produces: {
+                    'bone_pick': 'amount',
+                },
+                duration: '30 + (amount * 2 + crafted) / 2.5 seconds',
+            },
+            static: true,
+            category: ['skeleton', 'mining',],
+            unlocked() { return tmp.m.layerShown; },
+        },
+        tin_belt: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    total = crafting_default_all_time(this.id, all_time);
+
+                return [
+                    ['slime_goo', D.sumGeometricSeries(count, 15, 1.75, total)],
+                    ['rib', D.sumGeometricSeries(count, 1, 1.5, total)],
+                    ['tin_ore', D.sumGeometricSeries(count, 1, 1.25, total)],
+                ];
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [['tin_belt', count]];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    total = crafting_default_all_time(this.id, all_time);
+
+                let time = D.times(count, 2).add(total).times(1.25).add(50);
+
+                time = time.div(tmp.c.crafting.speed);
+
+                return time;
+            },
+            formulas: {
+                consumes: {
+                    'slime_goo': '15 * (1.75 ^ (amount + crafted) - 1.75 ^ crafted)',
+                    'rib': '1.5 ^ (amount + crafted) - 1.5 ^ crafted',
+                    'tin_ore': '1.25 ^ (amount + crafted) - 1.25 ^ crafted',
+                },
+                produces: {
+                    'tin_belt': 'amount',
+                },
+                duration: '50 + (amount * 2 + crafted) * 1.25 seconds',
+            },
+            static: true,
+            category: ['skeleton', 'mining', 'slime',],
+            unlocked() { return tmp.m.layerShown; },
+        },
+        bronze_cart: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    total = crafting_default_all_time(this.id, all_time);
+
+                return [
+                    ['bronze_blend', D.sumGeometricSeries(count, 2, 1.125, total)],
+                    ['skull', D.sumGeometricSeries(count, 1, 1.125, total)],
+                ];
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [['bronze_cart', count]];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    total = crafting_default_all_time(this.id, all_time);
+
+                let time = D.times(count, 2).add(total).times(20).add(60);
+
+                time = time.div(tmp.c.crafting.speed);
+
+                return time;
+            },
+            formulas: {
+                consumes: {
+                    'bronze_blend': '2 * (1.125 ^ (amount + crafted) - 1.125 ^ crafted)',
+                    'skull': '1.125 ^ (amount + crafted) - 1.125 ^ crafted',
+                },
+                produces: {
+                    'bronze_cart': 'amount',
+                },
+                duration: '60 + (amount * 2 + crafted) * 20 seconds',
+            },
+            static: true,
+            category: ['skeleton', 'mining',],
+            unlocked() { return tmp.m.layerShown; },
+        },
     },
     crafting: {
         max() { return D.dTen; },
@@ -339,6 +831,10 @@ addLayer('c', {
             let speed = D.dOne;
 
             if (hasAchievement('ach', 35)) speed = speed.times(achievementEffect('ach', 35));
+
+            if (hasUpgrade('m', 34)) mult = mult.add(upgradeEffect('m', 34).speed);
+
+            speed = speed.times(item_effect('tin_belt').speed);
 
             return speed;
         },
@@ -366,6 +862,28 @@ addLayer('c', {
             },
         },
         12: {
+            title: 'Mining',
+            display() { return player.c.hide_cat.includes('mining') ? 'Hidden' : 'Visible'; },
+            onClick() {
+                if (player.c.hide_cat.includes('mining')) {
+                    const i = player.c.hide_cat.indexOf('mining');
+                    player.c.hide_cat.splice(i, 1);
+                } else {
+                    player.c.hide_cat.push('mining');
+                }
+            },
+            canClick: true,
+            style() {
+                return {
+                    'background-color': player.c.hide_cat.includes('mining') ? '#CC5555' : tmp.m.color,
+                    'width': '100px',
+                    'height': '100px',
+                    'min-height': 'unset',
+                };
+            },
+            unlocked() { return tmp.m.layerShown; },
+        },
+        13: {
             title: 'Slime',
             display() { return player.c.hide_cat.includes('slime') ? 'Hidden' : 'Visible'; },
             onClick() {
@@ -385,6 +903,28 @@ addLayer('c', {
                     'min-height': 'unset',
                 };
             },
+        },
+        14: {
+            title: 'Skeleton',
+            display() { return player.c.hide_cat.includes('skeleton') ? 'Hidden' : 'Visible'; },
+            onClick() {
+                if (player.c.hide_cat.includes('skeleton')) {
+                    const i = player.c.hide_cat.indexOf('skeleton');
+                    player.c.hide_cat.splice(i, 1);
+                } else {
+                    player.c.hide_cat.push('skeleton');
+                }
+            },
+            canClick: true,
+            style() {
+                return {
+                    'background-color': player.c.hide_cat.includes('skeleton') ? '#CC5555' : tmp.xp.monsters.skeleton.color,
+                    'width': '100px',
+                    'height': '100px',
+                    'min-height': 'unset',
+                };
+            },
+            unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
         },
     },
     automate() {

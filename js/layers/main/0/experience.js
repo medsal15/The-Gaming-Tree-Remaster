@@ -1,5 +1,9 @@
 'use strict';
 
+const MONSTER_SIZES = {
+    width: 2,
+    height: 2,
+};
 addLayer('xp', {
     row: 0,
     position: 0,
@@ -44,7 +48,18 @@ addLayer('xp', {
                     return `You have ${resourceColor(color, formatWhole(player.xp.points), 'font-size:1.5em;')}${gain_txt}\
                         /${resourceColor(color, formatWhole(cap))} experience`;
                 }],
-                ['display-text', () => `You have killed ${resourceColor(tmp.xp.kill.color, formatWhole(tmp.xp.kill.total), 'font-size:1.5em;')} enemies`],
+                ['display-text', () => {
+                    const current = player.xp.monsters[player.xp.selected].kills,
+                        /** @type {string[]} */
+                        kill_ext = [];
+                    let kill_txt = '';
+
+                    if (D.neq(current, tmp.xp.kill.total)) kill_ext.push(resourceColor(tmp.xp.kill.color, formatWhole(current)));
+
+                    if (kill_ext.length) kill_txt = ` (${kill_ext.join(',')})`;
+
+                    return `You have killed ${resourceColor(tmp.xp.kill.color, formatWhole(tmp.xp.kill.total), 'font-size:1.5em;')}${kill_txt} enemies`;
+                }],
                 'blank',
                 ['display-text', () => {
                     const selected = player.xp.selected;
@@ -72,7 +87,7 @@ addLayer('xp', {
 
                     return `Attack for ${format(damage)} damage`;
                 }],
-                ['display-text', 'Hold to click 4 times per second'],
+                ['display-text', 'Hold to click 5 times per second'],
                 'blank',
                 ['display-text', () => {
                     if (D.lte(tmp.c.chance_multiplier, 0)) return '';
@@ -348,9 +363,10 @@ addLayer('xp', {
             },
             /** @returns {{[mon in monsters]: Decimal}} */
             effect() {
-                return {
-                    slime: D.max(tmp.xp.monsters.slime.health, 4).root(4),
-                };
+                return Object.fromEntries(
+                    Object.keys(tmp.xp.monsters)
+                        .map(mon => [mon, D.max(tmp.xp.monsters[mon].health, 4).root(4)])
+                );
             },
             effectDisplay() {
                 if (!tmp[this.layer].upgrades[this.id].show) return '';
@@ -416,9 +432,13 @@ addLayer('xp', {
                     const min = colors[i - 1],
                         max = colors[i],
                         diff = D.minus(max[0], min[0]),
-                        fraction = D.minus(prog, min[0]).div(diff).max(0).min(1).toNumber();
+                        fraction = D.minus(prog, min[0]).div(diff).clamp(0, 1).toNumber();
 
-                    backgroundColor = `#${Array.from({ length: 3 }, (_, i) => Math.floor(max[1][i] * fraction + min[1][i] * (1 - fraction)).toString(16).padStart(2, '0')).join('')}`;
+                    backgroundColor = `#${Array.from(
+                        { length: 3 },
+                        (_, i) => Math.floor(max[1][i] * fraction + min[1][i] * (1 - fraction))
+                            .toString(16).padStart(2, '0'))
+                        .join('')}`;
                 }
                 return { backgroundColor, };
             },
@@ -429,6 +449,28 @@ addLayer('xp', {
     clickables: {
         // Fight
         11: {
+            style: {
+                width: '120px',
+                height: '120px',
+                'background-image': `url(./resources/images/UI.png)`,
+                'background-repeat': 'no-repeat',
+                'image-rendering': 'crisp-edges',
+                'background-size': `${UI_SIZES.width * 120}px ${UI_SIZES.height * 120}px`,
+                'background-position': '-240px -120px',
+            },
+            onClick() {
+                const selected = player.xp.selected,
+                    i = tmp.xp.monster_list.indexOf(selected);
+
+                player.xp.selected = tmp.xp.monster_list[i - 1];
+            },
+            canClick() {
+                const selected = player.xp.selected;
+
+                return selected != tmp.xp.monster_list[0];
+            },
+        },
+        12: {
             style: {
                 width: '180px',
                 height: '180px',
@@ -458,14 +500,36 @@ addLayer('xp', {
                 return D.gt(player.xp.monsters[selected].health, 0);
             },
         },
+        13: {
+            style: {
+                width: '120px',
+                height: '120px',
+                'background-image': `url(./resources/images/UI.png)`,
+                'background-repeat': 'no-repeat',
+                'image-rendering': 'crisp-edges',
+                'background-size': `${UI_SIZES.width * 120}px ${UI_SIZES.height * 120}px`,
+                'background-position': '-240px 0',
+            },
+            onClick() {
+                const selected = player.xp.selected,
+                    i = tmp.xp.monster_list.indexOf(selected);
+
+                player.xp.selected = tmp.xp.monster_list[i + 1];
+            },
+            canClick() {
+                const selected = player.xp.selected;
+
+                return selected != tmp.xp.monster_list[tmp.xp.monster_list.length - 1];
+            },
+        },
         // Bestiary
         21: {
             style: {
                 'background-image': `url(./resources/images/UI.png)`,
                 'background-repeat': 'no-repeat',
                 'image-rendering': 'crisp-edges',
-                'background-size': `${UI_SIZES.width * 100}% ${UI_SIZES.height * 100}%`,
-                'background-position': '0 100%',
+                'background-size': `${UI_SIZES.width * 120}px ${UI_SIZES.height * 120}px`,
+                'background-position': '-120px -120px',
             },
             onClick() {
                 const list = tmp.xp.monster_list,
@@ -488,8 +552,8 @@ addLayer('xp', {
                 'background-image': `url(./resources/images/UI.png)`,
                 'background-repeat': 'no-repeat',
                 'image-rendering': 'crisp-edges',
-                'background-size': `${UI_SIZES.width * 100}% ${UI_SIZES.height * 100}%`,
-                'background-position': '100% 0',
+                'background-size': `${UI_SIZES.width * 120}px ${UI_SIZES.height * 120}px`,
+                'background-position': '-120px 0',
             },
             onClick() {
                 /** @type {monsters[]} */
@@ -599,7 +663,7 @@ addLayer('xp', {
 
                 if (hasUpgrade('xp', 32)) xp = xp.times(upgradeEffect('xp', 32)[this.id]);
 
-                if (inChallenge('b', 11) || hasChallenge('b', 11)) xp = xp.times(2);
+                if (inChallenge('b', 11)) xp = xp.times(2);
 
                 return xp;
             },
@@ -624,6 +688,51 @@ addLayer('xp', {
                     Tastes like dirty water.`;
             },
         },
+        skeleton: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.xp.monsters).find(mon => layers.xp.monsters[mon] == this); },
+            color: '#BBBBDD',
+            name: 'skeleton',
+            unlocked() { return hasChallenge('b', 11); },
+            position: [1, 0],
+            level(kills) {
+                let k = D(kills ?? player.xp.monsters[this.id].kills);
+
+                return k.div(10).root(2).floor().add(1);
+            },
+            health(level) {
+                let l = D(level ?? tmp?.xp?.monsters[this.id].level);
+
+                const level_mult = D.minus(l, 1).pow_base(2);
+
+                let health = D.times(level_mult, 15).times(tmp.xp?.modifiers.health.mult ?? 1);
+
+                return health;
+            },
+            experience(level) {
+                const l = D(level ?? tmp.xp.monsters[this.id].level);
+
+                let xp = D.times(l, tmp.xp.modifiers.xp.base)
+                    .times(3)
+                    .times(tmp.xp.modifiers.xp.mult);
+
+                if (hasUpgrade('xp', 32)) xp = xp.times(upgradeEffect('xp', 32)[this.id]);
+
+                return xp;
+            },
+            damage() { return tmp.xp.modifiers.damage.total; },
+            damage_per_second() {
+                let mult = D.dZero;
+
+                if (hasUpgrade('xp', 21) && player.xp.selected == this.id) mult = mult.add(upgradeEffect('xp', 21));
+
+                return D.times(mult, tmp.xp.monsters[this.id].damage);
+            },
+            lore: `Reanimated bones of a dead person.<br>\
+                Surprisingly clean; maybe these bones can be useful.<br>\
+                Does not attack to kill, only to free its brethen.<br>\
+                Smells like bones.`,
+        },
     },
     kill: {
         color: '#DD4477',
@@ -631,7 +740,13 @@ addLayer('xp', {
     },
     modifiers: {
         damage: {
-            base() { return D.dOne; },
+            base() {
+                let base = D.dOne;
+
+                base = base.add(item_effect('bone_pick').damage);
+
+                return base;
+            },
             mult() {
                 let mult = D.dOne;
 
@@ -639,9 +754,16 @@ addLayer('xp', {
                 if (hasUpgrade('xp', 22)) mult = mult.times(upgradeEffect('xp', 22));
                 if (hasUpgrade('xp', 31)) mult = mult.times(upgradeEffect('xp', 31));
 
+                if (hasUpgrade('m', 13)) mult = mult.times(upgradeEffect('m', 13));
+                if (hasUpgrade('m', 32)) mult = mult.times(upgradeEffect('m', 32).enemy);
+
                 if (hasUpgrade('l', 21)) mult = mult.times(upgradeEffect('l', 21));
 
                 mult = mult.times(item_effect('slime_pocket').damage);
+                mult = mult.times(item_effect('bone_shiv'));
+                mult = mult.times(item_effect('rock_club'));
+
+                if (hasAchievement('ach', 65)) mult = mult.times(achievementEffect('ach', 65));
 
                 return mult;
             },
@@ -659,6 +781,9 @@ addLayer('xp', {
                 if (hasUpgrade('l', 11)) mult = mult.times(upgradeEffect('l', 11));
 
                 mult = mult.times(item_effect('slime_crystal').mult);
+                mult = mult.times(item_effect('crystal_skull').mult);
+
+                if (hasAchievement('ach', 65)) mult = mult.times(achievementEffect('ach', 65));
 
                 return mult;
             },
@@ -667,11 +792,14 @@ addLayer('xp', {
 
                 if (hasAchievement('ach', 15)) cap = cap.add(achievementEffect('ach', 15))
 
+                if (hasUpgrade('m', 23)) cap = cap.times(upgradeEffect('m', 23));
+
                 cap = cap.times(tmp.l.effect.cap);
                 if (hasUpgrade('l', 12)) cap = cap.times(upgradeEffect('l', 12));
                 if (hasUpgrade('l', 22)) cap = cap.times(upgradeEffect('l', 22));
 
                 cap = cap.times(item_effect('slime_crystal').cap);
+                cap = cap.times(item_effect('crystal_skull').cap);
 
                 return cap;
             },
@@ -699,12 +827,14 @@ addLayer('xp', {
 
         const held = item_effect('slime_pocket').hold,
             /** @type {number[]} */
-            upgs = [];
+            upgs = [],
+            /** @type {(keyof Player['xp'])[]} */
+            keep = ['selected', 'lore'];
         if (D.gt(held, 0)) {
             upgs.push(...player.xp.upgrades.slice(0, held));
         }
 
-        layerDataReset(this.layer);
+        layerDataReset(this.layer, keep);
 
         player.xp.upgrades.push(...upgs);
     },
