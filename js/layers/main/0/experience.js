@@ -1,8 +1,8 @@
 'use strict';
 
 const MONSTER_SIZES = {
-    width: 2,
-    height: 2,
+    width: 1,
+    height: 1,
 };
 addLayer('xp', {
     row: 0,
@@ -88,19 +88,6 @@ addLayer('xp', {
                     return `Attack for ${format(damage)} damage`;
                 }],
                 ['display-text', 'Hold to click 5 times per second'],
-                'blank',
-                ['display-text', () => {
-                    if (D.lte(tmp.c.chance_multiplier, 0)) return '';
-
-                    let drops = 'nothing',
-                        count = '';
-                    const last_drops = player.xp.monsters[player.xp.selected].last_drops,
-                        last_count = player.xp.monsters[player.xp.selected].last_drops_times;
-                    if (last_drops.length) drops = listFormat.format(last_drops.map(([item, amount]) => `${format(amount)} ${tmp.items[item].name}`));
-                    if (last_count.gt(1)) count = ` (${formatWhole(last_count)})`;
-
-                    return `${capitalize(tmp.xp.monsters[player.xp.selected].name)} dropped ${drops}${count}`;
-                }],
             ],
         },
         'Upgrades': {
@@ -125,281 +112,10 @@ addLayer('xp', {
                 'blank',
                 ['column', () => bestiary_content(player.xp.lore)],
             ],
-            unlocked() { return hasUpgrade('xp', 23) || hasAchievement('ach', 14); },
+            unlocked() { return hasUpgrade('xp', 23); },
         },
     },
     upgrades: {
-        11: {
-            title: 'Double-Edged Sword',
-            kills: D.dOne,
-            show() { return hasUpgrade(this.layer, this.id) || D.gte(tmp.xp.kill.total, this.kills) || hasChallenge('b', 11); },
-            description() {
-                if (!tmp[this.layer].upgrades[this.id].show) {
-                    return `Unlocked at ${formatWhole(this.kills)} kills`;
-                }
-                return 'Deal +50% damage';
-            },
-            canAfford() { return tmp[this.layer].upgrades[this.id].show; },
-            cost: D.dOne,
-            style() {
-                if (!tmp[this.layer].upgrades[this.id].show) {
-                    return {
-                        'background-color': 'transparent',
-                        'border': `5px dashed ${colors[options.theme][1]}`,
-                        'color': colors[options.theme][1],
-                    };
-                }
-            },
-            effect() { return D(1.5); },
-            effectDisplay() {
-                if (!tmp[this.layer].upgrades[this.id].show) return '';
-                return `*${format(upgradeEffect(this.layer, this.id))}`;
-            },
-        },
-        12: {
-            title: 'Brainy Slimes',
-            kills: D(3),
-            show() { return hasUpgrade(this.layer, this.id) || D.gte(tmp.xp.kill.total, this.kills) || hasChallenge('b', 11); },
-            description() {
-                if (!tmp[this.layer].upgrades[this.id].show) {
-                    return `Unlocked at ${formatWhole(this.kills)} kills`;
-                }
-                return 'Gain +50% more XP';
-            },
-            canAfford() { return tmp[this.layer].upgrades[this.id].show; },
-            cost: D(5),
-            style() {
-                if (!tmp[this.layer].upgrades[this.id].show) {
-                    return {
-                        'background-color': 'transparent',
-                        'border': `5px dashed ${colors[options.theme][1]}`,
-                        'color': colors[options.theme][1],
-                    };
-                }
-            },
-            effect() { return D(1.5); },
-            effectDisplay() {
-                if (!tmp[this.layer].upgrades[this.id].show) return '';
-                return `*${format(upgradeEffect(this.layer, this.id))}`;
-            },
-        },
-        13: {
-            title: 'Potion of Weakness',
-            kills: D.dTen,
-            show() { return hasUpgrade(this.layer, this.id) || D.gte(tmp.xp.kill.total, this.kills) || hasChallenge('b', 11); },
-            description() {
-                if (!tmp[this.layer].upgrades[this.id].show) {
-                    return `Unlocked at ${formatWhole(this.kills)} kills`;
-                }
-                if (tmp.xp.monster_list.length > 1) return '-25% enemy health';
-                return '-25% slime health';
-            },
-            canAfford() { return tmp[this.layer].upgrades[this.id].show; },
-            cost: D.dTen,
-            style() {
-                if (!tmp[this.layer].upgrades[this.id].show) {
-                    return {
-                        'background-color': 'transparent',
-                        'border': `5px dashed ${colors[options.theme][1]}`,
-                        'color': colors[options.theme][1],
-                    };
-                }
-            },
-            effect() { return D(.75); },
-            effectDisplay() {
-                if (!tmp[this.layer].upgrades[this.id].show) return '';
-                return `*${formatWhole(upgradeEffect(this.layer, this.id))}`;
-            },
-        },
-        21: {
-            title: 'Slime Trap',
-            kills: D(20),
-            show() { return hasUpgrade(this.layer, this.id) || D.gte(tmp.xp.kill.total, this.kills) || hasChallenge('b', 11); },
-            description() {
-                if (!tmp[this.layer].upgrades[this.id].show) {
-                    return `Unlocked at ${formatWhole(this.kills)} kills`;
-                }
-                return 'Passively deal 100% of your damage per second';
-            },
-            canAfford() { return tmp[this.layer].upgrades[this.id].show; },
-            cost: D(25),
-            style() {
-                if (!tmp[this.layer].upgrades[this.id].show) {
-                    return {
-                        'background-color': 'transparent',
-                        'border': `5px dashed ${colors[options.theme][1]}`,
-                        'color': colors[options.theme][1],
-                    };
-                }
-            },
-            effect() { return D.dOne; },
-            effectDisplay() {
-                if (!tmp[this.layer].upgrades[this.id].show) return '';
-                const dps = D.times(upgradeEffect(this.layer, this.id), tmp.xp.monsters[player.xp.selected].damage);
-                return `${format(dps)}/s`;
-            },
-        },
-        22: {
-            title: 'Blood Sword',
-            kills: D(35),
-            show() { return hasUpgrade(this.layer, this.id) || D.gte(tmp.xp.kill.total, this.kills) || hasChallenge('b', 11); },
-            description() {
-                if (!tmp[this.layer].upgrades[this.id].show) {
-                    return `Unlocked at ${formatWhole(this.kills)} kills`;
-                }
-                if (!shiftDown) {
-                    return 'Kills boost damage';
-                }
-                let formula = 'log10(kills + 10)';
-
-                return `Formula: ${formula}`;
-            },
-            canAfford() { return tmp[this.layer].upgrades[this.id].show; },
-            cost: D(50),
-            style() {
-                if (!tmp[this.layer].upgrades[this.id].show) {
-                    return {
-                        'background-color': 'transparent',
-                        'border': `5px dashed ${colors[options.theme][1]}`,
-                        'color': colors[options.theme][1],
-                    };
-                }
-            },
-            effect() { return D.add(tmp.xp.kill.total, 10).log10(); },
-            effectDisplay() {
-                if (!tmp[this.layer].upgrades[this.id].show) return '';
-                return `*${format(upgradeEffect(this.layer, this.id))}`;
-            },
-        },
-        23: {
-            title: 'Bestiary',
-            kills: D(50),
-            show() { return hasUpgrade(this.layer, this.id) || D.gte(tmp.xp.kill.total, this.kills) || hasChallenge('b', 11); },
-            description() {
-                if (!tmp[this.layer].upgrades[this.id].show) {
-                    return `Unlocked at ${formatWhole(this.kills)} kills`;
-                }
-                if (!shiftDown) {
-                    return 'Kills boost XP gain<br>Unlock the bestiary';
-                }
-                let formula = '10√(kills + 10)';
-
-                return `Formula: ${formula}`;
-            },
-            canAfford() { return tmp[this.layer].upgrades[this.id].show; },
-            cost: D(75),
-            style() {
-                if (!tmp[this.layer].upgrades[this.id].show) {
-                    return {
-                        'background-color': 'transparent',
-                        'border': `5px dashed ${colors[options.theme][1]}`,
-                        'color': colors[options.theme][1],
-                    };
-                }
-            },
-            effect() { return D.add(tmp.xp.kill.total, 10).root(10); },
-            effectDisplay() {
-                if (!tmp[this.layer].upgrades[this.id].show) return '';
-                return `*${format(upgradeEffect(this.layer, this.id))}`;
-            },
-        },
-        31: {
-            title: 'Smart Sword',
-            kills: D(75),
-            show() { return hasUpgrade(this.layer, this.id) || D.gte(tmp.xp.kill.total, this.kills) || hasChallenge('b', 11); },
-            description() {
-                if (!tmp[this.layer].upgrades[this.id].show) {
-                    return `Unlocked at ${formatWhole(this.kills)} kills`;
-                }
-                if (!shiftDown) {
-                    return 'XP boost damage';
-                }
-                let formula = 'log10(XP + 10)';
-
-                return `Formula: ${formula}`;
-            },
-            canAfford() { return tmp[this.layer].upgrades[this.id].show; },
-            cost: D(100),
-            style() {
-                if (!tmp[this.layer].upgrades[this.id].show) {
-                    return {
-                        'background-color': 'transparent',
-                        'border': `5px dashed ${colors[options.theme][1]}`,
-                        'color': colors[options.theme][1],
-                    };
-                }
-            },
-            effect() { return D.add(player.xp.points, 10).log10(); },
-            effectDisplay() {
-                if (!tmp[this.layer].upgrades[this.id].show) return '';
-                return `*${format(upgradeEffect(this.layer, this.id))}`;
-            },
-        },
-        32: {
-            title: 'Champions',
-            kills: D(100),
-            show() { return hasUpgrade(this.layer, this.id) || D.gte(tmp.xp.kill.total, this.kills) || hasChallenge('b', 11); },
-            description() {
-                if (!tmp[this.layer].upgrades[this.id].show) {
-                    return `Unlocked at ${formatWhole(this.kills)} kills`;
-                }
-                if (!shiftDown) {
-                    return 'Enemy max health boosts XP';
-                }
-                let formula = '4√(max health)';
-
-                return `Formula: ${formula}`;
-            },
-            canAfford() { return tmp[this.layer].upgrades[this.id].show; },
-            cost: D(150),
-            style() {
-                if (!tmp[this.layer].upgrades[this.id].show) {
-                    return {
-                        'background-color': 'transparent',
-                        'border': `5px dashed ${colors[options.theme][1]}`,
-                        'color': colors[options.theme][1],
-                    };
-                }
-            },
-            /** @returns {{[mon in monsters]: Decimal}} */
-            effect() {
-                return Object.fromEntries(
-                    Object.keys(tmp.xp.monsters)
-                        .map(mon => [mon, D.max(tmp.xp.monsters[mon].health, 4).root(4)])
-                );
-            },
-            effectDisplay() {
-                if (!tmp[this.layer].upgrades[this.id].show) return '';
-                return `*${format(upgradeEffect(this.layer, this.id)[player.xp.selected])}`;
-            },
-        },
-        33: {
-            title: 'Limit Break',
-            kills: D(125),
-            show() { return hasUpgrade(this.layer, this.id) || D.gte(tmp.xp.kill.total, this.kills) || hasChallenge('b', 11); },
-            description() {
-                if (!tmp[this.layer].upgrades[this.id].show) {
-                    return `Unlocked at ${formatWhole(this.kills)} kills`;
-                }
-                return 'Unlock 2 new layers<br>Double XP gain';
-            },
-            canAfford() { return tmp[this.layer].upgrades[this.id].show; },
-            cost: D(444),
-            style() {
-                if (!tmp[this.layer].upgrades[this.id].show) {
-                    return {
-                        'background-color': 'transparent',
-                        'border': `5px dashed ${colors[options.theme][1]}`,
-                        'color': colors[options.theme][1],
-                    };
-                }
-            },
-            effect() { return D.dTwo; },
-            effectDisplay() {
-                if (!tmp[this.layer].upgrades[this.id].show) return '';
-                return `*${format(upgradeEffect(this.layer, this.id))}`;
-            },
-        },
     },
     bars: {
         health: {
@@ -469,6 +185,7 @@ addLayer('xp', {
 
                 return selected != tmp.xp.monster_list[0];
             },
+            unlocked() { tmp.xp.monster_list.length > 0 },
         },
         12: {
             style: {
@@ -521,6 +238,7 @@ addLayer('xp', {
 
                 return selected != tmp.xp.monster_list[tmp.xp.monster_list.length - 1];
             },
+            unlocked() { tmp.xp.monster_list.length > 0 },
         },
         // Bestiary
         21: {
@@ -594,19 +312,6 @@ addLayer('xp', {
                     const level = monster.level(data.kills);
 
                     data.health = D.add(data.health, monster.health(level));
-
-                    if (D.gt(tmp.c.chance_multiplier, 0)) {
-                        const drops = get_source_drops(`kill:${id}`),
-                            equal = drops.length == data.last_drops.length &&
-                                drops.every(([item, amount]) => data.last_drops.some(([litem, lamount]) => litem == item && D.eq_tolerance(amount, lamount, 1e-3)));
-                        if (equal) {
-                            data.last_drops_times = D.add(data.last_drops_times, 1);
-                        } else {
-                            data.last_drops_times = D.dOne;
-                            data.last_drops = drops;
-                        }
-                        gain_items(drops);
-                    }
                 }
             });
     },
@@ -625,15 +330,11 @@ addLayer('xp', {
             _id: null,
             get id() { return this._id ??= Object.keys(layers.xp.monsters).find(mon => layers.xp.monsters[mon] == this); },
             color() {
-                if (inChallenge('b', 11)) return '#FF6600';
-
                 return '#55CC11';
             },
             name: 'slime',
             position() {
                 let i = 0;
-
-                if (inChallenge('b', 11)) i = 1;
 
                 return [0, i];
             },
@@ -647,11 +348,7 @@ addLayer('xp', {
 
                 const level_mult = D.minus(l, 1).pow_base(1.5);
 
-                let health = D.times(level_mult, 10).times(tmp.xp?.modifiers.health.mult ?? 1);
-
-                if (inChallenge('b', 11)) health = health.times(2);
-
-                if (hasChallenge('b', 11)) health = health.div(2);
+                let health = D.times(level_mult, 5).times(tmp.xp?.modifiers.health.mult ?? 1);
 
                 return health;
             },
@@ -661,17 +358,11 @@ addLayer('xp', {
                 let xp = D.times(l, tmp.xp.modifiers.xp.base)
                     .times(tmp.xp.modifiers.xp.mult);
 
-                if (hasUpgrade('xp', 32)) xp = xp.times(upgradeEffect('xp', 32)[this.id]);
-
-                if (inChallenge('b', 11)) xp = xp.times(2);
-
                 return xp;
             },
             damage() { return tmp.xp.modifiers.damage.total; },
             damage_per_second() {
                 let mult = D.dZero;
-
-                if (hasUpgrade('xp', 21) && player.xp.selected == this.id) mult = mult.add(upgradeEffect('xp', 21));
 
                 return D.times(mult, tmp.xp.monsters[this.id].damage);
             },
@@ -688,51 +379,6 @@ addLayer('xp', {
                     Tastes like dirty water.`;
             },
         },
-        skeleton: {
-            _id: null,
-            get id() { return this._id ??= Object.keys(layers.xp.monsters).find(mon => layers.xp.monsters[mon] == this); },
-            color: '#BBBBDD',
-            name: 'skeleton',
-            unlocked() { return hasChallenge('b', 11); },
-            position: [1, 0],
-            level(kills) {
-                let k = D(kills ?? player.xp.monsters[this.id].kills);
-
-                return k.div(10).root(2).floor().add(1);
-            },
-            health(level) {
-                let l = D(level ?? tmp?.xp?.monsters[this.id].level);
-
-                const level_mult = D.minus(l, 1).pow_base(2);
-
-                let health = D.times(level_mult, 15).times(tmp.xp?.modifiers.health.mult ?? 1);
-
-                return health;
-            },
-            experience(level) {
-                const l = D(level ?? tmp.xp.monsters[this.id].level);
-
-                let xp = D.times(l, tmp.xp.modifiers.xp.base)
-                    .times(3)
-                    .times(tmp.xp.modifiers.xp.mult);
-
-                if (hasUpgrade('xp', 32)) xp = xp.times(upgradeEffect('xp', 32)[this.id]);
-
-                return xp;
-            },
-            damage() { return tmp.xp.modifiers.damage.total; },
-            damage_per_second() {
-                let mult = D.dZero;
-
-                if (hasUpgrade('xp', 21) && player.xp.selected == this.id) mult = mult.add(upgradeEffect('xp', 21));
-
-                return D.times(mult, tmp.xp.monsters[this.id].damage);
-            },
-            lore: `Reanimated bones of a dead person.<br>\
-                Surprisingly clean; maybe these bones can be useful.<br>\
-                Does not attack to kill, only to free its brethen.<br>\
-                Smells like bones.`,
-        },
     },
     kill: {
         color: '#DD4477',
@@ -743,27 +389,10 @@ addLayer('xp', {
             base() {
                 let base = D.dOne;
 
-                base = base.add(item_effect('bone_pick').damage);
-
                 return base;
             },
             mult() {
                 let mult = D.dOne;
-
-                if (hasUpgrade('xp', 11)) mult = mult.times(upgradeEffect('xp', 11));
-                if (hasUpgrade('xp', 22)) mult = mult.times(upgradeEffect('xp', 22));
-                if (hasUpgrade('xp', 31)) mult = mult.times(upgradeEffect('xp', 31));
-
-                if (hasUpgrade('m', 13)) mult = mult.times(upgradeEffect('m', 13));
-                if (hasUpgrade('m', 32)) mult = mult.times(upgradeEffect('m', 32).enemy);
-
-                if (hasUpgrade('l', 21)) mult = mult.times(upgradeEffect('l', 21));
-
-                mult = mult.times(item_effect('slime_pocket').damage);
-                mult = mult.times(item_effect('bone_shiv'));
-                mult = mult.times(item_effect('rock_club'));
-
-                if (hasAchievement('ach', 65)) mult = mult.times(achievementEffect('ach', 65));
 
                 return mult;
             },
@@ -774,32 +403,10 @@ addLayer('xp', {
             mult() {
                 let mult = D.dOne;
 
-                if (hasUpgrade('xp', 12)) mult = mult.times(upgradeEffect('xp', 12));
-                if (hasUpgrade('xp', 23)) mult = mult.times(upgradeEffect('xp', 23));
-                if (hasUpgrade('xp', 33)) mult = mult.times(upgradeEffect('xp', 33));
-
-                if (hasUpgrade('l', 11)) mult = mult.times(upgradeEffect('l', 11));
-
-                mult = mult.times(item_effect('slime_crystal').mult);
-                mult = mult.times(item_effect('crystal_skull').mult);
-
-                if (hasAchievement('ach', 65)) mult = mult.times(achievementEffect('ach', 65));
-
                 return mult;
             },
             cap() {
                 let cap = D(1_000);
-
-                if (hasAchievement('ach', 15)) cap = cap.add(achievementEffect('ach', 15))
-
-                if (hasUpgrade('m', 23)) cap = cap.times(upgradeEffect('m', 23));
-
-                cap = cap.times(tmp.l.effect.cap);
-                if (hasUpgrade('l', 12)) cap = cap.times(upgradeEffect('l', 12));
-                if (hasUpgrade('l', 22)) cap = cap.times(upgradeEffect('l', 22));
-
-                cap = cap.times(item_effect('slime_crystal').cap);
-                cap = cap.times(item_effect('crystal_skull').cap);
 
                 return cap;
             },
@@ -808,10 +415,6 @@ addLayer('xp', {
         health: {
             mult() {
                 let mult = D.dOne;
-
-                if (hasUpgrade('xp', 13)) mult = mult.times(upgradeEffect('xp', 13));
-
-                mult = mult.times(item_effect('slime_page').health);
 
                 return mult;
             },
