@@ -30,9 +30,7 @@ let modInfo = {
 
 		// main
 		'layers/main/side/achievement.js',
-		'layers/main/0/experience.js', 'layers/main/0/mining.js',
-		'layers/main/1/level.js', 'layers/main/1/crafting.js',
-		'layers/main/2/boss.js',
+		'layers/main/0/experience.js',
 	],
 	/**
 	 * If you have a Discord server or other discussion place, you can add a link to it.
@@ -65,11 +63,11 @@ let VERSION = {
 	/**
 	 * The mod's version number, displayed at the top right of the tree tab.
 	 */
-	num: 'R0.2',
+	num: 'R0.1',
 	/**
 	 * The version's name, displayed alongside the number in the info tab.
 	 */
-	name: 'idk yet this is future mes problem',
+	name: '',
 	beta: true,
 };
 
@@ -77,14 +75,8 @@ let VERSION = {
  * HTML displayed in the changelog tab
  */
 let changelog = `<h1>Changelog:</h1><br>
-	<h3>v0.2</h3><br>
-		- Lowered slime health scaling.<br>
-		- Corrected a few grammar mistakes.<br>
-		- Nerfed the costs of some crafting recipes.<br>
-		- ???<br>
-		- Update endgame: ???<br>
 	<h3>v0.1</h3><br>
-		- Rewrote XP, Level, Loot, and Boss.<br>
+		- Rewrote XP.<br>
 		- Update endgame: Enter the first boss fight.`;
 
 let winText = `Congratulations! You have finished the current content in the game. Look forward for more.`;
@@ -131,12 +123,6 @@ function addedPlayerData() {
 var displayThings = [
 	() => VERSION.beta ? '<span class="warning">Beta version, things might be a bit unstable</span>' : '',
 	() => isEndgame() ? '<span style="color:#60C0F0">You are past endgame. Content may not be balanced.</span>' : '',
-	() => {
-		const chal = activeChallenge('b');
-		if (!chal) return '';
-
-		return `You are in ${resourceColor(tmp.b.color, tmp.b.name)} challenge ${resourceColor(tmp.b.challenges[chal].color, tmp.b.challenges[chal].name)}`;
-	},
 ];
 
 /**

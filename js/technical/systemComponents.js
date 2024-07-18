@@ -179,7 +179,7 @@ var systemComponents = {
                 <td><button class="opt" onclick="toggleOpt('noRNG'); needsCanvasUpdate = true">Disable Luck: {{ options.noRNG?"ON":"OFF" }}</button></td>
 			</tr>
 			<tr>
-                <td><button v-if="tmp.c.layerShown" class="opt" onclick="changeLootChance(); needsCanvasUpdate = true">Fractional Chance Mode: {{ CHANCE_MODE[options.chanceMode] }}</button></td>
+                <td><button v-if="false" class="opt" onclick="changeLootChance(); needsCanvasUpdate = true">Fractional Chance Mode: {{ CHANCE_MODE[options.chanceMode] }}</button></td>
 			</tr>
         </table>`
 	},
