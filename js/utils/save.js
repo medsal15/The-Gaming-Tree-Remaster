@@ -283,6 +283,14 @@ function exportSave() {
 	document.execCommand("copy");
 	document.body.removeChild(el);
 }
+function importModal() {
+	/** @type {HTMLDialogElement} */
+	const dialog = document.getElementById('saveImport'),
+		/** @type {HTMLTextAreaElement} */
+		textarea = document.getElementById('saveImportArea');
+	textarea.value = '';
+	dialog.showModal();
+}
 function importSave(imported = undefined, forced = false) {
 	if (imported === undefined)
 		imported = prompt("Paste your save here");

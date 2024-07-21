@@ -150,5 +150,15 @@
 		</div>
 		<div class="bg2" v-bind:style="tmp.backgroundStyle"></div>
 
+		<dialog id="saveImport">
+			<form method="dialog">
+				<div><label for="saveImportArea">Paste your save here</label></div>
+				<div><textarea id="saveImportArea" autofocus></textarea></div>
+				<div>
+					<button v-on:click="() => importSave(document.getElementById('saveImportArea').value)">OK</button>
+					<button value="cancel">Cancel</button>
+				</div>
+			</form>
+		</dialog>
 	</div>
 </body>

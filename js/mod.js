@@ -34,8 +34,12 @@ let VERSION = {
 };
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h3>v0.2</h3><br>
+		- ???<br>
+		- Improve import modal.<br>
+		- Update endgame: ???<br>
 	<h3>v0.1</h3><br>
-		- Rewrote XP.<br>
+		- Rewrote XP, C, L.<br>
 		- Update endgame: Enter the first boss fight.`;
 
 let winText = `Congratulations! You have finished the current content in the game. Look forward for more.`;
