@@ -9,3 +9,17 @@ table.layer-table,
 .warning {
     color: #CC5555;
 }
+
+#saveImport {
+    background-color: var(--background, black);
+    color: var(--color, white);
+}
+
+#saveImport form {
+    line-height: 2;
+}
+
+::backdrop {
+    background-color: var(--background, black);
+    opacity: 0.75;
+}

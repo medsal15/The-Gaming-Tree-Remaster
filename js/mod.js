@@ -25,11 +25,11 @@ let VERSION = {
 	/**
 	 * The mod's version number, displayed at the top right of the tree tab.
 	 */
-	num: 'R0.1',
+	num: 'R0.2',
 	/**
 	 * The version's name, displayed alongside the number in the info tab.
 	 */
-	name: '',
+	name: 'Bones and Stones',
 	beta: true,
 };
 
