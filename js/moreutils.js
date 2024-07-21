@@ -233,12 +233,32 @@ function rgb_opposite_bw(color) {
     return '#FFFFFF';
 }
 /**
+ * Given a color, returns its negative
+ *
+ * @param {string} color
+ */
+function rgb_negative(color) {
+    return `#${rgb_split(color).map(n => (255 - n).toString(16).padStart(2, '0')).join('')}`;
+}
+/**
+ * Given a color, returns its grayscale
+ *
+ * @param {string} color
+ */
+function rgb_grayscale(color) {
+    const sum = rgb_split(color).map(n => n / 256 / 3)
+        .reduce((a, b) => a + b, 0) * 256;
+
+    return `#${Math.floor(sum).toString(16).padStart(2, '0').repeat(3)}`;
+}
+/**
  * Splits a hex color into its red, green, and blue values
  *
  * @param {string} color
  * @returns {[number, number, number]}
  */
 function rgb_split(color) {
+    if (!color || typeof color != 'string') return [0, 0, 0];
     return Array.from({ length: 3 }, (_, i) => parseInt(color.slice(i * 2 + 1, i * 2 + 3), 16));
 }
 /**
@@ -278,7 +298,7 @@ function bestiary_content(monster) {
         ],
         ['display-text', capitalize(tmonst.name)],
         'blank',
-        ['display-text', `Level ${formatWhole(tmonst.level)}`],
+        ['display-text', `Level ${resourceColor(tmp.l.color, formatWhole(tmonst.level))}`],
         ['display-text', `Killed ${resourceColor(tmp.xp.kill.color, formatWhole(player.xp.monsters[monster].kills))} times`],
         ['display-text', `Gives ${resourceColor(tmp.xp.color, format(tmonst.experience))} XP on kill`],
         'blank',
@@ -288,10 +308,24 @@ function bestiary_content(monster) {
 
     /** @type {TabFormatEntries<'xp'>[]} */
     const upgrade_lines = [];
-    if (hasUpgrade('xp', 32)) upgrade_lines.push([
+
+    if (hasUpgrade('l', 31)) upgrade_lines.push([
         'display-text',
-        `${resourceColor(tmp.xp.color, capitalize(tmp.xp.upgrades[32].title))} effect: *${format(upgradeEffect('xp', 32)[monster])} XP`
+        `${resourceColor(tmp.l.skill_points.color, tmp.l.upgrades[31].title)} effect: +${format(upgradeEffect('l', 31)[monster])} damage`,
     ]);
+    // Monster specific upgrades
+    switch (monster) {
+        case 'slime': {
+            if (inChallenge('b', 11)) upgrade_lines.push([
+                'display-text',
+                `${resourceColor(tmp.b.color, tmp.b.challenges[11].name)} active effect: *${formatWhole(2)} health, *${format(1.5)} experience`,
+            ]);
+            if (hasChallenge('b', 11)) upgrade_lines.push([
+                'display-text',
+                `${resourceColor(tmp.b.color, tmp.b.challenges[11].name)} reward effect: *${format(1.5)} experience`,
+            ]);
+        }; break;
+    }
 
     if (upgrade_lines.length > 0) lines.push(...upgrade_lines, 'blank');
 
@@ -300,6 +334,370 @@ function bestiary_content(monster) {
         ['display-text', tmonst.lore],
     );
 
+    if (tmp.c.chance_multiplier.gt(0)) {
+        const drops = source_drops(`kill:${monster}`);
+        lines.push(
+            'blank',
+            ['display-text', 'Chance to drop:'],
+            ['row', Object.entries(drops.chances).map(/**@param{[items,Decimal]}*/([item, chance]) => {
+                const tile = item_tile(item);
+                tile.text = `${capitalize(tmp.items[item].name)}<br>${format_chance(chance)}`;
+
+                return ['tile', tile];
+            })],
+        );
+    }
+
     return lines;
 }
 
+/**
+ * Returns a map of toggles for the crafting layer
+ *
+ * @returns {{[key: `${'inventory'|'crafting'}_${categories}`]: Clickable<'c'>}}
+ */
+function crafting_toggles() {
+    /** @type {categories[]} */
+    const list = ['materials', 'equipment', 'slime'];
+
+    return Object.fromEntries(list.map(/**@returns{[string, Clickable<'c'>][]}*/cat => {
+        return [
+            [`inventory_${cat}`, {
+                canClick() { return true; },
+                onClick() {
+                    const vis = player.c.visiblity;
+
+                    vis.inventory[cat] = {
+                        'show': 'hide',
+                        'hide': 'ignore',
+                        'ignore': 'show',
+                    }[vis.inventory[cat] ??= 'ignore'];
+                },
+                display() {
+                    const vis = player.c.visiblity,
+                        name = {
+                            'materials': 'Materials',
+                            'equipment': 'Equipment',
+                            'slime': 'Slime',
+                        }[cat];
+
+                    let visibility = {
+                        'show': 'Shown',
+                        'hide': 'Hidden',
+                        'ignore': 'Ignored',
+                    }[vis.inventory[cat] ??= 'ignore'];
+
+                    return `<span style="font-size:1.5em;">${name}</span><br>\
+                        ${visibility}`;
+                },
+                style: {
+                    'backgroundColor'() {
+                        const vis = player.c.visiblity,
+                            color = {
+                                'materials': tmp.c.color,
+                                'equipment': tmp.c.color,
+                                'slime': tmp.xp.monsters.slime.color,
+                            }[cat];
+
+                        switch (vis.inventory[cat]) {
+                            case 'show':
+                                return color;
+                            case 'hide':
+                                return rgb_negative(color);
+                            case 'ignore':
+                                return rgb_grayscale(color);
+                        }
+                    },
+                },
+            }],
+            [`crafting_${cat}`, {
+                canClick() { return true; },
+                onClick() {
+                    const vis = player.c.visiblity;
+
+                    vis.crafting[cat] = {
+                        'show': 'hide',
+                        'hide': 'ignore',
+                        'ignore': 'show',
+                    }[vis.crafting[cat] ??= 'ignore'];
+                },
+                display() {
+                    const vis = player.c.visiblity,
+                        name = {
+                            'materials': 'Materials',
+                            'equipment': 'Equipment',
+                            'slime': 'Slime',
+                        }[cat];
+
+                    let visibility = {
+                        'show': 'Shown',
+                        'hide': 'Hidden',
+                        'ignore': 'Ignored',
+                    }[vis.crafting[cat] ??= 'ignore'];
+
+                    return `<span style="font-size:1.5em;">${name}</span><br>\
+                        ${visibility}`;
+                },
+                style: {
+                    'backgroundColor'() {
+                        const vis = player.c.visiblity,
+                            color = {
+                                'materials': tmp.c.color,
+                                'equipment': tmp.c.color,
+                                'slime': tmp.xp.monsters.slime.color,
+                            }[cat];
+
+                        switch (vis.crafting[cat]) {
+                            case 'show':
+                                return color;
+                            case 'hide':
+                                return rgb_negative(color);
+                            case 'ignore':
+                                return rgb_grayscale(color);
+                        }
+                    },
+                },
+            }],
+        ];
+    }).flat());
+}
+/**
+ * Returns the display for the inventory
+ *
+ * @returns {TabFormatEntries<'c'>[]}
+ */
+function inventory() {
+    const vis = player.c.visiblity.inventory,
+        /** @type {{[row: number]: items[]}} */
+        grid = {};
+
+    Object.values(tmp.items)
+        .filter(item => (item.unlocked ?? true) &&
+            ('grid' in item) &&
+            (
+                item.categories.some(cat => vis[cat] == 'show') ||
+                !item.categories.some(cat => vis[cat] == 'hide')
+            ))
+        .forEach(item => {
+            const [row, col] = item.grid;
+
+            (grid[row] ??= [])[col] = item.id;
+        });
+
+    return Object.values(grid).map(items => ['row', items.map(item => {
+        const tile = item_tile(item),
+            itemp = tmp.items[item];
+        let tooltip = '';
+
+        if ('effectDescription' in itemp) tooltip += itemp.effectDescription() + '<hr style="margin: 5px 0;">';
+        if ('sources' in itemp) {
+            const {
+                chance = {},
+                per_second = {},
+                other = [],
+            } = itemp.sources,
+                tooltip_lines = [];
+
+            if (Object.entries(chance).filter(([, c]) => D.gt(c, 0)).length) tooltip_lines.push(...Object.entries(chance)
+                .map(/**@param{[string,Decimal]}*/([source, chance]) =>
+                    `${capitalize(source_name(source))}: ${format_chance(chance)}`));
+            if (Object.entries(per_second).filter(([, ps]) => D.gt(ps, 0)).length) tooltip_lines.push(...Object.entries(per_second)
+                .map(/**@param{[string,Decimal]}*/([source, amount]) =>
+                    `${capitalize(source_name(source))}: +${format(amount)} /s`));
+            if (other.length) tooltip_lines.push(...other.map(source => capitalize(source_name(source))));
+
+            tooltip += tooltip_lines.join('<br>');
+        }
+
+        if (!tooltip.length) tooltip = 'No sources';
+
+        tile.text += `<br>${formatWhole(player.items[item].amount)}`;
+        tile.tooltip = tooltip;
+        tile.onClick = () => {
+            if (player.c.compendium == item) player.c.compendium = false;
+            player.c.compendium = item;
+        };
+
+        return ['tile', tile];
+    })]);
+}
+/**
+ * Returns the display for a crafting recipe
+ *
+ * @param {string} recipe
+ * @returns {TabFormatEntries<'c'>[]}
+ */
+function crafting_show_recipe(recipe) {
+    const precipe = player.c.recipes[recipe],
+        trecipe = tmp.c.recipes[recipe],
+        vis = player.c.visiblity.crafting;
+
+    if (!(trecipe.unlocked ?? true) || (
+        trecipe.categories.some(cat => vis[cat] == 'hide') &&
+        !trecipe.categories.some(cat => vis[cat] == 'show')
+    )) return [];
+
+    const craft = D.gt(precipe.making, 0) ? `<br>Crafting ${formatWhole(precipe.making)}` : '',
+        total = trecipe.static ? `<br>Crafted ${formatWhole(precipe.crafted)}` : '',
+        /** @template T @type {(list: T[], size?: number) => T[][]} */
+        square = (list, size) => {
+            size ??= Math.ceil(Math.sqrt(list.length));
+            if (size <= 0) return [];
+
+            /** @type {T[][]} */
+            const sq = [];
+            let x = 0;
+
+            list.forEach(val => {
+                if (x >= sq.length) sq.push([val]);
+                else {
+                    sq[x].push(val);
+                    if (sq[x].length >= size) x++;
+                }
+            });
+
+            return sq;
+        },
+        /** @type {(list: ReturnType<square<['tile', tile]>>) => TabFormatEntries<'c'>} */
+        line = list => {
+            if (options.colCraft) return ['row', list.map(row => ['column', row])];
+            else return ['column', list.map(row => ['row', row])];
+        };
+
+    return ['row', [
+        line(square(trecipe.consumes.map(([item, cost]) => {
+            const tile = item_tile(item),
+                text = shiftDown ? `[${trecipe.formulas.consumes[item]}]` : `${format(player.items[item].amount)} / ${format(cost)}`;
+            tile.text = `${capitalize(tmp.items[item].name)}<br>${text}`;
+
+            return ['tile', tile];
+        }))),
+        'blank',
+        ['dynabar', {
+            direction: RIGHT,
+            height: 60,
+            width: 300,
+            progress() {
+                if ('duration' in trecipe) return D.div(player.c.recipes[trecipe.id].time, trecipe.duration);
+                return D.dZero;
+            },
+            display() {
+                if ('duration' in trecipe) {
+                    if (shiftDown) return `${trecipe.formulas.duration}`;
+                    return `${formatTime(player.c.recipes[trecipe.id].time)} / ${formatTime(trecipe.duration)}`;
+                }
+            },
+            fillStyle: {
+                'backgroundColor': colors[options.theme][3],
+            },
+        }],
+        'blank',
+        line(square(trecipe.produces.map(([item, prod]) => {
+            const tile = item_tile(item),
+                text = shiftDown ? `[${trecipe.formulas.produces[item]}]` : format(prod);
+            tile.text = `${capitalize(tmp.items[item].name)}<br>${text}`;
+
+            return ['tile', tile];
+        }))),
+        'blank',
+        ['column', [
+            ['tile', {
+                text: '+',
+                style: {
+                    height: '30px',
+                    width: '40px',
+                },
+                canClick() { return D.lt(precipe.target, tmp.c.crafting.max); },
+                onClick() { precipe.target = D.add(precipe.target, 1).min(tmp.c.crafting.max); },
+                onHold() { precipe.target = D.add(precipe.target, 1).min(tmp.c.crafting.max); },
+            }],
+            ['tile', {
+                text: `Craft ${formatWhole(precipe.target)}${craft}${total}`,
+                canClick() { return D.lte(precipe.making, 0) && crafting_can(recipe); },
+                onClick() {
+                    gain_items(trecipe.consumes.map(([item, amount]) => [item, amount.neg()]));
+                    precipe.making = precipe.target;
+                    precipe.time = D.dZero;
+                    precipe.crafted = D.add(precipe.crafted, precipe.target);
+                },
+                style: {
+                    height: '60px',
+                },
+            }],
+            ['tile', {
+                text: '-',
+                style: {
+                    height: '30px',
+                    width: '40px',
+                },
+                canClick() { return D.gt(precipe.target, 1); },
+                onClick() { precipe.target = D.minus(precipe.target, 1).max(1); },
+                onHold() { precipe.target = D.minus(precipe.target, 1).max(1); },
+            }],
+        ]],
+    ]];
+}
+/**
+ * Returns the default amount for a recipe
+ *
+ * @param {string} recipe
+ * @param {DecimalSource} [amount]
+ */
+function crafting_default_amount(recipe, amount) {
+    if (amount && D.gt(amount, 0)) return D(amount);
+    if (D.gt(player.c.recipes[recipe].time, 0)) return player.c.recipes[recipe].making;
+    if (D.gt(player.c.recipes[recipe].target, 0)) return player.c.recipes[recipe].target;
+    return D.dOne;
+}
+/**
+ * Returns the default all_time for a recipe
+ *
+ * @param {string} recipe
+ * @param {DecimalSource} [all_time]
+ */
+function crafting_default_all_time(recipe, all_time) {
+    if (all_time && D.gt(all_time, 0)) return D(all_time);
+    if (!(tmp.c.recipes[recipe].static ?? false)) return D.dZero;
+    return player.c.recipes[recipe].crafted;
+}
+/**
+ * Checks whether a recipe can run
+ *
+ * @param {string} recipe
+ * @param {Decimal} amount
+ * @returns {boolean}
+ */
+function crafting_can(recipe, amount) {
+    /** @type {[items, Decimal][]} */
+    let items = [];
+    if (!amount) items = tmp.c.recipes[recipe].consumes;
+    else items = layers.c.recipes[recipe].consumes(amount);
+    return items.every(([item, amount]) => D.gte(player.items[item].amount, amount));
+}
+/**
+ * Returns the content for lore in the crafting tabFormat
+ *
+ * @param {items|false} item
+ * @returns {TabFormatEntries<'c'>[]}
+ */
+function compendium_content(item) {
+    if (!item) return [];
+    const itemp = tmp.items[item];
+
+    if (!(itemp.unlocked ?? true)) return [];
+
+    /** @type {TabFormatEntries<'c'>[]} */
+    const lines = [
+        ['display-text', capitalize(itemp.name)],
+        'blank',
+        ['display-text', `You have ${resourceColor(tmp.c.color, format(player.items[item].amount))}`],
+        ['display-text', `Obtained ${resourceColor(tmp.c.color, format(player.items[item].total))} times`],
+        'blank',
+    ];
+
+    if ('effectDescription' in itemp) lines.push(['display-text', item_list[item].effectDescription()], 'blank');
+
+    lines.push(['display-text', itemp.lore]);
+
+    return lines;
+}

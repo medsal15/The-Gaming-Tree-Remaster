@@ -20,6 +20,7 @@ function getStartOptions() {
 		/** @type {keyof typeof CHANCE_MODE} */
 		chanceMode: 'NEVER',
 		noRNG: false,
+		colCraft: false,
 	}
 }
 

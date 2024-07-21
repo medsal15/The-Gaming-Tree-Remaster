@@ -1,7 +1,8 @@
 // ************ Themes ************
-var themes = ["default", "aqua"]
+/** @type {(keyof typeof colors)[]} */
+const themes = ["default", "aqua"]
 
-var colors = {
+const colors = {
 	default: {
 		1: "#ffffff",//Branch color 1
 		2: "#bfbfbf",//Branch color 2
@@ -24,7 +25,6 @@ var colors = {
 	},
 }
 function changeTheme() {
-
 	colors_theme = colors[options.theme || "default"];
 	document.body.style.setProperty('--background', colors_theme["background"]);
 	document.body.style.setProperty('--background_tooltip', colors_theme["background_tooltip"]);
@@ -32,6 +32,7 @@ function changeTheme() {
 	document.body.style.setProperty('--points', colors_theme["points"]);
 	document.body.style.setProperty("--locked", colors_theme["locked"]);
 }
+/** @returns {keyof typeof colors} */
 function getThemeName() {
 	return options.theme ? options.theme : "default";
 }
