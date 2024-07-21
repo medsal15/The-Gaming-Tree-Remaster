@@ -35,20 +35,18 @@ type TabFormatEntries<L extends keyof Layers> = ['display-text', Computable<stri
         ...string[][]
     ]
 ] |
-['tile', tile] | [
-    'dynabar',
-    {
-        direction: 0 | 1 | 2 | 3
-        progress(): number | Decimal
-        width: number
-        height: number
-        display?: Computable<string>
-        baseStyle?: Computable<CSSStyles>
-        fillStyle?: Computable<CSSStyles>
-        borderStyle?: Computable<CSSStyles>
-        textStyle?: Computable<CSSStyles>
-    }
-];
+['tile', tile] |
+['dynabar', {
+    direction: 0 | 1 | 2 | 3
+    progress(): number | Decimal
+    width: number
+    height: number
+    display?: Computable<string>
+    baseStyle?: Computable<CSSStyles>
+    fillStyle?: Computable<CSSStyles>
+    borderStyle?: Computable<CSSStyles>
+    textStyle?: Computable<CSSStyles>
+}];
 
 type tile = {
     text?: Computable<string>
@@ -1768,6 +1766,7 @@ declare class Item<I> {
     /** Amount is reset when that row is */
     row?: Layer<string>['row']
     unlocked?: boolean
+    categories: categories[]
 
     lore: Computable<string>
 
@@ -1791,8 +1790,14 @@ declare class Item<I> {
     effectDescription(amount?: DecimalSource): string
 }
 
-type items = 'slime_goo' | 'slime_core_shard' | 'slime_core' | 'dense_slime_core';
+type items = 'slime_goo' | 'slime_core_shard' | 'slime_core' | 'dense_slime_core' |
+    'slime_crystal' | 'slime_knife' | 'slime_injector' | 'slime_die';
 type monsters = 'slime';
+
+type drop_sources = `kill:${monsters}`;
+type drop_types = 'kill' | 'crafting';
+type categories = 'materials' | 'equipment' |
+    'slime';
 
 type Layers = {
     // Side
@@ -1836,7 +1841,7 @@ type Layers = {
             lore: Computable<string>
             unlocked?(): boolean
         } }
-        monster_list(): monsters[]
+        list(): monsters[]
         kill: {
             color: string
             total(): Decimal
@@ -1845,7 +1850,6 @@ type Layers = {
             damage: {
                 base(): Decimal
                 mult(): Decimal
-                total(): Decimal
             }
             xp: {
                 base(): Decimal
@@ -1861,7 +1865,59 @@ type Layers = {
         }
     }
     // Row 1
+    l: Layer<'l'> & {
+        skill_points: {
+            color: string
+            total(): Decimal
+            remaining(): Decimal
+        }
+    }
+    c: Layer<'c'> & {
+        chance_multiplier(): Decimal
+        crafting: {
+            /** Max multiplier for crafting amount */
+            max(): Decimal
+            /** Total times static recipes have been crafted */
+            crafted(): Decimal
+            /** Divides crafting time */
+            speed(): Decimal
+        }
+        recipes: {
+            [id: string]: {
+                private _id: string | null
+                readonly id: string
+                unlocked?: Computable<boolean>
+
+                /** Items consumed for an output multiplier */
+                consumes(amount?: DecimalSource, all_time?: DecimalSource): [items, Decimal][]
+                /** Items produced with a given multiplier */
+                produces(amount?: DecimalSource, all_time?: DecimalSource): [items, Decimal][]
+                /** Duration to craft an amount of items, if 0 or absent, crafting is instant */
+                duration?(amount?: DecimalSource, all_time?: DecimalSource): Decimal
+                formulas: {
+                    duration?: string
+                    consumes: { [item in items]?: string }
+                    produces: { [item in items]?: string }
+                }
+                /**
+                 * If true, all time crafted amount will be counted for consuming and producing
+                 */
+                static?: boolean
+                categories: categories[]
+            }
+        }
+    }
     // Row 2
+    b: Layer<'b'> & {
+        complete(): Decimal
+        challenges?: {
+            [id: string]: Challenge<'b'> & {
+                progress(): Decimal
+                display(): string
+                color: Computable<string>
+            }
+        }
+    }
 };
 type Temp = {
     displayThings: (string | (() => string))[]
@@ -1913,7 +1969,32 @@ type Player = {
         } }
     }
     // Row 1
+    l: LayerData & {}
+    c: LayerData & {
+        shown: boolean
+        visiblity: {
+            inventory: {
+                [cat in categories]: 'show' | 'hide' | 'ignore'
+            }
+            crafting: {
+                [cat in categories]: 'show' | 'hide' | 'ignore'
+            }
+        }
+        recipes: {
+            [id: string]: {
+                target: Decimal
+                making: Decimal
+                time: Decimal
+                /** Total times crafted */
+                crafted: Decimal
+            }
+        }
+        compendium: items | false
+    }
     // Row 2
+    b: LayerData & {
+        shown: boolean
+    }
 };
 
 /** Adds the items in question to the player data */

@@ -86,10 +86,10 @@ You can make almost any value dynamic by using a function in its place, includin
 
 - type: **optional**. Determines which prestige formula you use. Defaults to "none".
 
-    - "normal": The amount of currency you gain is independent of its current amount (like Prestige). The formula before bonuses is based on `baseResource^exponent`
-    - "static": The cost is dependent on your total after reset. The formula before bonuses is based on `base^(x^exponent)`
-    - "custom": You can define everything, from the calculations to the text on the button, yourself. (See more at the bottom)
-    - "none": This layer does not prestige, and therefore does not need any of the other features in this section.
+  - "normal": The amount of currency you gain is independent of its current amount (like Prestige). The formula before bonuses is based on `baseResource^exponent`
+  - "static": The cost is dependent on your total after reset. The formula before bonuses is based on `base^(x^exponent)`
+  - "custom": You can define everything, from the calculations to the text on the button, yourself. (See more at the bottom)
+  - "none": This layer does not prestige, and therefore does not need any of the other features in this section.
 
 - baseResource: The name of the resource that determines how much of the main currency you gain on reset.
 
@@ -147,14 +147,14 @@ You can make almost any value dynamic by using a function in its place, includin
 ## Other features
 
 - doReset(resettingLayer): **optional**. Is triggered when a layer on a row greater than or equal to this one does a reset. The default behavior is to reset everything on the row, but only if it was triggered by a layer in a higher row. `doReset` is always called for side layers, but for these the default behavior is to reset nothing.
-                
+
     If you want to keep things, determine what to keep based on `resettingLayer`, `milestones`, and such, then call `layerDataReset(layer, keep)`, where `layer` is this layer, and `keep` is an array of the names of things to keep. It can include things like "points", "best", "total" (for this layer's prestige currency), "upgrades",  any unique variables like "generatorPower", etc. If you want to only keep specific upgrades or something like that, save them in a separate variable, then call `layerDataReset`, and then set `player[this.layer].upgrades` to the saved upgrades.
 
-- update(diff): **optional**. This function is called every game tick. Use it for any passive resource production or time-based things. `diff` is the time since the last tick. 
+- update(diff): **optional**. This function is called every game tick. Use it for any passive resource production or time-based things. `diff` is the time since the last tick.
 
 - autoUpgrade: **optional**, a boolean value, if true, the game will attempt to buy this layer's upgrades every tick. Defaults to false.
 
-- automate(): **optional**. This function is called every game tick, after production. Use it to activate automation things that aren't otherwise supported. 
+- automate(): **optional**. This function is called every game tick, after production. Use it to activate automation things that aren't otherwise supported.
 
 - resetsNothing: **optional**. Returns true if this layer shouldn't trigger any resets when you prestige.
 
@@ -175,11 +175,12 @@ componentStyles: {
 
 - leftTab: **optional**, if true, this layer will use the left tab instead of the right tab.
 
-- previousTab: **optional**, a layer's id. If a layer has a previousTab, the layer will always have a back arrow and pressing the back arrow on this layer will take you to the layer with this id. 
+- previousTab: **optional**, a layer's id. If a layer has a previousTab, the layer will always have a back arrow and pressing the back arrow on this layer will take you to the layer with this id.
 
 - deactivated: **optional**, if this is true, hasUpgrade, hasChallenge, hasAchievement, and hasMilestone will return false for things in the layer, and you will be unable to buy or click things, or gain achievements/milestones on the layer. You will have to disable effects of buyables, the innate layer effect, and possibly other things yourself.
 
-## Custom Prestige type  
+## Custom Prestige type
+
 (All of these can also be used by other prestige types)
 
 - getResetGain(): **mostly for custom prestige type**. Returns how many points you should get if you reset now. You can call `getResetGain(this.layer, useType = "static")` or similar to calculate what your gain would be under another prestige type (provided you have all of the required features in the layer).

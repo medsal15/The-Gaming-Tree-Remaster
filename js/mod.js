@@ -31,6 +31,8 @@ let modInfo = {
 		// main
 		'layers/main/side/achievement.js',
 		'layers/main/0/experience.js',
+		'layers/main/1/level.js', 'layers/main/1/crafting.js',
+		'layers/main/2/boss.js',
 	],
 	/**
 	 * If you have a Discord server or other discussion place, you can add a link to it.
@@ -123,6 +125,14 @@ function addedPlayerData() {
 var displayThings = [
 	() => VERSION.beta ? '<span class="warning">Beta version, things might be a bit unstable</span>' : '',
 	() => isEndgame() ? '<span style="color:#60C0F0">You are past endgame. Content may not be balanced.</span>' : '',
+	() => {
+		const chal = activeChallenge('b');
+		if (!chal) return '';
+
+		const chaltemp = tmp.b.challenges[chal];
+
+		return `You are in ${tmp.b.name} challenge ${resourceColor(chaltemp.color, chaltemp.name)}`;
+	},
 ];
 
 /**
@@ -131,7 +141,7 @@ var displayThings = [
  * @returns {Boolean}
  */
 function isEndgame() {
-	return false;
+	return inChallenge('b', 11);
 }
 
 

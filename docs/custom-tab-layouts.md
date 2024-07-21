@@ -45,15 +45,15 @@ These are the existing components, but you can create more in [components.js](/j
 
 - prestige-button: The button to reset for a currency in this layer.
 
-- text-input: A text input box. The argument is the name of the variable in player[layer] that the input is for, player[layer][argument]
+- text-input: A text input box. The argument is the name of the variable in `player[layer]` that the input is for, `player[layer][argument]`
     (Works with strings, numbers, and Decimals!)
 
 - slider: Lets the user input a value with a slider. The argument a 3-element array: [name, min, max].
-    The name is the name of the variable in player[layer] that the input  is for, and min and max are the limits of the slider.
+    The name is the name of the variable in `player[layer]` that the input  is for, and min and max are the limits of the slider.
     (Does not work for Decimal values)
 
 - drop-down: Lets the user input a value with a dropdown menu. The argument a 2-element array: [name, options].
-    The name is the name of the variable in player[layer] that the input is for, and options is an array of strings for options you can use.
+    The name is the name of the variable in `player[layer]` that the input is for, and options is an array of strings for options you can use.
 
 - drop-down-double: Same as `drop-down`, but each option is also an array with the first entry being the value and the second being the display.
 
