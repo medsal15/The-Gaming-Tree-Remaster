@@ -10,6 +10,7 @@ addLayer('ach', {
     startData() {
         return {
             unlocked: true,
+            pool_balls: [],
         };
     },
     tooltip() { return `${formatWhole(tmp.ach.categories.normal.owned.length)} achievements`; },
@@ -328,7 +329,7 @@ addLayer('ach', {
             // Not implemented
             name: 'Cueless',
             tooltip: 'Collect all 15 pool balls<br>Reward: Get a cueball',
-            done() { return player.ach.pool_balls.length = 15; },
+            done() { return player.ach.pool_balls.length == 15; },
             onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Secret Completed!', 3, tmp.ach.categories.secret.color); },
             style() {
                 let style = {};
