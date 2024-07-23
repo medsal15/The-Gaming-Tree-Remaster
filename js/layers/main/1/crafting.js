@@ -468,6 +468,8 @@ addLayer('c', {
                 },
                 duration: '(crafting * 2 + crafted) * 7.5 + 7.5 seconds',
             },
+            categories: ['equipment', 'skeleton',],
+            static: true,
         },
         crystal_skull: {
             _id: null,
