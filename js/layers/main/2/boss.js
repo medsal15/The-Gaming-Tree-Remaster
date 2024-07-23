@@ -114,6 +114,9 @@ addLayer('b', {
                 if (!tmp.b.challenges[11].unlocked) {
                     return D.div(tmp.xp.kill.total, 360);
                 }
+                if (!tmp.b.challenges[12].unlocked) {
+                    return D.div(player.items.gold_nugget.amount, 1);
+                }
                 return D.dZero;
             },
             display() {
@@ -122,6 +125,10 @@ addLayer('b', {
 
                 if (!tmp.b.challenges[11].unlocked) {
                     return `${formatWhole(tmp.xp.kill.total)} / ${formatWhole(360)} kills`;
+                }
+                if (!tmp.b.challenges[12].unlocked) {
+                    const name = (tmp.items.gold_nugget.unlocked ?? true) ? tmp.items.gold_nugget.name : 'unknown';
+                    return `Mine ${formatWhole(player.items.gold_nugget.amount)} / ${formatWhole(1)} ${name}`;
                 }
                 return 'Not fighting a boss';
             },
@@ -149,6 +156,22 @@ addLayer('b', {
             display() { return `${formatWhole(tmp.xp.kill.total)} / ${formatWhole(490)} kills`; },
             unlocked() { return player.b.shown && player.b.visible_challenges.includes(this.id); },
             onEnter() { player.b.shown = true; },
+            group: 'boss',
+            buttonStyle() {
+                const group = tmp[this.layer].challenges[this.id].group
+                return { 'backgroundColor': tmp.b.groups[group].color, };
+            },
+        },
+        12: {
+            name: 'Captain Goldtooth',
+            challengeDescription: `Fight Captain Goldtooth's pirate army.<br>
+                Monsters drop coins instead of items, which must be purchased at Captain Goldtooth's shop.`,
+            rewardDescription: `Keep Captain Goldtooth's shop unlocked, skeletons have a chance to drop gold nuggets.`,
+            goalDescription: 'Spend ???',
+            canComplete() { return false; },
+            progress() { return D.dZero; },
+            display() { return `0 / ???`; },
+            unlocked() { return player.b.shown && player.b.visible_challenges.includes(this.id); },
             group: 'boss',
             buttonStyle() {
                 const group = tmp[this.layer].challenges[this.id].group
@@ -269,8 +292,12 @@ addLayer('b', {
         },
     },
     automate() {
-        if (D.gte(tmp.xp.kill.total, 490)) {
+        if (!player.b.visible_challenges.includes('11') && D.gte(tmp.xp.kill.total, 490)) {
             player.b.visible_challenges.push('11');
+            doPopup('none', `${tmp.b.challenges[11].name}`, 'Boss unlocked', 5, tmp.b.color);
+        }
+        if (!player.b.visible_challenges.includes('12') && D.gt(player.items.gold_nugget.amount, 0)) {
+            player.b.visible_challenges.push('12');
             doPopup('none', `${tmp.b.challenges[11].name}`, 'Boss unlocked', 5, tmp.b.color);
         }
     },

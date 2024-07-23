@@ -129,6 +129,18 @@ function format_chance(chance) {
     }
 }
 /**
+ * @param {{min: DecimalSource, max: DecimalSource}} range
+ */
+function format_range(range) {
+    const min = D(range.min),
+        max = D(range.max);
+    if (options.noRNG) {
+        return `+${format(min.add(max).div(2))}`;
+    } else {
+        return `+${format(min)}-${format(max)}`;
+    }
+}
+/**
  * Shorthand for Decimal and shorter way to create one
  *
  * @type {((val: DecimalSource) => Decimal)&{[k in keyof typeof Decimal]: (typeof Decimal)[k]}}
@@ -316,14 +328,27 @@ function bestiary_content(monster) {
     // Monster specific upgrades
     switch (monster) {
         case 'slime': {
-            if (inChallenge('b', 11)) upgrade_lines.push([
-                'display-text',
-                `${resourceColor(tmp.b.color, tmp.b.challenges[11].name)} active effect: *${formatWhole(2)} health, *${format(1.5)} experience`,
-            ]);
-            if (hasChallenge('b', 11)) upgrade_lines.push([
-                'display-text',
-                `${resourceColor(tmp.b.color, tmp.b.challenges[11].name)} reward effect: *${format(1.5)} experience`,
-            ]);
+            if (inChallenge('b', 11)) {
+                const group = tmp.b.challenges[11].group;
+                upgrade_lines.push([
+                    'display-text',
+                    `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[11].name)} active effect: *${formatWhole(2)} health, *${format(1.5)} experience`,
+                ]);
+            }
+            if (inChallenge('b', 21)) {
+                const group = tmp.b.challenges[21].group;
+                upgrade_lines.push([
+                    'display-text',
+                    `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[21].name)} active effect: *${formatWhole(2)} health, /${format(2)} experience`,
+                ]);
+            }
+            if (hasChallenge('b', 11)) {
+                const group = tmp.b.challenges[11].group;
+                upgrade_lines.push([
+                    'display-text',
+                    `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[11].name)} reward effect: *${format(1.5)} experience`,
+                ]);
+            }
         }; break;
     }
 
@@ -334,20 +359,162 @@ function bestiary_content(monster) {
         ['display-text', tmonst.lore],
     );
 
-    if (tmp.c.chance_multiplier.gt(0)) {
-        const drops = source_drops(`kill:${monster}`),
-            list = Object.entries(drops.chances);
-        if (list.length > 0)
-            lines.push(
-                'blank',
-                ['display-text', 'Chance to drop:'],
-                ['row', list.map(/**@param{[items,Decimal]}*/([item, chance]) => {
-                    const tile = item_tile(item);
-                    tile.text = `${capitalize(tmp.items[item].name)}<br>${format_chance(chance)}`;
+    const own_drops = source_drops(`kill:${monster}`),
+        any_drops = source_drops('kill:any'),
+        /** @type {[items, Decimal][]} */
+        chances = [...Object.entries(own_drops.chances), ...Object.entries(any_drops.chances)],
+        /** @type {[items, {min: Decimal, max: Decimal}][]} */
+        ranges = [...Object.entries(own_drops.range), ...Object.entries(any_drops.range)];
+    if (ranges.length > 0) {
+        lines.push(
+            'blank',
+            ['display-text', 'Drops:'],
+            ['row', ranges.map(([item, range]) => {
+                let tile;
+                if (!(tmp.items[item].unlocked ?? true)) {
+                    tile = item_tile_unknown();
+                } else {
+                    tile = item_tile(item);
+                }
+                tile.text += `<br>${format_range(range)}`;
 
-                    return ['tile', tile];
-                })],
-            );
+                return ['tile', tile];
+            })],
+        );
+    }
+    if (chances.length > 0) {
+        lines.push(
+            'blank',
+            ['display-text', 'Chance to drop:'],
+            ['row', chances.map(([item, chance]) => {
+                let tile;
+                if (!(tmp.items[item].unlocked ?? true)) {
+                    tile = item_tile_unknown();
+                } else {
+                    tile = item_tile(item);
+                }
+                tile.text += `<br>${format_chance(chance)}`;
+
+                return ['tile', tile];
+            })],
+        );
+    }
+
+    return lines;
+}
+
+/**
+ * Gets a random ore for mining
+ *
+ * @returns {ores}
+ */
+function random_ore() {
+    /** @type {[ores, Decimal][]} */
+    const list = Object.values(tmp.m.ores)
+        .filter(ore => (ore.unlocked ?? true) && D.gt(ore.weight, 0))
+        .map(ore => [ore.id, ore.weight]),
+        sum = list.reduce((sum, [, weight]) => D.add(sum, weight), D.dZero);
+
+    let rand = sum.times(Math.random()),
+        i = 0;
+    for (; i < list.length && rand.gt(0); i++) {
+        rand = rand.minus(list[i][1]);
+    }
+
+    return list[i - 1][0];
+}
+/**
+ * Returns the total weight of all unlocked ores
+ *
+ * @returns {Decimal}
+ */
+function total_ore_weights() {
+    return Object.values(tmp.m.ores)
+        .filter(ore => (ore.unlocked ?? true) && D.gt(ore.weight, 0))
+        .reduce((sum, ore) => D.add(sum, ore.weight), D.dZero);
+}
+/**
+ * Returns the content for lore in the mining tabFormat
+ *
+ * @param {ores} ore
+ * @returns {TabFormatEntries<'m'>[]}
+ */
+function handbook_content(ore) {
+    const tore = tmp.m.ores[ore];
+
+    if (!(tore.unlocked ?? true)) return [];
+
+    /** @type {TabFormatEntries<'m'>[]} */
+    const lines = [
+        [
+            'raw-html',
+            `<div style="width: 240px; height: 240px; overflow: hidden">
+                    <img src="./resources/images/ores.png"
+                        style="width: ${ORE_SIZES.width * 100}%;
+                            height: ${ORE_SIZES.height * 100}%;
+                            margin-left: ${-240 * tore.position[0]}px;
+                            margin-top: ${-240 * tore.position[1]}px;
+                            image-rendering: crisp-edges;"/>
+                </div>`
+        ],
+        ['display-text', capitalize(tore.name)],
+        'blank',
+        ['display-text', `Mined ${resourceColor(tmp.m.color, formatWhole(player.m.ores[ore].broken))} times`],
+        'blank',
+        ['display-text', `Maximum health: ${format(tore.health)}`],
+        ['display-text', `Chance to find: ${format_chance(D.div(tore.weight, total_ore_weights()))}`],
+        'blank',
+    ];
+
+    /** @type {TabFormatEntries<'xp'>[]} */
+    const upgrade_lines = [];
+
+    if (hasUpgrade('m', 14)) upgrade_lines.push([
+        'display-text',
+        `${resourceColor(tmp.items[tmp.m.upgrades[14].item].color, tmp.m.upgrades[14].title)} effect: *${format(upgradeEffect('m', 14)[ore])} drops`,
+    ]);
+
+    if (upgrade_lines.length > 0) lines.push(...upgrade_lines, 'blank');
+
+    const own_drops = source_drops(`mining:${ore}`),
+        any_drops = source_drops('mining:any'),
+        /** @type {[items, Decimal][]} */
+        chances = [...Object.entries(own_drops.chances), ...Object.entries(any_drops.chances)],
+        /** @type {[items, {min: Decimal, max: Decimal}][]} */
+        ranges = [...Object.entries(own_drops.range), ...Object.entries(any_drops.range)];
+    if (ranges.length > 0) {
+        lines.push(
+            'blank',
+            ['display-text', 'Drops:'],
+            ['row', ranges.map(([item, range]) => {
+                let tile;
+                if (!(tmp.items[item].unlocked ?? true)) {
+                    tile = item_tile_unknown();
+                } else {
+                    tile = item_tile(item);
+                }
+                tile.text += `<br>${format_range(range)}`;
+
+                return ['tile', tile];
+            })],
+        );
+    }
+    if (chances.length > 0) {
+        lines.push(
+            'blank',
+            ['display-text', 'Chance to drop:'],
+            ['row', chances.map(([item, chance]) => {
+                let tile;
+                if (!(tmp.items[item].unlocked ?? true)) {
+                    tile = item_tile_unknown();
+                } else {
+                    tile = item_tile(item);
+                }
+                tile.text += `<br>${format_chance(chance)}`;
+
+                return ['tile', tile];
+            })],
+        );
     }
 
     return lines;
@@ -360,7 +527,7 @@ function bestiary_content(monster) {
  */
 function crafting_toggles() {
     /** @type {categories[]} */
-    const list = ['materials', 'equipment', 'slime', 'skeleton'],
+    const list = ['materials', 'equipment', 'slime', 'skeleton', 'mining'],
         /** @type {(cat: categories) => boolean} */
         unlocked = cat => {
             switch (cat) {
@@ -371,7 +538,25 @@ function crafting_toggles() {
                     return tmp.xp.monsters.slime.unlocked ?? true;
                 case 'skeleton':
                     return tmp.xp.monsters.skeleton.unlocked ?? true;
+                case 'mining':
+                    return tmp.m.layerShown;
             }
+        },
+        /** @type {{[cat in categories]: string}} */
+        names = {
+            'materials': 'Materials',
+            'equipment': 'Equipment',
+            'slime': 'Slime',
+            'skeleton': 'Skeleton',
+            'mining': 'Mining',
+        },
+        /** @type {{[cat in categories]: () => string}} */
+        colors = {
+            'materials': () => tmp.c.color,
+            'equipment': () => tmp.c.color,
+            'slime': () => tmp.xp.monsters.slime.color,
+            'skeleton': () => tmp.xp.monsters.skeleton.color,
+            'mining': () => tmp.m.color,
         };
 
     return Object.fromEntries(list.map(/**@returns{[string, Clickable<'c'>][]}*/cat => {
@@ -389,12 +574,7 @@ function crafting_toggles() {
                 },
                 display() {
                     const vis = player.c.visiblity,
-                        name = {
-                            'materials': 'Materials',
-                            'equipment': 'Equipment',
-                            'slime': 'Slime',
-                            'skeleton': 'Skeleton',
-                        }[cat];
+                        name = names[cat];
 
                     let visibility = {
                         'show': 'Shown',
@@ -402,18 +582,12 @@ function crafting_toggles() {
                         'ignore': 'Ignored',
                     }[vis.inventory[cat] ??= 'ignore'];
 
-                    return `<span style="font-size:1.5em;">${name}</span><br>\
-                        ${visibility}`;
+                    return `<span style="font-size:1.5em;">${name}</span><br>${visibility}`;
                 },
                 style: {
                     'backgroundColor'() {
                         const vis = player.c.visiblity,
-                            color = {
-                                'materials': tmp.c.color,
-                                'equipment': tmp.c.color,
-                                'slime': tmp.xp.monsters.slime.color,
-                                'skeleton': tmp.xp.monsters.skeleton.color,
-                            }[cat];
+                            color = colors[cat]();
 
                         switch (vis.inventory[cat]) {
                             case 'show':
@@ -440,12 +614,7 @@ function crafting_toggles() {
                 },
                 display() {
                     const vis = player.c.visiblity,
-                        name = {
-                            'materials': 'Materials',
-                            'equipment': 'Equipment',
-                            'slime': 'Slime',
-                            'skeleton': 'Skeleton',
-                        }[cat];
+                        name = names[cat];
 
                     let visibility = {
                         'show': 'Shown',
@@ -453,18 +622,12 @@ function crafting_toggles() {
                         'ignore': 'Ignored',
                     }[vis.crafting[cat] ??= 'ignore'];
 
-                    return `<span style="font-size:1.5em;">${name}</span><br>\
-                        ${visibility}`;
+                    return `<span style="font-size:1.5em;">${name}</span><br>${visibility}`;
                 },
                 style: {
                     'backgroundColor'() {
                         const vis = player.c.visiblity,
-                            color = {
-                                'materials': tmp.c.color,
-                                'equipment': tmp.c.color,
-                                'slime': tmp.xp.monsters.slime.color,
-                                'skeleton': tmp.xp.monsters.skeleton.color,
-                            }[cat];
+                            color = colors[cat]();
 
                         switch (vis.crafting[cat]) {
                             case 'show':
@@ -514,6 +677,7 @@ function inventory() {
             const {
                 chance = {},
                 per_second = {},
+                range = {},
                 other = [],
             } = itemp.sources,
                 tooltip_lines = [];
@@ -521,6 +685,8 @@ function inventory() {
             if (Object.entries(chance).filter(([, c]) => D.gt(c, 0)).length) tooltip_lines.push(...Object.entries(chance)
                 .map(/**@param{[string,Decimal]}*/([source, chance]) =>
                     `${capitalize(source_name(source))}: ${format_chance(chance)}`));
+            if (Object.entries(range).filter(([, r]) => D.gt(r.max, 0)).length) tooltip_lines.push(Object.entries(range)
+                .map(/**@param{[items,{min:Decimal,max:Decimal}]}*/([source, range]) => `${capitalize(source_name(source))}: ${format_range(range)}`));
             if (Object.entries(per_second).filter(([, ps]) => D.gt(ps, 0)).length) tooltip_lines.push(...Object.entries(per_second)
                 .map(/**@param{[string,Decimal]}*/([source, amount]) =>
                     `${capitalize(source_name(source))}: +${format(amount)} /s`));
@@ -638,7 +804,6 @@ function crafting_show_recipe(recipe) {
                     gain_items(trecipe.consumes.map(([item, amount]) => [item, amount.neg()]));
                     precipe.making = precipe.target;
                     precipe.time = D.dZero;
-                    precipe.crafted = D.add(precipe.crafted, precipe.target);
                 },
                 style: {
                     height: '60px',

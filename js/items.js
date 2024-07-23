@@ -2,6 +2,16 @@
  * @type {{[id in items]: Item<id>}}
  */
 const item_list = {
+    'unknown': {
+        id: null,
+        color: '#445566',
+        name: 'unknown',
+        row: 'side',
+        lore: `What could this be?<br>
+            Is it a snowball, a rare gem, or another undiscovered object?<br>
+            So mysterious...`,
+        categories: [],
+    },
     // Slime
     'slime_goo': {
         id: null,
@@ -548,7 +558,6 @@ const item_list = {
             Why would you do that?`,
         categories: ['materials', 'skeleton'],
     },
-    //todo implement mining effect
     'bone_pick': {
         id: null,
         color() { return tmp.xp.monsters.skeleton.color; },
@@ -748,12 +757,141 @@ const item_list = {
             return `Multiply luck by ${luck} and skull drop chances by ${skull}`;
         },
     },
-    //todo cueball
+    // Mining
+    'stone': {
+        id: null,
+        color: '#BBBBDD',
+        name: 'stone',
+        grid: [2, 0],
+        icon: [4, 0],
+        row: 0,
+        sources: {
+            range() {
+                let min = D(5),
+                    max = D(15);
+
+                min = D.times(min, tmp.m.modifiers.range.mult);
+                max = D.times(max, tmp.m.modifiers.range.mult);
+
+                if (hasUpgrade('m', 23)) {
+                    min = D.times(min, upgradeEffect('m', 23).stone);
+                    max = D.times(max, upgradeEffect('m', 23).stone);
+                }
+
+                return { 'mining:any': { min, max } };
+            },
+        },
+        lore: `A piece of a large rock.<br>
+            Considered worthless by most people.<br>
+            With the amount you have... Is there even any value?`,
+        categories: ['materials', 'mining'],
+        unlocked() { return tmp.m.layerShown; },
+    },
+    'copper_ore': {
+        id: null,
+        color: '#FFAA11',
+        name: 'copper ore',
+        grid: [2, 1],
+        icon: [4, 1],
+        row: 0,
+        sources: {
+            range() {
+                let min = D(3),
+                    max = D(10);
+
+                min = D.times(min, tmp.m.modifiers.range.mult);
+                max = D.times(max, tmp.m.modifiers.range.mult);
+
+                if (hasUpgrade('m', 23)) {
+                    min = D.times(min, upgradeEffect('m', 23).ore);
+                    max = D.times(max, upgradeEffect('m', 23).ore);
+                }
+
+                return { 'mining:copper': { min, max } };
+            },
+        },
+        lore: `An orange mineral.<br>
+            Useful for tools and electricity.<br>
+            Slowly turns teal over time, lowering its usefulness.`,
+        categories: ['materials', 'mining'],
+        unlocked() { return tmp.m.layerShown; },
+    },
+    'tin_ore': {
+        id: null,
+        color: '#FFFFCC',
+        name: 'tin ore',
+        grid: [2, 2],
+        icon: [4, 2],
+        row: 0,
+        sources: {
+            range() {
+                let min = D(1),
+                    max = D(5);
+
+                min = D.times(min, tmp.m.modifiers.range.mult);
+                max = D.times(max, tmp.m.modifiers.range.mult);
+
+                if (hasUpgrade('m', 23)) {
+                    min = D.times(min, upgradeEffect('m', 23).ore);
+                    max = D.times(max, upgradeEffect('m', 23).ore);
+                }
+
+                return { 'mining:tin': { min, max } };
+            },
+        },
+        lore: `A light yellow mineral.<br>
+            Useful for jewelry.<br>
+            Surprisingly valuable for some reason.`,
+        categories: ['materials', 'mining'],
+        unlocked() { return tmp.m.layerShown; },
+    },
+    'bronze_blend': {
+        id: null,
+        color: '#BB7744',
+        name: 'bronze blend',
+        grid: [2, 3],
+        icon: [4, 3],
+        row: 0,
+        sources: {
+            other: ['crafting'],
+        },
+        lore: `A solid brown alloy.<br>
+            Useful for all kinds of things.<br>
+            Also valuable.`,
+        categories: ['materials', 'mining'],
+        unlocked() { return tmp.m.layerShown; },
+    },
+    'gold_nugget': {
+        id: null,
+        color: '#FFFF44',
+        name: 'gold nugget',
+        grid: [2, 4],
+        icon: [4, 4],
+        row: 0,
+        sources: {
+            chance() {
+                if (D.eq(tmp.c.chance_multiplier, 0)) return {};
+
+                let chance = D(1 / 100);
+
+                chance = chance.times(tmp.c.chance_multiplier);
+
+                if (hasUpgrade('m', 23)) chance = chance.times(upgradeEffect('m', 23));
+
+                return { 'mining:any': chance };
+            },
+        },
+        lore: `An extremely rare mineral.<br>
+            Also very valuable.<br>
+            Some people would kill for one of these.`,
+        categories: ['materials', 'mining'],
+        unlocked() { return D.gte(player.items.gold_nugget.amount, 1); },
+    },
 };
 
 const ITEM_SIZES = {
     width: 12,
-    height: 4,
+    height: 5,
 };
 /**
  * @type {{[row in Layer['row']]: items[]}}
@@ -840,8 +978,31 @@ function item_tile(item) {
     };
 }
 
+/**
+ * Creates a tile for an unknown item display
+ *
+ * Can be safely modified
+ *
+ * The tile text is already set to the item name
+ *
+ * @returns {tile}
+ */
 function item_tile_unknown() {
-    //todo
+    const itemp = tmp.items.unknown;
+
+    return {
+        text: 'Unknown',
+        style: {
+            'color': rgb_opposite_bw(itemp.color),
+            'background-color': itemp.color,
+            'background-image': `url(./resources/images/unknown.png)`,
+            'background-origin': `border-box`,
+            'background-repeat': `no-repeat`,
+            'image-rendering': 'crisp-edges',
+            'background-size': `80px 80px`,
+            'transform': 'initial',
+        },
+    };
 }
 
 
@@ -864,10 +1025,20 @@ function source_name(source) {
     /** @type {[drop_types, string[]]} */
     const [type, ...sub] = source.split(':');
     switch (type) {
-        case 'kill':
-            return tmp.xp.monsters[sub[0]].name;
+        case 'kill': {
+            /** @type {monsters|'any'} */
+            const monster = sub[0];
+            if (monster == 'any') return 'kill anything';
+            return tmp.xp.monsters[monster].name;
+        };
         case 'crafting':
             return 'crafting';
+        case 'mining': {
+            /** @type {ores|'any'} */
+            const ore = sub[0];
+            if (ore == 'any') return 'mine anything';
+            return tmp.m.ores[ore].name;
+        };
     }
 }
 /**
@@ -878,22 +1049,41 @@ function source_name(source) {
  * @param {drop_sources} source
  * @returns {{
  *  chances: {[item in items]: Decimal}
+ *  range: {[item in items]: {min: Decimal, max: Decimal}}
  * }}
  */
 function source_drops(source) {
     const items = {
         chances: {},
+        range: {},
     };
 
     Object.values(tmp.items).forEach(item => {
         if (!('sources' in item)) return;
 
-        //todo allow bigger sources drops (eg 'kill:foo' also rolls 'kill')
-
         if ('chance' in item.sources && source in item.sources.chance && D.gt(item.sources.chance[source], 0)) items.chances[item.id] = item.sources.chance[source];
+        if ('range' in item.sources && source in item.sources.range && D.gt(item.sources.range[source].max, 0)) items.range[item.id] = item.sources.range[source];
     });
 
     return items;
+}
+/**
+ * Merges multiple sets of drops into one
+ *
+ * @param {...[items, Decimal][]} drops
+ * @returns {[items, Decimal][]}
+ */
+function merge_drops(...drops) {
+    /** @type {Record<items, Decimal>} */
+    const total = {},
+        /**
+         * @type {(item: items, amount: DecimalSource) => void}
+         */
+        add = (item, amount) => total[item] = D.add(total[item] ?? 0, amount);
+
+    drops.forEach(set => set.forEach(([item, amount]) => add(item, amount)));
+
+    return Object.entries(total);
 }
 /**
  * Computes the drops from a type
@@ -928,6 +1118,18 @@ function get_source_drops(source, chance_multiplier = D.dOne) {
         } else {
             to_roll.push([item, chance]);
         }
+    });
+    Object.entries(items.range).forEach(/**@param{[items,{min:Decimal,max:Decimal}]}*/([item, range]) => {
+        const min = range.min,
+            delta = D.minus(range.max, range.min);
+        let result;
+        if (options.noRNG) {
+            result = D.div(delta, 2);
+        } else {
+            result = D.times(delta, Math.random());
+        }
+        result = result.add(min).times(chance_multiplier);
+        add_to_results(item, result);
     });
 
     if (to_roll.length > 7) {
