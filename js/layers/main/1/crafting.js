@@ -80,6 +80,7 @@ addLayer('c', {
         if (hasAchievement('ach', 44)) mult = mult.add(achievementEffect('ach', 44));
 
         mult = mult.times(item_effect('slime_die').luck);
+        mult = mult.times(item_effect('magic_slime_ball').luck);
 
         return mult;
     },
@@ -87,7 +88,7 @@ addLayer('c', {
         11: {
             title() { return `Looting lv.${formatWhole(getBuyableAmount(this.layer, this.id))}`; },
             display() {
-                let cost = shiftDown ? '[200 * amount]' : formatWhole(tmp[this.layer].buyables[this.id].cost),
+                let cost = shiftDown ? '[100 * (amount + 2)]' : `${formatWhole(tmp.xp.kill.total)} / ${formatWhole(tmp[this.layer].buyables[this.id].cost)}`,
                     effect = shiftDown ? '[(amount - 1) / 20]' : format(buyableEffect(this.layer, this.id));
 
                 return `Multiplies item drop chances by ${effect}<br>
@@ -98,7 +99,7 @@ addLayer('c', {
             cost(x) {
                 if (tmp[this.layer].deactivated) x = D.dZero;
 
-                return D.add(x, 1).times(200);
+                return D.add(x, 2).times(100);
             },
             canAfford() { return D.gte(tmp.xp.kill.total, tmp[this.layer].buyables[this.id].cost); },
             effect(x) {
@@ -199,6 +200,72 @@ addLayer('c', {
             },
             categories: ['materials', 'slime',],
         },
+        skull: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['bone', D.times(13, count)],
+                    ['rib', D.times(4, count)],
+                ];
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['skull', count],
+                ];
+            },
+            formulas: {
+                consumes: {
+                    'bone': '13 * count',
+                    'rib': '4 * count',
+                },
+                produces: {
+                    'skull': 'count',
+                },
+            },
+            categories: ['materials', 'skeleton',],
+        },
+        slimy_skull: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['slime_goo', D.times(25, count)],
+                    ['slime_core', D.times(5, count)],
+                    ['skull', D.times(2, count)],
+                ];
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['slimy_skull', count],
+                ];
+            },
+            duration() {
+                let duration = D(15);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'slime_goo': '25 * count',
+                    'slime_core': '5 * count',
+                    'skull': '2 * count',
+                },
+                produces: {
+                    'slimy_skull': 'count',
+                },
+                duration: '15 seconds',
+            },
+            categories: ['materials', 'skeleton', 'slime',],
+        },
         // Equipment
         slime_crystal: {
             _id: null,
@@ -223,7 +290,7 @@ addLayer('c', {
                 const count = crafting_default_amount(this.id, amount),
                     all = crafting_default_all_time(this.id, all_time);
 
-                let duration = D.times(count, 2).add(all).times(5).add(15);
+                let duration = D.times(count, 2).add(all).times(5).add(10);
 
                 return D.div(duration, tmp.c.crafting.speed);
             },
@@ -235,7 +302,7 @@ addLayer('c', {
                 produces: {
                     'slime_crystal': 'amount',
                 },
-                duration: '(crafting * 2 + crafted) * 5 + 30 seconds',
+                duration: '(crafting * 2 + crafted) * 5 + 10 seconds',
             },
             categories: ['equipment', 'slime',],
             static: true,
@@ -263,7 +330,7 @@ addLayer('c', {
                 const count = crafting_default_amount(this.id, amount),
                     all = crafting_default_all_time(this.id, all_time);
 
-                let duration = D.times(count, 2).add(all).times(15);
+                let duration = D.times(count, 2).add(all).times(10);
 
                 return D.div(duration, tmp.c.crafting.speed);
             },
@@ -275,7 +342,7 @@ addLayer('c', {
                 produces: {
                     'slime_knife': 'amount',
                 },
-                duration: '(crafting * 2 + crafted) * 25 seconds',
+                duration: '(crafting * 2 + crafted) * 10 seconds',
             },
             categories: ['equipment', 'slime',],
             static: true,
@@ -304,7 +371,7 @@ addLayer('c', {
                 const count = crafting_default_amount(this.id, amount),
                     all = crafting_default_all_time(this.id, all_time);
 
-                let duration = D.times(count, 2).add(all).times(7.5).add(15);
+                let duration = D.times(count, 2).add(all).times(10).add(15);
 
                 return D.div(duration, tmp.c.crafting.speed);
             },
@@ -317,7 +384,7 @@ addLayer('c', {
                 produces: {
                     'slime_injector': 'amount',
                 },
-                duration: '(crafting * 2 + crafted) * 7.5 + 15 seconds',
+                duration: '(crafting * 2 + crafted) * 10 + 15 seconds',
             },
             categories: ['equipment', 'slime',],
             static: true,
@@ -362,6 +429,166 @@ addLayer('c', {
                 duration: '(crafting * 4 + crafted) * 5 + 20 seconds',
             },
             categories: ['equipment', 'slime',],
+            static: true,
+        },
+        bone_pick: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                return [
+                    ['bone', D.sumGeometricSeries(count, 10, 1.8, all)],
+                    ['rib', D.sumGeometricSeries(count, 3, 1.4, all)],
+                ];
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['bone_pick', count],
+                ];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let duration = D.times(count, 2).add(all).times(7.5).add(7.5);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'bone': '10 * 1.8 ^ amount',
+                    'rib': '3 * 1.4 ^ amount',
+                },
+                produces: {
+                    'bone_pick': 'amount',
+                },
+                duration: '(crafting * 2 + crafted) * 7.5 + 7.5 seconds',
+            },
+        },
+        crystal_skull: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                return [
+                    ['skull', D.sumGeometricSeries(count, 1, 1.2, all)],
+                    ['slime_goo', D.sumGeometricSeries(count, 25, 1.8, all)],
+                    ['slime_crystal', D.sumGeometricSeries(count, 1, 1.05, all)],
+                ];
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['crystal_skull', count],
+                ];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let duration = D.add(count, all).times(30);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'skull': '1 * 1.2 ^ amount',
+                    'slime_goo': '25 * 1.8 ^ amount',
+                    'slime_crystal': '1.05 ^ amount',
+                },
+                produces: {
+                    'crystal_skull': 'amount',
+                },
+                duration: '(crafting + crafted) * 30 seconds',
+            },
+            categories: ['equipment', 'skeleton', 'slime',],
+            static: true,
+        },
+        bone_slate: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                return [
+                    ['rib', D.sumGeometricSeries(count, 10, 1.4, all)],
+                    ['slime_core_shard', D.sumGeometricSeries(count, 12, 1.4, all)],
+                ];
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['bone_slate', count],
+                ];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let duration = D.times(count, 4).add(all).times(5).add(15);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'rib': '10 * 1.4 ^ amount',
+                    'slime_core_shard': '12 * 1.4 ^ amount',
+                },
+                produces: {
+                    'bone_slate': 'amount',
+                },
+                duration: '(crafting * 4 + crafted) * 5 + 15 seconds',
+            },
+            categories: ['equipment', 'skeleton',],
+            static: true,
+        },
+        magic_slime_ball: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                return [
+                    ['dense_slime_core', D.sumGeometricSeries(count, 2, 1.1, all)],
+                    ['slimy_skull', D.sumGeometricSeries(count, 1, 1.1, all)],
+                ];
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['magic_slime_ball', count],
+                ];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let duration = D.add(count, all).times(5).add(30);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'dense_slime_core': '2 * 1.1 ^ amount',
+                    'slimy_skull': '1.1 ^ amount',
+                },
+                produces: {
+                    'magic_slime_ball': 'amount',
+                },
+                duration: '(crafting + crafted) * 5 + 30 seconds',
+            },
+            categories: ['equipment', 'skeleton', 'slime',],
             static: true,
         },
     },

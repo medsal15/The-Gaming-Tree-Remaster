@@ -136,8 +136,13 @@ addLayer('l', {
         },
         13: {
             title: 'Higher Limit',
-            description: 'Experience cap +25%',
-            effect() { return D(1.25); },
+            description() {
+                let text = 'Skills increase experience cap';
+                if (shiftDown) text += 'Formula: skills / 4 + 1';
+
+                return text;
+            },
+            effect() { return D.div(player.l.upgrades.length, 4).add(1); },
             effectDisplay() { return `*${format(upgradeEffect(this.layer, this.id))}`; },
             style() {
                 let style = {};
@@ -305,6 +310,7 @@ addLayer('l', {
         if (hasUpgrade('l', 32)) mult = mult.div(upgradeEffect('l', 32));
 
         mult = mult.div(item_effect('slime_injector').level);
+        mult = mult.div(item_effect('bone_slate').level);
 
         return mult;
     },

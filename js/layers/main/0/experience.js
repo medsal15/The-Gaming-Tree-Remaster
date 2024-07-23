@@ -1,8 +1,8 @@
 'use strict';
 
 const MONSTER_SIZES = {
-    width: 1,
-    height: 2,
+    width: 2,
+    height: 3,
 };
 addLayer('xp', {
     row: 0,
@@ -132,7 +132,7 @@ addLayer('xp', {
         11: {
             title: 'Larger Sword',
             kills: D.dOne,
-            show() { return hasUpgrade(this.layer, this.id) || D.gte(tmp.xp.kill.total, this.kills); },
+            show() { return hasUpgrade(this.layer, this.id) || D.gte(tmp.xp.kill.total, this.kills) || hasChallenge('b', 11); },
             description() {
                 if (!tmp[this.layer].upgrades[this.id].show) {
                     return `Unlocked at ${formatWhole(this.kills)} kills`;
@@ -159,7 +159,7 @@ addLayer('xp', {
         12: {
             title: 'Slimy Records',
             kills: D(5),
-            show() { return hasUpgrade(this.layer, this.id) || D.gte(tmp.xp.kill.total, this.kills); },
+            show() { return hasUpgrade(this.layer, this.id) || D.gte(tmp.xp.kill.total, this.kills) || hasChallenge('b', 11); },
             description() {
                 if (!tmp[this.layer].upgrades[this.id].show) {
                     return `Unlocked at ${formatWhole(this.kills)} kills`;
@@ -186,7 +186,7 @@ addLayer('xp', {
         13: {
             title: 'Level Down',
             kills: D.dTen,
-            show() { return hasUpgrade(this.layer, this.id) || D.gte(tmp.xp.kill.total, this.kills); },
+            show() { return hasUpgrade(this.layer, this.id) || D.gte(tmp.xp.kill.total, this.kills) || hasChallenge('b', 11); },
             description() {
                 if (!tmp[this.layer].upgrades[this.id].show) {
                     return `Unlocked at ${formatWhole(this.kills)} kills`;
@@ -213,7 +213,7 @@ addLayer('xp', {
         21: {
             title: 'Blood Knowledge',
             kills: D(20),
-            show() { return hasUpgrade(this.layer, this.id) || D.gte(tmp.xp.kill.total, this.kills); },
+            show() { return hasUpgrade(this.layer, this.id) || D.gte(tmp.xp.kill.total, this.kills) || hasChallenge('b', 11); },
             description() {
                 if (!tmp[this.layer].upgrades[this.id].show) {
                     return `Unlocked at ${formatWhole(this.kills)} kills`;
@@ -245,7 +245,7 @@ addLayer('xp', {
         22: {
             title: 'Trap',
             kills: D(35),
-            show() { return hasUpgrade(this.layer, this.id) || D.gte(tmp.xp.kill.total, this.kills); },
+            show() { return hasUpgrade(this.layer, this.id) || D.gte(tmp.xp.kill.total, this.kills) || hasChallenge('b', 11); },
             description() {
                 if (!tmp[this.layer].upgrades[this.id].show) {
                     return `Unlocked at ${formatWhole(this.kills)} kills`;
@@ -272,7 +272,7 @@ addLayer('xp', {
         23: {
             title: 'Deadly Sword',
             kills: D(50),
-            show() { return hasUpgrade(this.layer, this.id) || D.gte(tmp.xp.kill.total, this.kills); },
+            show() { return hasUpgrade(this.layer, this.id) || D.gte(tmp.xp.kill.total, this.kills) || hasChallenge('b', 11); },
             description() {
                 if (!tmp[this.layer].upgrades[this.id].show) {
                     return `Unlocked at ${formatWhole(this.kills)} kills`;
@@ -303,7 +303,7 @@ addLayer('xp', {
         31: {
             title: 'Unhealthy Knowledge',
             kills: D(75),
-            show() { return hasUpgrade(this.layer, this.id) || D.gte(tmp.xp.kill.total, this.kills); },
+            show() { return hasUpgrade(this.layer, this.id) || D.gte(tmp.xp.kill.total, this.kills) || hasChallenge('b', 11); },
             description() {
                 if (!tmp[this.layer].upgrades[this.id].show) {
                     return `Unlocked at ${formatWhole(this.kills)} kills`;
@@ -334,7 +334,7 @@ addLayer('xp', {
         32: {
             title: 'Weak Points',
             kills: D(100),
-            show() { return hasUpgrade(this.layer, this.id) || D.gte(tmp.xp.kill.total, this.kills); },
+            show() { return hasUpgrade(this.layer, this.id) || D.gte(tmp.xp.kill.total, this.kills) || hasChallenge('b', 11); },
             description() {
                 if (!tmp[this.layer].upgrades[this.id].show) {
                     return `Unlocked at ${formatWhole(this.kills)} kills`;
@@ -365,7 +365,7 @@ addLayer('xp', {
         33: {
             title: 'Power of Riches',
             kills: D(150),
-            show() { return hasUpgrade(this.layer, this.id) || D.gte(tmp.xp.kill.total, this.kills); },
+            show() { return hasUpgrade(this.layer, this.id) || D.gte(tmp.xp.kill.total, this.kills) || hasChallenge('b', 11); },
             description() {
                 if (!tmp[this.layer].upgrades[this.id].show) {
                     return `Unlocked at ${formatWhole(this.kills)} kills`;
@@ -460,7 +460,7 @@ addLayer('xp', {
 
                 return selected != tmp.xp.list[0];
             },
-            unlocked() { tmp.xp.list.length > 0 },
+            unlocked() { return tmp.xp.list.length > 1; },
         },
         12: {
             style: {
@@ -513,7 +513,7 @@ addLayer('xp', {
 
                 return selected != tmp.xp.list[tmp.xp.list.length - 1];
             },
-            unlocked() { tmp.xp.list.length > 0 },
+            unlocked() { return tmp.xp.list.length > 1; },
         },
         // Bestiary
         21: {
@@ -619,6 +619,7 @@ addLayer('xp', {
             get id() { return this._id ??= Object.keys(layers.xp.monsters).find(mon => layers.xp.monsters[mon] == this); },
             color() {
                 if (inChallenge('b', 11)) return '#FF6600';
+                if (inChallenge('b', 21)) return '#AAFFDD';
 
                 return '#55CC11';
             },
@@ -627,6 +628,7 @@ addLayer('xp', {
                 let i = 0;
 
                 if (inChallenge('b', 11)) i++;
+                if (inChallenge('b', 21)) i += 2;
 
                 return [0, i];
             },
@@ -642,7 +644,7 @@ addLayer('xp', {
 
                 let health = D.times(level_mult, 5).times(tmp.xp?.modifiers.health.mult ?? 1);
 
-                if (inChallenge('b', 11)) health = health.times(2);
+                if (inChallenge('b', 11) || inChallenge('b', 21)) health = health.times(2);
 
                 return health;
             },
@@ -654,6 +656,7 @@ addLayer('xp', {
 
                 if (inChallenge('b', 11)) xp = xp.times(1.5);
                 if (hasChallenge('b', 11)) xp = xp.times(1.5);
+                if (inChallenge('b', 21)) xp = xp.div(2);
 
                 return xp;
             },
@@ -667,7 +670,7 @@ addLayer('xp', {
             damage_per_second() {
                 let mult = D.dZero;
 
-                if (hasUpgrade('xp', 22)) mult = D.add(mult, upgradeEffect('xp', 22));
+                if (hasUpgrade('xp', 22) && this.id == player.xp.selected) mult = D.add(mult, upgradeEffect('xp', 22));
 
                 return D.times(mult, tmp.xp.monsters[this.id].damage);
             },
@@ -678,11 +681,73 @@ addLayer('xp', {
                         Diet consists of grass, cattle, and water.<br>
                         Tastes very spicy. Might also be poisonous.`;
                 }
+                if (inChallenge('b', 21)) {
+                    return `A light blue ball of jelly.<br>\
+                        Hard and freezing. Brrr!<br>
+                        Diet consists mostly of water.<br>
+                        Tastes like mint. Your tongue is stuck to it.`;
+                }
                 return `A green ball of jelly.<br>\
                     Soft, harmless, and cold; the perfect pillow.<br>\
                     Diet consists of grass, insects, and water.<br>\
                     Tastes like dirty water.`;
             },
+        },
+        skeleton: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.xp.monsters).find(mon => layers.xp.monsters[mon] == this); },
+            color() { return '#DDEEEE'; },
+            name: 'skeleton',
+            position() {
+                let i = 0;
+
+                return [1, i];
+            },
+            level(kills) {
+                let k = D(kills ?? player.xp.monsters[this.id].kills);
+
+                return k.div(10).root(2).floor().add(1);
+            },
+            health(level) {
+                let l = D(level ?? tmp?.xp?.monsters[this.id].level);
+
+                const level_mult = D.minus(l, 1).pow_base(1.75);
+
+                let health = D.times(level_mult, 10).times(tmp.xp?.modifiers.health.mult ?? 1);
+
+                return health;
+            },
+            experience(level) {
+                const l = D(level ?? tmp.xp.monsters[this.id].level);
+
+                let xp = D.times(2.5, tmp.xp.modifiers.xp.base)
+                    .times(l)
+                    .times(tmp.xp.modifiers.xp.mult);
+
+                xp = xp.pow(1.25);
+
+                return xp;
+            },
+            damage() {
+                let base = tmp.xp.modifiers.damage.base;
+
+                if (hasUpgrade('l', 31)) base = base.add(upgradeEffect('l', 31)[this.id]);
+
+                return D.times(base, tmp.xp.modifiers.damage.mult);
+            },
+            damage_per_second() {
+                let mult = D.dZero;
+
+                if (hasUpgrade('xp', 22) && this.id == player.xp.selected) mult = D.add(mult, upgradeEffect('xp', 22));
+
+                return D.times(mult, tmp.xp.monsters[this.id].damage);
+            },
+            lore() {
+                return `A dead body that has come back to life.<br>
+                    Brought to life near the ocean.<br>
+                    Tough in a fight, but not on the level of a guard.`;
+            },
+            unlocked() { return hasChallenge('b', 11); },
         },
     },
     kill: {
@@ -695,6 +760,8 @@ addLayer('xp', {
                 let base = D.dOne;
 
                 if (hasUpgrade('l', 11)) base = base.add(upgradeEffect('l', 11));
+
+                base = base.add(item_effect('bone_pick').xp_damage);
 
                 return base;
             },
@@ -725,6 +792,7 @@ addLayer('xp', {
 
                 mult = mult.times(item_effect('slime_crystal').xp_mult);
                 mult = mult.times(item_effect('slime_injector').xp_mult);
+                mult = mult.times(item_effect('crystal_skull').xp_mult);
 
                 if (hasAchievement('ach', 14)) mult = mult.times(achievementEffect('ach', 14));
 
@@ -741,6 +809,7 @@ addLayer('xp', {
                 cap = cap.times(tmp.l.effect);
 
                 cap = cap.times(item_effect('slime_crystal').xp_cap);
+                cap = cap.times(item_effect('crystal_skull').xp_cap);
 
                 return cap;
             },
