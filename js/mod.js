@@ -34,11 +34,11 @@ let VERSION = {
 };
 
 let changelog = `<h1>Changelog:</h1><br>
-	<h3>v0.2</h3><br>
+	<h3>v0.2: Bones and Stones</h3><br>
 		- ???<br>
 		- Improve import modal.<br>
-		- Update endgame: ???<br>
-	<h3>v0.1</h3><br>
+		- Update endgame: Enter the second boss fight.<br>
+	<h3>v0.1: Basics</h3><br>
 		- Rewrote XP, C, L.<br>
 		- Update endgame: Enter the first boss fight.`;
 
@@ -84,15 +84,16 @@ var displayThings = [
 		const chal = activeChallenge('b');
 		if (!chal) return '';
 
-		const chaltemp = tmp.b.challenges[chal];
+		const chaltemp = tmp.b.challenges[chal],
+			color = tmp.b.groups[chaltemp.group].color;
 
-		return `You are in ${tmp.b.name} challenge ${resourceColor(chaltemp.color, chaltemp.name)}`;
+		return `You are in ${tmp.b.name} challenge ${resourceColor(color, chaltemp.name)}`;
 	},
 ];
 
 // Determines when the game "ends"
 function isEndgame() {
-	return inChallenge('b', 11);
+	return false;
 }
 
 

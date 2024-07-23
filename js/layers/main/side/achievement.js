@@ -276,6 +276,7 @@ addLayer('ach', {
             },
             unlocked() { return player.b.shown; },
         },
+        //todo skeleton achievements
         //#endregion Normal
         //#region Secret
         21: {
@@ -312,10 +313,27 @@ addLayer('ach', {
             name: 'Disenchanted',
             tooltip: 'Get an item without looting',
             done() { return D.eq(getBuyableAmount('c', 11), 0) && Object.values(player.items).some(it => D.gt(it.amount, 0)); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Secret Completed!', 3, tmp.ach.categories.secret.color); },
             style() {
                 let style = {};
 
                 style['background-color'] = tmp.c.color;
+                style['border'] = `solid 3px ${tmp.ach.categories.secret.color}`;
+
+                return style;
+            },
+            unlocked() { return hasAchievement(this.layer, this.id); },
+        },
+        61: {
+            // Not implemented
+            name: 'Cueless',
+            tooltip: 'Collect all 15 pool balls<br>Reward: Get a cueball',
+            done() { return player.ach.pool_balls.length = 15; },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Secret Completed!', 3, tmp.ach.categories.secret.color); },
+            style() {
+                let style = {};
+
+                style['background-color'] = tmp.ach.color;
                 style['border'] = `solid 3px ${tmp.ach.categories.secret.color}`;
 
                 return style;
@@ -336,7 +354,7 @@ addLayer('ach', {
             owned() { return player.ach.achievements.filter(id => this.rows.includes(Math.floor(id / 10))); },
         },
         secret: {
-            rows: [2],
+            rows: [6, 2],
             color: '#FF0077',
             visible() {
                 return Object.values(tmp.ach.achievements)
@@ -344,5 +362,14 @@ addLayer('ach', {
             },
             owned() { return player.ach.achievements.filter(id => this.rows.includes(Math.floor(id / 10))); },
         },
+    },
+    automate() {
+        if (D.gte(player.items.magic_slime_ball.amount, 1)) {
+            let num = 14;
+            if (inChallenge('b', 11)) num = 11;
+            else if (inChallenge('b', 21)) num = 21;
+
+            if (!player.ach.pool_balls.includes(num)) player.ach.pool_balls.push(num);
+        }
     },
 });

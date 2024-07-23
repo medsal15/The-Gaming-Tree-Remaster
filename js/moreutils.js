@@ -288,13 +288,13 @@ function bestiary_content(monster) {
         [
             'raw-html',
             `<div style="width: 240px; height: 240px; overflow: hidden">
-                    <img src="./resources/images/enemies.png"
-                        style="width: ${MONSTER_SIZES.width * 100}%;
-                            height: ${MONSTER_SIZES.height * 100}%;
-                            margin-left: ${-240 * tmonst.position[0]}px;
-                            margin-top: ${-240 * tmonst.position[1]}px;
-                            image-rendering: crisp-edges;"/>
-                </div>`
+                <img src="./resources/images/enemies.png"
+                    style="width: ${MONSTER_SIZES.width * 100}%;
+                        height: ${MONSTER_SIZES.height * 100}%;
+                        margin-left: ${-240 * tmonst.position[0]}px;
+                        margin-top: ${-240 * tmonst.position[1]}px;
+                        image-rendering: crisp-edges;"/>
+            </div>`
         ],
         ['display-text', capitalize(tmonst.name)],
         'blank',
@@ -335,17 +335,19 @@ function bestiary_content(monster) {
     );
 
     if (tmp.c.chance_multiplier.gt(0)) {
-        const drops = source_drops(`kill:${monster}`);
-        lines.push(
-            'blank',
-            ['display-text', 'Chance to drop:'],
-            ['row', Object.entries(drops.chances).map(/**@param{[items,Decimal]}*/([item, chance]) => {
-                const tile = item_tile(item);
-                tile.text = `${capitalize(tmp.items[item].name)}<br>${format_chance(chance)}`;
+        const drops = source_drops(`kill:${monster}`),
+            list = Object.entries(drops.chances);
+        if (list.length > 0)
+            lines.push(
+                'blank',
+                ['display-text', 'Chance to drop:'],
+                ['row', list.map(/**@param{[items,Decimal]}*/([item, chance]) => {
+                    const tile = item_tile(item);
+                    tile.text = `${capitalize(tmp.items[item].name)}<br>${format_chance(chance)}`;
 
-                return ['tile', tile];
-            })],
-        );
+                    return ['tile', tile];
+                })],
+            );
     }
 
     return lines;
@@ -358,7 +360,19 @@ function bestiary_content(monster) {
  */
 function crafting_toggles() {
     /** @type {categories[]} */
-    const list = ['materials', 'equipment', 'slime'];
+    const list = ['materials', 'equipment', 'slime', 'skeleton'],
+        /** @type {(cat: categories) => boolean} */
+        unlocked = cat => {
+            switch (cat) {
+                case 'materials':
+                case 'equipment':
+                    return true;
+                case 'slime':
+                    return tmp.xp.monsters.slime.unlocked ?? true;
+                case 'skeleton':
+                    return tmp.xp.monsters.skeleton.unlocked ?? true;
+            }
+        };
 
     return Object.fromEntries(list.map(/**@returns{[string, Clickable<'c'>][]}*/cat => {
         return [
@@ -379,6 +393,7 @@ function crafting_toggles() {
                             'materials': 'Materials',
                             'equipment': 'Equipment',
                             'slime': 'Slime',
+                            'skeleton': 'Skeleton',
                         }[cat];
 
                     let visibility = {
@@ -397,6 +412,7 @@ function crafting_toggles() {
                                 'materials': tmp.c.color,
                                 'equipment': tmp.c.color,
                                 'slime': tmp.xp.monsters.slime.color,
+                                'skeleton': tmp.xp.monsters.skeleton.color,
                             }[cat];
 
                         switch (vis.inventory[cat]) {
@@ -409,6 +425,7 @@ function crafting_toggles() {
                         }
                     },
                 },
+                unlocked: () => unlocked(cat),
             }],
             [`crafting_${cat}`, {
                 canClick() { return true; },
@@ -427,6 +444,7 @@ function crafting_toggles() {
                             'materials': 'Materials',
                             'equipment': 'Equipment',
                             'slime': 'Slime',
+                            'skeleton': 'Skeleton',
                         }[cat];
 
                     let visibility = {
@@ -445,6 +463,7 @@ function crafting_toggles() {
                                 'materials': tmp.c.color,
                                 'equipment': tmp.c.color,
                                 'slime': tmp.xp.monsters.slime.color,
+                                'skeleton': tmp.xp.monsters.skeleton.color,
                             }[cat];
 
                         switch (vis.crafting[cat]) {
@@ -457,6 +476,7 @@ function crafting_toggles() {
                         }
                     },
                 },
+                unlocked: () => unlocked(cat),
             }],
         ];
     }).flat());
@@ -698,6 +718,42 @@ function compendium_content(item) {
     if ('effectDescription' in itemp) lines.push(['display-text', item_list[item].effectDescription()], 'blank');
 
     lines.push(['display-text', itemp.lore]);
+
+    return lines;
+}
+
+/**
+ * Returns the content for lore in the boss tabFormat
+ *
+ * @param {monsters} monster
+ * @returns {TabFormatEntries<'b'>[]}
+ */
+function bosstiary_content(boss) {
+    const bosst = tmp.b.bosses[boss];
+
+    if (!(bosst.unlocked ?? true)) return [];
+
+    /** @type {TabFormatEntries<'b'>[]} */
+    const lines = [
+        [
+            'raw-html',
+            `<div style="width: 240px; height: 240px; overflow: hidden">
+                <img src="./resources/images/bosses.png"
+                    style="width: ${BOSS_SIZES.width * 100}%;
+                        height: ${BOSS_SIZES.height * 100}%;
+                        margin-left: ${-240 * bosst.position[0]}px;
+                        margin-top: ${-240 * bosst.position[1]}px;
+                        image-rendering: crisp-edges;"/>
+            </div>`
+        ],
+        ['display-text', capitalize(bosst.name)],
+        'blank',
+        ['display-text', hasChallenge('b', bosst.challenge) ? 'Defeated' : 'Not yet defeated'],
+    ];
+
+    if (inChallenge('b', bosst.challenge)) lines.push(['display-text', 'Currently fighting']);
+
+    lines.push('blank', ['display-text', bosst.lore]);
 
     return lines;
 }

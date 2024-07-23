@@ -1,5 +1,10 @@
 'use strict';
 
+const BOSS_SIZES = {
+    width: 2,
+    height: 2,
+};
+
 addLayer('b', {
     row: 2,
     position: 0,
@@ -12,14 +17,16 @@ addLayer('b', {
     symbol: 'B',
     color: '#CC5555',
     tooltip() {
-        if (!player.b.shown) return `Reach ${formatWhole(500)} kills to fight (you have ${formatWhole(tmp.xp.kill.total)} kills)`;
-        return `${formatWhole(tmp.b.complete)} bosses beaten`;
+        if (!player.b.shown) return `Reach ${formatWhole(360)} kills to fight (you have ${formatWhole(tmp.xp.kill.total)} kills)`;
+        return `${formatWhole(tmp.b.complete.total)} bosses beaten`;
     },
     startData() {
         return {
             unlocked: true,
             shown: false,
             points: D.dZero,
+            visible_challenges: [],
+            lore: 'slime_sovereign',
         };
     },
     layerShown() { return player.b.shown || D.gte(tmp.xp.kill.total, 250); },
@@ -47,13 +54,52 @@ addLayer('b', {
         'Bosses': {
             content: [
                 ['display-text', () => {
-                    return `You have beaten ${resourceColor(tmp.b.color, formatWhole(tmp.b.complete), 'font-size:1.5em;')} bosses`;
+                    return `You have beaten ${resourceColor(tmp.b.color, formatWhole(tmp.b.complete.total), 'font-size:1.5em;')} bosses`;
                 }],
                 'blank',
                 ['bar', 'progress'],
                 'blank',
-                ['challenge', 11],
+                ['challenges', () => tmp.b.groups.boss.rows],
             ],
+        },
+        'Mini Bosses': {
+            content: [
+                ['display-text', () => {
+                    return `You have beaten ${resourceColor(tmp.b.groups.mini.color, formatWhole(tmp.b.groups.mini.completions), 'font-size:1.5em;')} mini bosses`;
+                }],
+                'blank',
+                ['bar', 'progress'],
+                'blank',
+                ['challenges', () => tmp.b.groups.mini.rows],
+            ],
+            buttonStyle: {
+                'borderColor'() { return tmp.b.groups.mini.color; },
+            },
+            unlocked() { return D.gte(tmp.b.groups.boss.completions, 1); },
+        },
+        'Relics': {
+            content: [
+                ['display-text', () => {
+                    return `You have obtained ${resourceColor(tmp.b.groups.relic.color, formatWhole(tmp.b.groups.relic.completions), 'font-size:1.5em;')} relics`;
+                }],
+                'blank',
+                ['bar', 'progress'],
+                'blank',
+                ['challenges', () => tmp.b.groups.relic.rows],
+            ],
+            buttonStyle: {
+                'borderColor'() { return tmp.b.groups.relic.color; },
+            },
+            unlocked() { return D.gte(tmp.b.groups.mini.completions, 1); },
+        },
+        'Bosstiary': {
+            content: [
+                ['display-text', 'Boss information'],
+                ['clickables', [1]],
+                'blank',
+                ['column', () => bosstiary_content(player.b.lore)],
+            ],
+            unlocked() { return player.b.visible_challenges.length > 0; },
         },
     },
     bars: {
@@ -66,7 +112,7 @@ addLayer('b', {
                 if (chal && inChallenge('b', chal)) return layers.b.challenges[chal].progress();
 
                 if (!tmp.b.challenges[11].unlocked) {
-                    return D.div(tmp.xp.kill.total, 500);
+                    return D.div(tmp.xp.kill.total, 360);
                 }
                 return D.dZero;
             },
@@ -75,36 +121,190 @@ addLayer('b', {
                 if (chal && inChallenge('b', chal)) return layers.b.challenges[chal].display();
 
                 if (!tmp.b.challenges[11].unlocked) {
-                    return `${formatWhole(tmp.xp.kill.total)} / ${formatWhole(500)} kills`;
+                    return `${formatWhole(tmp.xp.kill.total)} / ${formatWhole(360)} kills`;
                 }
-                return 'No bosses left';
+                return 'Not fighting a boss';
             },
             fillStyle: {
-                'backgroundColor'() { return tmp.b.color; },
+                'backgroundColor'() {
+                    const chal = activeChallenge('b');
+                    if (!chal) return tmp.b.color;
+
+                    const group = tmp.b.challenges[chal].group;
+                    return tmp.b.groups[group].color;
+                },
             },
         },
     },
     challenges: {
+        // Main
         11: {
-            name: 'Slime King',
-            challengeDescription: `Fight the Slime King and anger the slimes<br>\
+            name: 'Slime Sovereign',
+            challengeDescription: `Fight the Slime Sovereign and anger the slimes.<br>\
                 Double slime health and experience, slime items effects are boosted.`,
             rewardDescription: `+50% slime experience, slime items effects boost is kept, unlock a new enemy, and XP upgrades stay unlocked`,
-            goalDescription: 'Kill 500 slimes',
-            canComplete() { return D.gte(tmp.xp.kill.total, 500); },
-            progress() { return D.div(tmp.xp.kill.total, 500); },
-            display() { return `${formatWhole(tmp.xp.kill.total)} / ${formatWhole(500)} kills`; },
-            unlocked() { return hasChallenge('b', 11) || inChallenge('b', 11) || D.gte(tmp.xp.kill.total, 500) || player.b.shown; },
+            goalDescription: 'Kill 490 slimes',
+            canComplete() { return D.gte(tmp.xp.kill.total, 490); },
+            progress() { return D.div(tmp.xp.kill.total, 490); },
+            display() { return `${formatWhole(tmp.xp.kill.total)} / ${formatWhole(490)} kills`; },
+            unlocked() { return player.b.shown && player.b.visible_challenges.includes(this.id); },
             onEnter() { player.b.shown = true; },
-            color() { return tmp.b.color; },
+            group: 'boss',
+            buttonStyle() {
+                const group = tmp[this.layer].challenges[this.id].group
+                return { 'backgroundColor': tmp.b.groups[group].color, };
+            },
+        },
+        // Mini
+        21: {
+            name: 'Slime Monarch',
+            challengeDescription: `Fight the Slime Monarch and anger the slimes, again.<br>\
+                Double slime health and half experience, slime items effects are nerfed.`,
+            rewardDescription: `???`,
+            goalDescription: 'Kill 360 slimes',
+            canComplete() { return D.gte(tmp.xp.kill.total, 360); },
+            progress() { return D.div(tmp.xp.kill.total, 360); },
+            display() { return `${formatWhole(tmp.xp.kill.total)} / ${formatWhole(360)} kills`; },
+            unlocked() { return hasChallenge('b', 11); },
+            group: 'mini',
+            buttonStyle() {
+                const group = tmp[this.layer].challenges[this.id].group
+                return { 'backgroundColor': tmp.b.groups[group].color, };
+            },
+        },
+        // Relics
+    },
+    clickables: {
+        // Bosstiary
+        11: {
+            style: {
+                'background-image': `url(./resources/images/UI.png)`,
+                'background-repeat': 'no-repeat',
+                'image-rendering': 'crisp-edges',
+                'background-size': `${UI_SIZES.width * 120}px ${UI_SIZES.height * 120}px`,
+                'background-position': '-120px -120px',
+            },
+            onClick() {
+                const list = tmp.b.list,
+                    i = list.indexOf(player.b.lore);
+                player.b.lore = list[i - 1];
+            },
+            canClick() {
+                if (!Array.isArray(tmp.b.list)) return false;
+                const i = tmp.b.list.indexOf(player.b.lore);
+                return i > 0;
+            },
+            unlocked() {
+                /** @type {monsters[]} */
+                const list = tmp.b.list;
+                return list.length > 1;
+            },
+        },
+        12: {
+            style: {
+                'background-image': `url(./resources/images/UI.png)`,
+                'background-repeat': 'no-repeat',
+                'image-rendering': 'crisp-edges',
+                'background-size': `${UI_SIZES.width * 120}px ${UI_SIZES.height * 120}px`,
+                'background-position': '-120px 0',
+            },
+            onClick() {
+                /** @type {monsters[]} */
+                const list = tmp.b.list,
+                    i = list.indexOf(player.b.lore);
+                player.b.lore = list[i + 1];
+            },
+            canClick() {
+                const list = tmp.b.list;
+                if (!Array.isArray(list)) return false;
+                const i = list.indexOf(player.b.lore);
+                return i < list.length - 1;
+            },
+            unlocked() {
+                /** @type {monsters[]} */
+                const list = tmp.b.list;
+                return list.length > 1;
+            },
         },
     },
-    complete() { return Object.values(player.b.challenges).reduce((sum, n) => D.add(sum, n), D.dZero); },
+    complete: {
+        total() {
+            return D.add(tmp.b.groups.boss.completions, tmp.b.groups.mini.completions);
+        },
+    },
+    groups: {
+        boss: {
+            completions() {
+                return Object.keys(tmp.b.challenges)
+                    .filter(id => !isNaN(id) && this.rows.includes(Math.floor(id / 10)))
+                    .reduce((sum, id) => D.add(sum, challengeCompletions('b', id)), D.dZero);
+            },
+            color() { return tmp.b.color; },
+            rows: [1],
+        },
+        mini: {
+            completions() {
+                return Object.keys(tmp.b.challenges)
+                    .filter(id => !isNaN(id) && this.rows.includes(Math.floor(id / 10)))
+                    .reduce((sum, id) => D.add(sum, challengeCompletions('b', id)), D.dZero);
+            },
+            color: '#CC5599',
+            rows: [2],
+        },
+        relic: {
+            completions() {
+                return Object.keys(tmp.b.challenges)
+                    .filter(id => !isNaN(id) && this.rows.includes(Math.floor(id / 10)))
+                    .reduce((sum, id) => D.add(sum, challengeCompletions('b', id)), D.dZero);
+            },
+            color: '#55CCCC',
+            rows: [],
+        },
+    },
     branches: ['l'],
     nodeStyle: {
         'backgroundColor'() {
-            if (!player.b.shown && D.lt(tmp.xp.kill.total, 500)) return colors[options.theme].locked;
+            if (!player.b.shown && D.lt(tmp.xp.kill.total, 360)) return colors[options.theme].locked;
             return tmp.b.color;
         },
     },
+    automate() {
+        if (D.gte(tmp.xp.kill.total, 490)) {
+            player.b.visible_challenges.push('11');
+            doPopup('none', `${tmp.b.challenges[11].name}`, 'Boss unlocked', 5, tmp.b.color);
+        }
+    },
+    prestigeNotify() { return !activeChallenge('b') && [11].some(id => tmp.b.challenges[id].unlocked && !hasChallenge('b', id)); },
+    shouldNotify() {
+        const chal = activeChallenge('b');
+        if (!chal) return false;
+        return canCompleteChallenge('b', chal);
+    },
+    bosses: {
+        // Main
+        'slime_sovereign': {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.b.bosses).find(([, r]) => r == this)[0]; },
+            unlocked() { return tmp.b.challenges[11].unlocked; },
+            name: 'slime sovereign',
+            position: [0, 0],
+            lore: `Most powerful slime in the world, and their leader.<br>
+                Understandably angry considering not even you know how many slimes died by your blade.<br>
+                Sends an army of powerful slimes to defeat you.`,
+            challenge: 11,
+        },
+        // Mini
+        'slime_monarch': {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.b.bosses).find(([, r]) => r == this)[0]; },
+            unlocked() { return tmp.b.challenges[21].unlocked; },
+            name: 'slime monarch',
+            position: [0, 1],
+            lore: `Child of the Slime Sovereign.<br>
+                Angry that you defeated its parent, it now seeks revenge.<br>
+                Sends its personal guard to defeat you.`,
+            challenge: 21,
+        },
+    },
+    list() { return Object.keys(layers.b.bosses).filter(boss => tmp.b.bosses[boss].unlocked ?? true); },
 });

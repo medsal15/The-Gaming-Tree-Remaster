@@ -1758,7 +1758,7 @@ declare class LayerData {
 declare class Item<I> {
     readonly id: I
     color: Computable<string>
-    name: string
+    name: Computable<string>
     /** Position in the grid, 0-based */
     grid?: [number, number]
     /** Position of the icon, 0-based */
@@ -1791,13 +1791,15 @@ declare class Item<I> {
 }
 
 type items = 'slime_goo' | 'slime_core_shard' | 'slime_core' | 'dense_slime_core' |
-    'slime_crystal' | 'slime_knife' | 'slime_injector' | 'slime_die';
-type monsters = 'slime';
+    'slime_crystal' | 'slime_knife' | 'slime_injector' | 'slime_die' |
+    'bone' | 'rib' | 'skull' | 'slimy_skull' |
+    'bone_pick' | 'crystal_skull' | 'bone_slate' | 'magic_slime_ball';
+type monsters = 'slime' | 'skeleton';
 
-type drop_sources = `kill:${monsters}`;
+type drop_sources = `kill:${monsters}` | 'crafting';
 type drop_types = 'kill' | 'crafting';
 type categories = 'materials' | 'equipment' |
-    'slime';
+    monsters;
 
 type Layers = {
     // Side
@@ -1864,6 +1866,8 @@ type Layers = {
             }
         }
     }
+    m: Layer<'m'> & {
+    }
     // Row 1
     l: Layer<'l'> & {
         skill_points: {
@@ -1909,14 +1913,38 @@ type Layers = {
     }
     // Row 2
     b: Layer<'b'> & {
-        complete(): Decimal
         challenges?: {
             [id: string]: Challenge<'b'> & {
                 progress(): Decimal
                 display(): string
-                color: Computable<string>
+                group: 'boss' | 'mini' | 'relic'
             }
         }
+        groups: {
+            [type in 'boss' | 'mini' | 'relic']: {
+                completions(): Decimal
+                color: Computable<string>
+                rows: number[]
+            }
+        }
+        complete: {
+            total(): Decimal
+        }
+        bosses: {
+            [id: string]: {
+                private _id: string | null
+                readonly id: string
+                unlocked?: Computable<boolean>
+                /** Name of the boss, lowercase */
+                name: Computable<string>
+                /** Position of the boss in the monster spritesheet */
+                position: Computable<[number, number]>
+                lore: Computable<string>
+                /** Linked challenge */
+                challenge: string
+            }
+        }
+        list(): string[]
     }
 };
 type Temp = {
@@ -1956,7 +1984,9 @@ type Player = {
         total: Decimal
     } }
     // Side
-    ach: LayerData & {}
+    ach: LayerData & {
+        pool_balls: number[]
+    }
     // Row 0
     xp: LayerData & {
         selected: monsters
@@ -1968,6 +1998,7 @@ type Player = {
             last_drops_times: Decimal
         } }
     }
+    m: LayerData & {}
     // Row 1
     l: LayerData & {}
     c: LayerData & {
@@ -1994,6 +2025,9 @@ type Player = {
     // Row 2
     b: LayerData & {
         shown: boolean
+        /** List of visible challenges */
+        visible_challenges: string[]
+        lore: string
     }
 };
 

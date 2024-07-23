@@ -12,6 +12,7 @@ const item_list = {
             let icon = [0, 0];
 
             if (inChallenge('b', 11)) icon[1] += 4;
+            if (inChallenge('b', 21)) icon[1] += 8;
 
             return icon;
         },
@@ -32,6 +33,10 @@ const item_list = {
                 Feels warm to the touch.<br>
                 Tastes bad and spicy.`;
 
+            if (inChallenge('b', 21)) return `A chunk of light blue goo.<br>
+                Feels cold to the touch.<br>
+                Tastes minty, but stays stuck to your tongue.`;
+
             return `A chunk of green goo.<br>
                 Feels weird to the touch.<br>
                 Not only does it taste like dirty water, but it's hard to chew.`;
@@ -47,6 +52,7 @@ const item_list = {
             let icon = [0, 1];
 
             if (inChallenge('b', 11)) icon[1] += 4;
+            if (inChallenge('b', 21)) icon[1] += 8;
 
             return icon;
         },
@@ -67,6 +73,10 @@ const item_list = {
                 Very sharp, be careful when handling.<br>
                 Can be recombined into an intact core with a bit of goo.`;
 
+            if (inChallenge('b', 21)) return `A blue shard.<br>
+                Surprisingly dull.<br>
+                Can be recombined into an intact core with a bit of goo.`;
+
             return `A dark green shard.<br>
                 Surprisingly sharp, so careful when handling.<br>
                 Can be recombined into an intact core with a bit of goo.`;
@@ -82,6 +92,7 @@ const item_list = {
             let icon = [0, 2];
 
             if (inChallenge('b', 11)) icon[1] += 4;
+            if (inChallenge('b', 21)) icon[1] += 8;
 
             return icon;
         },
@@ -104,6 +115,11 @@ const item_list = {
                 Hot to the touch and valuable.<br>
                 Hard, but shatters easily.`;
 
+            if (inChallenge('b', 21)) return `The very core of a slime.<br>
+                Cold to the touch and valuable.<br>
+                Hard, does not shatter when thrown to the ground.<br>
+                Why is still so hard to get it then?`;
+
             return `The very core of a slime.<br>
                 Smooth to the touch and valuable.<br>
                 Fragile! Handle with care.`;
@@ -119,6 +135,7 @@ const item_list = {
             let icon = [0, 3];
 
             if (inChallenge('b', 11)) icon[1] += 4;
+            if (inChallenge('b', 21)) icon[1] += 8;
 
             return icon;
         },
@@ -131,6 +148,10 @@ const item_list = {
                 It glows in an angry red light.<br>
                 You can feel it pulse in your hands.`;
 
+            if (inChallenge('b', 21)) return `This is a bad idea.<br>
+                It glows in a cold blue light.<br>
+                Even through thick gloves, you can feel it slowly freeze your hands.`;
+
             return `The- This- What even is this?<br>
                 It glows in a worrying green light.<br>
                 You can feel it pulse in your hands.`;
@@ -141,11 +162,12 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.slime.color; },
         name: 'slime crystal',
-        grid: [1, 0],
+        grid: [0, 4],
         icon() {
             let icon = [1, 0];
 
             if (inChallenge('b', 11)) icon[1] += 4;
+            if (inChallenge('b', 21)) icon[1] += 8;
 
             return icon;
         },
@@ -158,6 +180,10 @@ const item_list = {
                 Can hold experience better than you.<br>
                 A clunky nightlight.`;
 
+            if (inChallenge('b', 21)) return `A bright blue crystal made of pure slime.<br>
+                Can hold experience as well as you.<br>
+                A clunky lamp.`;
+
             return `A bright green crystal made of pure slime.<br>
                 Can hold experience better than you.<br>
                 A clunky nightlight.`;
@@ -168,7 +194,10 @@ const item_list = {
 
             let xp_mult, xp_cap;
 
-            if (inChallenge('b', 11) || hasChallenge('b', 11)) {
+            if (inChallenge('b', 21)) {
+                xp_mult = D.div(x, 11).add(1);
+                xp_cap = D.pow(1.05, x);
+            } else if (inChallenge('b', 11) || hasChallenge('b', 11)) {
                 xp_mult = D.div(x, 9).add(1);
                 xp_cap = D.pow(1.15, x);
             } else {
@@ -181,7 +210,10 @@ const item_list = {
         effectDescription(amount) {
             let gain, cap;
             if (shiftDown) {
-                if (inChallenge('b', 11) || hasChallenge('b', 11)) {
+                if (inChallenge('b', 21)) {
+                    gain = '[amount / 11 + 1]';
+                    cap = '[1.05 ^ amount]';
+                } else if (inChallenge('b', 11) || hasChallenge('b', 11)) {
                     gain = '[amount / 9 + 1]';
                     cap = '[1.15 ^ amount]';
                 } else {
@@ -203,11 +235,12 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.slime.color; },
         name: 'slime knife',
-        grid: [1, 1],
+        grid: [0, 5],
         icon() {
             let icon = [1, 1];
 
             if (inChallenge('b', 11)) icon[1] += 4;
+            if (inChallenge('b', 21)) icon[1] += 8;
 
             return icon;
         },
@@ -218,7 +251,11 @@ const item_list = {
         lore() {
             if (inChallenge('b', 11)) return `A sharp red weapon.<br>
                 Requires a license to use in some kingdoms.<br>
-                Chefs love this, as it allows cooking spicy food without spices`;
+                Chefs love this, as it allows cooking spicy food without spices.`;
+
+            if (inChallenge('b', 21)) return `A cold blue weapon.<br>
+                Covers cuts with a layer of frost.<br>
+                Even with its cold handle, it's considered a revolution for ice cream.`;
 
             return `A crude green weapon.<br>
                 Very sharp, be careful with it.<br>
@@ -230,7 +267,9 @@ const item_list = {
 
             let damage;
 
-            if (inChallenge('b', 11) || hasChallenge('b', 11)) {
+            if (inChallenge('b', 21)) {
+                damage = D.pow(1.1, x);
+            } else if (inChallenge('b', 11) || hasChallenge('b', 11)) {
                 damage = D.pow(1.3, x);
             } else {
                 damage = D.pow(1.2, x);
@@ -241,7 +280,9 @@ const item_list = {
         effectDescription(amount) {
             let damage;
             if (shiftDown) {
-                if (inChallenge('b', 11) || hasChallenge('b', 11)) {
+                if (inChallenge('b', 21)) {
+                    damage = '[1.1 ^ amount]';
+                } else if (inChallenge('b', 11) || hasChallenge('b', 11)) {
                     damage = '[1.3 ^ amount]';
                 } else {
                     damage = '[1.2 ^ amount]';
@@ -260,11 +301,12 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.slime.color; },
         name: 'slime injector',
-        grid: [1, 2],
+        grid: [0, 6],
         icon() {
             let icon = [1, 2];
 
             if (inChallenge('b', 11)) icon[1] += 4;
+            if (inChallenge('b', 21)) icon[1] += 8;
 
             return icon;
         },
@@ -277,6 +319,10 @@ const item_list = {
                 It makes you feel... angrier? Weird.<br>
                 Using too many may have side effects.`;
 
+            if (inChallenge('b', 21)) return `This experimental drug stabilizes slimes.<br>
+                It makes you feel... Wait...<br>
+                That's not good for you at all!`;
+
             return `This experimental drug destabilizes slimes.<br>
                 It also makes you feel... stronger. Whatever that means.<br>
                 Using too many may have side effects.`;
@@ -287,7 +333,11 @@ const item_list = {
 
             let health, level, xp_mult;
 
-            if (inChallenge('b', 11) || hasChallenge('b', 11)) {
+            if (inChallenge('b', 21)) {
+                health = D.pow(.95, x);
+                level = D.div(x, 11).add(1);
+                xp_mult = D.div(x, 5).root(2).pow_base(.95);
+            } else if (inChallenge('b', 11) || hasChallenge('b', 11)) {
                 health = D.pow(1.1, x);
                 level = D.div(x, 9).add(1);
                 xp_mult = D.div(x, 5).root(2).floor().pow_base(.9);
@@ -302,11 +352,15 @@ const item_list = {
         effectDescription(amount) {
             const x = D(amount ?? player.items[this.id].amount),
                 effect = item_list[this.id].effect(x),
-                show_xp = D.neq(effect.xp_mult, 1),
+                show_xp = D.neq(effect.xp_mult, 1) || inChallenge('b', 21),
                 show_level = player.l.unlocked;
             let health, level, xp;
             if (shiftDown) {
-                if (inChallenge('b', 11) || hasChallenge('b', 11)) {
+                if (inChallenge('b', 21)) {
+                    health = '[.95 ^ amount]';
+                    level = '[amount / 11 + 1]';
+                    xp = '[0.95 ^ 2√(amount / 5)]';
+                } else if (inChallenge('b', 11) || hasChallenge('b', 11)) {
                     health = '[1.1 ^ amount]';
                     level = '[amount / 9 + 1]';
                     xp = '[0.9 ^ floor(2√(amount / 5))]';
@@ -335,11 +389,12 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.slime.color; },
         name: 'slime die',
-        grid: [1, 3],
+        grid: [0, 7],
         icon() {
             let icon = [1, 3];
 
             if (inChallenge('b', 11)) icon[1] += 4;
+            if (inChallenge('b', 21)) icon[1] += 8;
 
             return icon;
         },
@@ -349,6 +404,10 @@ const item_list = {
         },
         lore() {
             if (inChallenge('b', 11)) return `A dice that glows in a worrying light.<br>
+                It feels lucky, somehow.<br>
+                Makes you feel like you can grab more from slimes.`;
+
+            if (inChallenge('b', 21)) return `A dice that glows in a cold light.<br>
                 It feels lucky, somehow.<br>
                 Makes you feel like you can grab more from slimes.`;
 
@@ -362,7 +421,9 @@ const item_list = {
 
             let luck, core_chance;
 
-            if (inChallenge('b', 11) || hasChallenge('b', 11)) {
+            if (inChallenge('b', 21)) {
+                luck = D.div(x, 25).add(1);
+            } else if (inChallenge('b', 11) || hasChallenge('b', 11)) {
                 luck = D.div(x, 17.5).add(1);
             } else {
                 luck = D.div(x, 20).add(1);
@@ -374,7 +435,9 @@ const item_list = {
         effectDescription(amount) {
             let luck, core;
             if (shiftDown) {
-                if (inChallenge('b', 11) || hasChallenge('b', 11)) {
+                if (inChallenge('b', 21)) {
+                    luck = '[amount / 25 + 1]';
+                } else if (inChallenge('b', 11) || hasChallenge('b', 11)) {
                     luck = '[amount / 17.5 + 1]';
                 } else {
                     luck = '[amount / 20 + 1]';
@@ -391,11 +454,306 @@ const item_list = {
             return `Multiply luck by ${luck} and core drop chances by ${core}`;
         },
     },
+    // Skeleton
+    'bone': {
+        id: null,
+        color() { return tmp.xp.monsters.skeleton.color; },
+        name: 'bone',
+        grid: [1, 0],
+        icon: [2, 0],
+        row: 1,
+        sources: {
+            chance() {
+                if (D.eq(tmp.c.chance_multiplier, 0)) return {};
+
+                let chance = D(1 / 3);
+
+                chance = chance.times(tmp.c.chance_multiplier);
+
+                return { 'kill:skeleton': chance };
+            },
+        },
+        lore: `A big rod mostly made of calcium.<br>
+            Stolen from a dead body, but (hopefully) not a grave.<br>
+            Wait long enough, and it becomes archeology.`,
+        categories: ['materials', 'skeleton'],
+    },
+    'rib': {
+        id: null,
+        color() { return tmp.xp.monsters.skeleton.color; },
+        name: 'rib',
+        grid: [1, 1],
+        icon: [2, 1],
+        row: 1,
+        sources: {
+            chance() {
+                if (D.eq(tmp.c.chance_multiplier, 0)) return {};
+
+                let chance = D(1 / 10);
+
+                chance = chance.times(tmp.c.chance_multiplier);
+
+                return { 'kill:skeleton': chance };
+            },
+        },
+        lore: `A curved bone.<br>
+            Part of a cage that protected important organs.<br>
+            A worthless boomerang.`,
+        categories: ['materials', 'skeleton'],
+    },
+    'skull': {
+        id: null,
+        color() { return tmp.xp.monsters.skeleton.color; },
+        name: 'skull',
+        grid: [1, 2],
+        icon: [2, 2],
+        row: 1,
+        sources: {
+            chance() {
+                if (D.eq(tmp.c.chance_multiplier, 0)) return {};
+
+                let chance = D(1 / 33);
+
+                chance = chance.times(tmp.c.chance_multiplier);
+                chance = chance.times(item_effect('magic_slime_ball').skull_chance);
+
+                return { 'kill:skeleton': chance };
+            },
+            other: ['crafting'],
+        },
+        lore: `The head of a skeleton.<br>
+            Used to store one of the most important organs in the body.<br>
+            Its hollow sockets make you feel unseasy.`,
+        categories: ['materials', 'skeleton'],
+    },
+    'slimy_skull': {
+        id: null,
+        color() { return tmp.xp.monsters.skeleton.color; },
+        name: 'slimy skull',
+        grid: [1, 3],
+        icon() {
+            let icon = [2, 3];
+
+            if (inChallenge('b', 11)) icon[1] += 4;
+            if (inChallenge('b', 21)) icon[1] += 8;
+
+            return icon;
+        },
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        lore: `A slimy skull.<br>
+            The goo is slowly flowing from its sockets...<br>
+            Why would you do that?`,
+        categories: ['materials', 'skeleton'],
+    },
+    //todo implement mining effect
+    'bone_pick': {
+        id: null,
+        color() { return tmp.xp.monsters.skeleton.color; },
+        name: 'bone pick',
+        grid: [1, 4],
+        icon: [3, 0],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        lore: `A pick made of bones.<br>
+            Not a good weapon, unless you're fighting rocks.<br>
+            Talking about rocks... There's an outcrop over there.`,
+        categories: ['equipment', 'skeleton'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let m_damage, xp_damage = D.div(x, 10);
+            if (D.gt(x, 0)) m_damage = D.div(x, 10).add(.9);
+            else m_damage = D.dZero;
+
+            return { xp_damage, m_damage, };
+        },
+        effectDescription(amount) {
+            let xp_damage, m_damage;
+            if (shiftDown) {
+                xp_damage = '[amount / 10]';
+                m_damage = '[(amount - 1) / 10 + 1]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                xp_damage = format(effect.xp_damage);
+                m_damage = format(effect.m_damage);
+            }
+
+            return `Increase damage dealt to enemies by ${xp_damage}, and mining damage by ${m_damage}<br>
+                Mining damage increases by 1 the first time`;
+        },
+    },
+    'crystal_skull': {
+        id: null,
+        color() { return tmp.xp.monsters.skeleton.color; },
+        name: 'crystal skull',
+        grid: [1, 5],
+        icon() {
+            let icon = [3, 1];
+
+            if (inChallenge('b', 11)) icon[1] += 4;
+            if (inChallenge('b', 21)) icon[1] += 8;
+
+            return icon;
+        },
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        lore() {
+            if (inChallenge('b', 11)) return `A skull containing some crystallized slime.<br>
+                Somehow, their placement allows for better experience yield and storage.<br>
+                When you look at its sockets, you can almost feel bloodlust...`;
+
+            if (inChallenge('b', 21)) return `A skull containing some crystallized slime.<br>
+                Somehow, their placement allows for better experience yield and storage.<br>
+                You try to not look at it, as you feel judged...`;
+
+            return `A skull containing some crystallized slime.<br>
+                Somehow, their placement allows for better experience yield and storage.<br>
+                Behind its sockets, it almost feels like it's thinking...`;
+        },
+        categories: ['equipment', 'skeleton', 'slime'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let xp_mult = D.div(x, 7).add(1),
+                xp_cap = D.pow(1.3, x);
+
+            return { xp_mult, xp_cap, };
+        },
+        effectDescription(amount) {
+            let gain, cap;
+            if (shiftDown) {
+                gain = '[amount / 7 + 1]';
+                cap = '[1.3 ^ amount]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                gain = format(effect.xp_mult);
+                cap = format(effect.xp_cap);
+            }
+
+            return `Multiply xp gain by ${gain} and cap by ${cap}`;
+        },
+    },
+    'bone_slate': {
+        id: null,
+        color() { return tmp.xp.monsters.skeleton.color; },
+        name: 'bone slate',
+        grid: [1, 6],
+        icon: [3, 2],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        lore: `A slab made of bones.<br>
+            Useful for recording things.<br>
+            It's a bit crooked, but there's a limit to what ribs can do.`,
+        categories: ['equipment', 'skeleton'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let level = D.div(x, 10).add(1);
+
+            return { level, };
+        },
+        effectDescription(amount) {
+            let level;
+            if (shiftDown) {
+                level = '[amount / 10 + 1]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                level = format(effect.level);
+            }
+
+            return `Multiply level gain by ${level}`;
+        },
+    },
+    'magic_slime_ball': {
+        id: null,
+        color() { return tmp.xp.monsters.skeleton.color; },
+        name() {
+            if (inChallenge('b', 11)) return 'Magic 11 Ball';
+            else if (inChallenge('b', 21)) return 'Magic 10 Ball';
+            return 'Magic 14 Ball';
+        },
+        grid: [1, 7],
+        icon() {
+            let icon = [3, 3];
+
+            if (inChallenge('b', 11)) icon[1] += 4;
+            else if (inChallenge('b', 21)) icon[1] += 8;
+
+            return icon;
+        },
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        lore() {
+            if (inChallenge('b', 11)) return `A magic 11 ball that can predict the future!<br>
+                Just ask a simple yes or no question to get an answer.<br>
+                Strange... It only seems to respond in the negative...`;
+
+            if (inChallenge('b', 21)) return `A magic 10 ball that can predict the future!<br>
+                Just ask a simple yes or no question to get an answer.<br>
+                Huh, nothing is happening... Is it frozen?`;
+
+            return `A magic 14 ball that can predict the future!<br>
+                Just ask a simple yes or no question to get an answer.<br>
+                An 8 ball? No, everyone knows only 14 ball are magical enough to answer questions.`;
+        },
+        categories: ['equipment', 'skeleton'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let luck, skull_chance;
+
+            if (inChallenge('b', 11)) {
+                luck = D.div(x, 11).add(1);
+            } else {
+                luck = D.div(x, 14).add(1);
+            }
+            skull_chance = D.root(x, 2.1).floor();
+
+            return { luck, skull_chance, };
+        },
+        effectDescription(amount) {
+            let luck, skull;
+            if (shiftDown) {
+                if (inChallenge('b', 11)) {
+                    luck = '[amount / 11 + 1]';
+                } else {
+                    luck = '[amount / 14 + 1]';
+                }
+                skull = '[floor(2.1√(amount))]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                luck = format(effect.luck);
+                skull = formatWhole(effect.skull_chance);
+            }
+
+            return `Multiply luck by ${luck} and skull drop chances by ${skull}`;
+        },
+    },
+    //todo cueball
 };
 
 const ITEM_SIZES = {
-    width: 8,
-    height: 2,
+    width: 12,
+    height: 4,
 };
 /**
  * @type {{[row in Layer['row']]: items[]}}
@@ -529,6 +887,8 @@ function source_drops(source) {
 
     Object.values(tmp.items).forEach(item => {
         if (!('sources' in item)) return;
+
+        //todo allow bigger sources drops (eg 'kill:foo' also rolls 'kill')
 
         if ('chance' in item.sources && source in item.sources.chance && D.gt(item.sources.chance[source], 0)) items.chances[item.id] = item.sources.chance[source];
     });
