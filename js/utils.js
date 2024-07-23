@@ -20,8 +20,8 @@ function respecBuyables(layer) {
 function canAffordUpgrade(layer, id) {
 	let upg = tmp[layer].upgrades[id]
 	if (tmp[layer].deactivated) return false
-	if (tmp[layer].upgrades[id].canAfford === false) return false
-	let cost = tmp[layer].upgrades[id].cost
+	if (upg.canAfford === false) return false
+	let cost = upg.cost
 	if (cost !== undefined)
 		return canAffordPurchase(layer, upg, cost)
 
@@ -42,7 +42,7 @@ function canBuyBuyable(layer, id) {
 
 /**
  * @param {keyof Layers} layer
- * @param {{currencyLocation: String, currencyInternalName: String, currencyLayer: String}} thing
+ * @param {CurrencyUpgrade<string>} thing
  * @param {String|Number|Decimal} cost
  */
 function canAffordPurchase(layer, thing, cost) {

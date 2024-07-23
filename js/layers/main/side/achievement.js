@@ -277,7 +277,51 @@ addLayer('ach', {
             },
             unlocked() { return player.b.shown; },
         },
-        //todo skeleton achievements
+        52: {
+            name: `You're Boned`,
+            tooltip: 'Kill a skeleton',
+            done() { return D.gte(player.xp.monsters.skeleton.kills, 1); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.xp.monsters.skeleton.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.xp.monsters.skeleton.color;
+
+                return style;
+            },
+            unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
+        },
+        53: {
+            name: 'Brown Metal',
+            tooltip: 'Make some bronze',
+            done() { return D.gt(player.items.bronze_blend.amount, 0); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.m.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.m.color;
+
+                return style;
+            },
+            unlocked() { return tmp.m.layerShown; },
+        },
+        54: {
+            name: 'A Bone to Pick',
+            tooltip: 'Obtain a bone pick<br>Reward: Increase mining damage by 0.1',
+            done() { return D.gte(player.items.bone_pick.amount, 1) },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.xp.monsters.skeleton.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.xp.monsters.skeleton.color;
+                style['border'] = `solid 3px ${tmp.ach.color}`;
+
+                return style;
+            },
+            unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
+            effect() { return D(.1); },
+        },
+        //todo mining achievements
         //#endregion Normal
         //#region Secret
         21: {

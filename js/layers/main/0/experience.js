@@ -588,18 +588,19 @@ addLayer('xp', {
 
                     data.health = D.add(data.health, monster.health(level));
 
-                    if (D.gt(tmp.c.chance_multiplier, 0)) {
-                        const drops = get_source_drops(`kill:${id}`),
-                            equal = drops.length == data.last_drops.length &&
-                                drops.every(([item, amount]) => data.last_drops.some(([litem, lamount]) => litem == item && D.eq_tolerance(amount, lamount, 1e-3)));
-                        if (equal) {
-                            data.last_drops_times = D.add(data.last_drops_times, 1);
-                        } else {
-                            data.last_drops_times = D.dOne;
-                            data.last_drops = drops;
-                        }
-                        gain_items(drops);
+                    // Drops
+                    const own = get_source_drops(`kill:${id}`),
+                        any = get_source_drops('kill:any'),
+                        drops = merge_drops(own, any),
+                        equal = drops.length == data.last_drops.length &&
+                            drops.every(([item, amount]) => data.last_drops.some(([litem, lamount]) => litem == item && D.eq_tolerance(amount, lamount, 1e-3)));
+                    if (equal) {
+                        data.last_drops_times = D.add(data.last_drops_times, 1);
+                    } else {
+                        data.last_drops_times = D.dOne;
+                        data.last_drops = drops;
                     }
+                    gain_items(drops);
                 }
             });
     },

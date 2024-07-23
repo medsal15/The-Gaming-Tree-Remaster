@@ -42,7 +42,7 @@ addLayer('c', {
             unlocked() { return player.c.shown; },
         },
     ],
-    branches: ['xp'],
+    branches: ['xp', 'm'],
     tabFormat: {
         'Crafting': {
             content: [
@@ -265,6 +265,35 @@ addLayer('c', {
                 duration: '15 seconds',
             },
             categories: ['materials', 'skeleton', 'slime',],
+        },
+        bronze_blend: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['copper_ore', D.times(9, count)],
+                    ['tin_ore', D.times(3, count)],
+                ];
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['bronze_blend', count],
+                ];
+            },
+            formulas: {
+                consumes: {
+                    'copper_ore': '9 * count',
+                    'tin_ore': '3 * count',
+                },
+                produces: {
+                    'bronze_blend': 'count',
+                }
+            },
+            categories: ['materials', 'mining',],
         },
         // Equipment
         slime_crystal: {
@@ -593,6 +622,7 @@ addLayer('c', {
             categories: ['equipment', 'skeleton', 'slime',],
             static: true,
         },
+        //todo mining
     },
     doReset(layer) {
         if (tmp[layer].row <= this.row) return;
@@ -614,6 +644,7 @@ addLayer('c', {
             if (D.gt(rec.making, 0) && D.gte(rec.time, tmp.c.recipes[id].duration)) {
                 gain_items(tmp.c.recipes[id].produces);
                 rec.time = D.dZero;
+                rec.crafted = D.add(rec.crafted, rec.making);
                 rec.making = D.dZero;
             }
         });
