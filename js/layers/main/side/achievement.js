@@ -321,7 +321,22 @@ addLayer('ach', {
             unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
             effect() { return D(.1); },
         },
-        //todo mining achievements
+        55: {
+            name: '24k Real',
+            tooltip: 'Get gold<br>Reward: Double luck',
+            done() { return D.gt(player.items.gold_nugget.amount, 0); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.m.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.m.color;
+                style['border'] = `solid 3px ${tmp.ach.color}`;
+
+                return style;
+            },
+            unlocked() { return tmp.m.layerShown; },
+            effect() { return D.dTwo; },
+        },
         //#endregion Normal
         //#region Secret
         21: {
