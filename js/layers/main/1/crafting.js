@@ -140,10 +140,15 @@ addLayer('c', {
             consumes(amount) {
                 const count = crafting_default_amount(this.id, amount);
 
-                return [
+                /** @type {[items, Decimal][]} */
+                let costs = [
                     ['slime_goo', D.times(10, count)],
                     ['slime_core_shard', D.times(3, count)],
                 ];
+
+                if (hasUpgrade('m', 34)) costs.forEach(([, c], i) => costs[i][1] = D.div(c, upgradeEffect('m', 34)));
+
+                return costs;
             },
             produces(amount) {
                 const count = crafting_default_amount(this.id, amount);
@@ -169,11 +174,16 @@ addLayer('c', {
             consumes(amount) {
                 const count = crafting_default_amount(this.id, amount);
 
-                return [
+                /** @type {[items, Decimal][]} */
+                let costs = [
                     ['slime_goo', D.times(25, count)],
                     ['slime_core_shard', D.times(7, count)],
                     ['slime_core', D.times(2, count)],
                 ];
+
+                if (hasUpgrade('m', 34)) costs.forEach(([, c], i) => costs[i][1] = D.div(c, upgradeEffect('m', 34)));
+
+                return costs;
             },
             produces(amount) {
                 const count = crafting_default_amount(this.id, amount);
@@ -206,10 +216,15 @@ addLayer('c', {
             consumes(amount) {
                 const count = crafting_default_amount(this.id, amount);
 
-                return [
+                /** @type {[items, Decimal][]} */
+                let costs = [
                     ['bone', D.times(13, count)],
                     ['rib', D.times(4, count)],
                 ];
+
+                if (hasUpgrade('m', 34)) costs.forEach(([, c], i) => costs[i][1] = D.div(c, upgradeEffect('m', 34)));
+
+                return costs;
             },
             produces(amount) {
                 const count = crafting_default_amount(this.id, amount);
@@ -228,6 +243,7 @@ addLayer('c', {
                 },
             },
             categories: ['materials', 'skeleton',],
+            unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
         },
         slimy_skull: {
             _id: null,
@@ -235,11 +251,16 @@ addLayer('c', {
             consumes(amount) {
                 const count = crafting_default_amount(this.id, amount);
 
-                return [
+                /** @type {[items, Decimal][]} */
+                let costs = [
                     ['slime_goo', D.times(25, count)],
                     ['slime_core', D.times(5, count)],
                     ['skull', D.times(2, count)],
                 ];
+
+                if (hasUpgrade('m', 34)) costs.forEach(([, c], i) => costs[i][1] = D.div(c, upgradeEffect('m', 34)));
+
+                return costs;
             },
             produces(amount) {
                 const count = crafting_default_amount(this.id, amount);
@@ -265,6 +286,7 @@ addLayer('c', {
                 duration: '15 seconds',
             },
             categories: ['materials', 'skeleton', 'slime',],
+            unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
         },
         bronze_blend: {
             _id: null,
@@ -272,10 +294,15 @@ addLayer('c', {
             consumes(amount) {
                 const count = crafting_default_amount(this.id, amount);
 
-                return [
+                /** @type {[items, Decimal][]} */
+                let costs = [
                     ['copper_ore', D.times(9, count)],
                     ['tin_ore', D.times(3, count)],
                 ];
+
+                if (hasUpgrade('m', 34)) costs.forEach(([, c], i) => costs[i][1] = D.div(c, upgradeEffect('m', 34)));
+
+                return costs;
             },
             produces(amount) {
                 const count = crafting_default_amount(this.id, amount);
@@ -294,6 +321,7 @@ addLayer('c', {
                 }
             },
             categories: ['materials', 'mining',],
+            unlocked() { return tmp.m.layerShown; },
         },
         // Equipment
         slime_crystal: {
@@ -499,6 +527,7 @@ addLayer('c', {
             },
             categories: ['equipment', 'skeleton',],
             static: true,
+            unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
         },
         crystal_skull: {
             _id: null,
@@ -541,6 +570,7 @@ addLayer('c', {
             },
             categories: ['equipment', 'skeleton', 'slime',],
             static: true,
+            unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
         },
         bone_slate: {
             _id: null,
@@ -581,6 +611,7 @@ addLayer('c', {
             },
             categories: ['equipment', 'skeleton',],
             static: true,
+            unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
         },
         magic_slime_ball: {
             _id: null,
@@ -621,8 +652,213 @@ addLayer('c', {
             },
             categories: ['equipment', 'skeleton', 'slime',],
             static: true,
+            unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
         },
-        //todo mining
+        stone_mace: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                return [
+                    ['bone', D.sumGeometricSeries(count, 5, 1.8, all)],
+                    ['stone', D.sumGeometricSeries(count, 20, 2, all)],
+                ];
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['stone_mace', count],
+                ];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let duration = D.times(count, 2).add(all).times(4).add(8);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'bone': '5 * 1.8 ^ amount',
+                    'stone': '20 * 2 ^ amount',
+                },
+                produces: {
+                    'stone_mace': 'amount',
+                },
+                duration: '(crafting * 2 + crafted) * 4 + 8 seconds',
+            },
+            categories: ['equipment', 'mining',],
+            static: true,
+            unlocked() { return tmp.m.layerShown; },
+        },
+        copper_pick: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                return [
+                    ['bone', D.sumGeometricSeries(count, 9, 1.8, all)],
+                    ['slime_goo', D.sumGeometricSeries(count, 15, 1.8, all)],
+                    ['copper_ore', D.sumGeometricSeries(count, 20, 1.5, all)],
+                ];
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['copper_pick', count],
+                ];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let duration = D.times(count, 2).add(all).times(8).add(8);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'bone': '9 * 1.8 ^ amount',
+                    'slime_goo': '15 * 1.8 ^ amount',
+                    'copper_ore': '20 * 1.5 ^ amount',
+                },
+                produces: {
+                    'copper_pick': 'amount',
+                },
+                duration: '(crafting * 2 + crafted) * 8 + 8 seconds',
+            },
+            categories: ['equipment', 'mining',],
+            static: true,
+            unlocked() { return tmp.m.layerShown; },
+        },
+        tin_cache: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                return [
+                    ['copper_ore', D.sumGeometricSeries(count, 10, 1.5, all)],
+                    ['tin_ore', D.sumGeometricSeries(count, 20, 1.25, all)],
+                ];
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['tin_cache', count],
+                ];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let duration = D.times(count, 2).add(all).times(4).add(12);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'copper_ore': '10 * 1.5 ^ amount',
+                    'tin_ore': '20 * 1.25 ^ amount',
+                },
+                produces: {
+                    'tin_cache': 'amount',
+                },
+                duration: '(crafting * 2 + crafted) * 4 + 12 seconds',
+            },
+            categories: ['equipment', 'mining',],
+            static: true,
+            unlocked() { return tmp.m.layerShown; },
+        },
+        bronze_cart: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                return [
+                    ['copper_ore', D.sumGeometricSeries(count, 25, 1.5, all)],
+                    ['bronze_blend', D.sumGeometricSeries(count, 10, 1.1, all)],
+                ];
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['bronze_cart', count],
+                ];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let duration = D.times(count, 3).add(all).times(8).add(16);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'copper_ore': '25 * 1.5 ^ amount',
+                    'bronze_blend': '10 * 1.1 ^ amount',
+                },
+                produces: {
+                    'bronze_cart': 'amount',
+                },
+                duration: '(crafting * 2 + crafted) * 8 + 16 seconds',
+            },
+            categories: ['equipment', 'mining',],
+            static: true,
+            unlocked() { return tmp.m.layerShown; },
+        },
+        doubloon: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                return [
+                    ['gold_nugget', D.sumGeometricSeries(count, 4, 1.125, all)],
+                ];
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['doubloon', count],
+                ];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let duration = D.times(count, 3).add(all).times(10).add(6);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'gold_nugget': '4 * 1.125 ^ amount',
+                },
+                produces: {
+                    'doubloon': 'amount',
+                },
+                duration: '(crafting * 3 + crafted) * 10 + 6 seconds',
+            },
+            categories: ['equipment', 'mining',],
+            static: true,
+            unlocked() { return inChallenge('b', 12) || hasChallenge('b', 12); },
+        },
     },
     doReset(layer) {
         if (tmp[layer].row <= this.row) return;

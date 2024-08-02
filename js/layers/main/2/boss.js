@@ -320,6 +320,17 @@ addLayer('b', {
                 Sends an army of powerful slimes to defeat you.`,
             challenge: 11,
         },
+        'captain_goldtooth': {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.b.bosses).find(([, r]) => r == this)[0]; },
+            unlocked() { return tmp.b.challenges[12].unlocked; },
+            name: 'captain goodtooth',
+            position: [1, 0],
+            lore: `In deep debts from the many fines and thefts committed.<br>
+                Banks refuse to let go of a debtor's debts, even in death...<br>
+                Continues stealing and getting fined while trying to clear her account.`,
+            challenge: 12,
+        },
         // Mini
         'slime_monarch': {
             _id: null,

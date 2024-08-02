@@ -34,6 +34,7 @@ const item_list = {
                 let chance = D(1 / 2);
 
                 chance = chance.times(tmp.c.chance_multiplier);
+                chance = chance.times(tmp.xp.modifiers.drops.mult);
 
                 return { 'kill:slime': chance };
             },
@@ -74,6 +75,7 @@ const item_list = {
                 let chance = D(1 / 7);
 
                 chance = chance.times(tmp.c.chance_multiplier);
+                chance = chance.times(tmp.xp.modifiers.drops.mult);
 
                 return { 'kill:slime': chance };
             },
@@ -114,6 +116,8 @@ const item_list = {
                 let chance = D(1 / 24);
 
                 chance = chance.times(tmp.c.chance_multiplier);
+                chance = chance.times(tmp.xp.modifiers.drops.mult);
+
                 chance = chance.times(item_effect('slime_die').core_chance);
 
                 return { 'kill:slime': chance };
@@ -479,6 +483,7 @@ const item_list = {
                 let chance = D(1 / 3);
 
                 chance = chance.times(tmp.c.chance_multiplier);
+                chance = chance.times(tmp.xp.modifiers.drops.mult);
 
                 return { 'kill:skeleton': chance };
             },
@@ -502,6 +507,7 @@ const item_list = {
                 let chance = D(1 / 10);
 
                 chance = chance.times(tmp.c.chance_multiplier);
+                chance = chance.times(tmp.xp.modifiers.drops.mult);
 
                 return { 'kill:skeleton': chance };
             },
@@ -525,6 +531,8 @@ const item_list = {
                 let chance = D(1 / 33);
 
                 chance = chance.times(tmp.c.chance_multiplier);
+                chance = chance.times(tmp.xp.modifiers.drops.mult);
+
                 chance = chance.times(item_effect('magic_slime_ball').skull_chance);
 
                 return { 'kill:skeleton': chance };
@@ -885,13 +893,220 @@ const item_list = {
             Also very valuable.<br>
             Some people would kill for one of these.`,
         categories: ['materials', 'mining'],
-        unlocked() { return D.gte(player.items.gold_nugget.amount, 1); },
+        unlocked() { return D.gte(player.items.gold_nugget.amount, 1) || player.b.visible_challenges.includes('12'); },
+    },
+    'stone_mace': {
+        id: null,
+        color: '#BBBBDD',
+        name: 'stone mace',
+        grid: [3, 0],
+        icon: [5, 0],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        lore: `A large rock on a stick.<br>
+            Good for whacking your enemies (which include rocks for some reason).<br>
+            As expected, it's quite heavy.`,
+        categories: ['equipment', 'mining'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let m_damage = D.pow(1.1, x),
+                xp_damage = D.div(x, 5);
+
+            return { xp_damage, m_damage, };
+        },
+        effectDescription(amount) {
+            let xp_damage, m_damage;
+            if (shiftDown) {
+                xp_damage = '[amount / 5]';
+                m_damage = '[1.1 ^ amount]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                xp_damage = format(effect.xp_damage);
+                m_damage = format(effect.m_damage);
+            }
+
+            return `Increase damage dealt to enemies by ${xp_damage}, and multiplies mining damage by ${m_damage}`;
+        },
+        unlocked() { return tmp.m.layerShown; },
+    },
+    'copper_pick': {
+        id: null,
+        color() {
+            const high = [0xFF, 0xAA, 0x11],
+                low = [0x11, 0xFF, 0xAA],
+                progress = D.minus(1, item_effect(this.id).decay).toNumber();
+
+            return `#${color_between(low, high, progress).map(n => n.toString(16).padStart(2, '0')).join('')}`;
+        },
+        name: 'copper pick',
+        grid: [3, 1],
+        icon: [5, 1],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        lore: `A solid orange pickaxe.<br>
+            Because it's made of copper, its effect decays over time.<br>
+            Do you find the orange tint or the teal tint prettier?`,
+        categories: ['equipment', 'mining'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let decay = D.add(player.m.resetTime, 10).log10(),
+                damage = D.pow(1.1, x),
+                ores = D.div(x, 10).add(1);
+
+            // Apply decay
+            damage = damage.root(decay);
+            ores = ores.root(decay);
+
+            return { decay, damage, ores, };
+        },
+        effectDescription(amount) {
+            let damage,
+                ores,
+                decay;
+            if (shiftDown) {
+                decay = 'log10(reset time + 10)'
+                ores = '[decay√(amount / 10 + 1)]';
+                damage = '[decay√(1.1 ^ amount)]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                decay = format(effect.decay);
+                damage = format(effect.damage);
+                ores = format(effect.ores);
+            }
+
+            return `Multiplies mining damage by ${damage}, and ores gained by ${ores}<br>Decay: ${decay}`;
+        },
+        unlocked() { return tmp.m.layerShown; },
+    },
+    'tin_cache': {
+        id: null,
+        color: '#FFFFCC',
+        name: 'tin cache',
+        grid: [3, 2],
+        icon: [5, 2],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        lore: `A big box made of copper and tin.<br>
+            Each one improves your level up.<br>
+            It can even hold things!`,
+        categories: ['equipment', 'mining'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let hold = D.floor(x),
+                level = D.div(x, 8).add(1);
+
+            return { hold, level, };
+        },
+        effectDescription(amount) {
+            let hold, level;
+            if (shiftDown) {
+                hold = '[amount]';
+                level = '[amount / 8 + 1]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                hold = formatWhole(effect.hold);
+                level = format(effect.level);
+            }
+
+            return `Holds ${hold} lower layer upgrades, and multiplies level gain by ${level}`;
+        },
+        unlocked() { return tmp.m.layerShown; },
+    },
+    'bronze_cart': {
+        id: null,
+        color: '#FFFFCC',
+        name: 'bronze cart',
+        grid: [3, 3],
+        icon: [5, 3],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        lore: `A hollow box with an opening on top and 4 wheels to the sides.<br>
+            Good for transporting items of all kinds.<br>
+            Don't forget to get rails!`,
+        categories: ['equipment', 'mining'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let xp_drop = D.add(x, 5).log(5),
+                m_drop = D.add(x, 4).log(4);
+
+            return { xp_drop, m_drop, };
+        },
+        effectDescription(amount) {
+            let xp_drop, m_drop;
+            if (shiftDown) {
+                xp_drop = '[log5(amount + 5)]';
+                m_drop = '[log4(amount + 4)]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                xp_drop = formatWhole(effect.xp_drop);
+                m_drop = format(effect.m_drop);
+            }
+
+            return `Multiplies enemy drops by ${xp_drop}, and mining drops by ${m_drop}`;
+        },
+        unlocked() { return tmp.m.layerShown; },
+    },
+    'doubloon': {
+        id: null,
+        color: '#FFFF44',
+        name: 'gold nugget',
+        grid: [3, 4],
+        icon: [5, 4],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        lore: `A large gold coin, found deep underwater.<br>
+            Its rarity makes it more valuable.<br>
+            Nobody knows whose face is on its side.`,
+        categories: ['equipment', 'mining'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let coin_mult = D.div(x, 10).add(1);
+
+            return { coin_mult, };
+        },
+        effectDescription(amount) {
+            let coin_mult;
+            if (shiftDown) {
+                coin_mult = '[amount / 10 + 1]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                coin_mult = format(effect.coin_mult);
+            }
+
+            return `Multiplies coin gain by ${coin_mult}`;
+        },
+        unlocked() { return inChallenge('b', 12) || hasChallenge('b', 12); },
     },
 };
 
 const ITEM_SIZES = {
     width: 12,
-    height: 5,
+    height: 6,
 };
 /**
  * @type {{[row in Layer['row']]: items[]}}
