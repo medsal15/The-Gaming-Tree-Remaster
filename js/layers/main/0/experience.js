@@ -804,6 +804,8 @@ addLayer('xp', {
 
                 if (hasAchievement('ach', 15)) cap = cap.add(achievementEffect('ach', 15));
 
+                if (hasUpgrade('m', 32)) cap = cap.times(upgradeEffect('m', 32));
+
                 if (hasUpgrade('l', 13)) cap = cap.times(upgradeEffect('l', 13));
                 if (hasUpgrade('l', 23)) cap = cap.times(upgradeEffect('l', 23));
 
@@ -828,6 +830,15 @@ addLayer('xp', {
                 return mult;
             },
         },
+        drops: {
+            mult() {
+                let mult = D.dOne;
+
+                mult = mult.times(item_effect('bronze_cart').xp_drop);
+
+                return mult;
+            },
+        },
     },
     list() {
         return Object.values(tmp.xp.monsters)
@@ -837,7 +848,7 @@ addLayer('xp', {
     doReset(layer) {
         if (tmp[layer].row <= this.row) return;
 
-        const held = 0,
+        const held = D(item_effect('tin_cache').hold).toNumber(),
             /** @type {number[]} */
             upgs = [],
             /** @type {(keyof Player['xp'])[]} */

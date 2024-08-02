@@ -1499,7 +1499,8 @@ type items = 'unknown' |
     'slime_crystal' | 'slime_knife' | 'slime_injector' | 'slime_die' |
     'bone' | 'rib' | 'skull' | 'slimy_skull' |
     'bone_pick' | 'crystal_skull' | 'bone_slate' | 'magic_slime_ball' |
-    'stone' | 'copper_ore' | 'tin_ore' | 'bronze_blend' | 'gold_nugget';
+    'stone' | 'copper_ore' | 'tin_ore' | 'bronze_blend' | 'gold_nugget' |
+    'stone_mace' | 'copper_pick' | 'tin_cache' | 'bronze_cart' | 'doubloon';
 
 type monsters = 'slime' | 'skeleton';
 
@@ -1573,6 +1574,9 @@ type Layers = {
             health: {
                 mult(): Decimal
             }
+            drops: {
+                mult(): Decimal
+            }
         }
     }
     m: Layer<'m'> & {
@@ -1622,6 +1626,10 @@ type Layers = {
         items: items[]
         /** Items listed in the layers */
         minerals: items[]
+        broken: {
+            color: Computable<string>
+            total(): Decimal
+        }
     }
     // Row 1
     l: Layer<'l'> & {
@@ -1701,6 +1709,7 @@ type Layers = {
         }
         list(): string[]
     }
+    //todo shop
 };
 type Temp = {
     displayThings: (string | (() => string))[]

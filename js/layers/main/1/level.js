@@ -138,6 +138,7 @@ addLayer('l', {
             title: 'Higher Limit',
             description() {
                 let text = 'Skills increase experience cap';
+
                 if (shiftDown) text += 'Formula: skills / 4 + 1';
 
                 return text;
@@ -309,8 +310,11 @@ addLayer('l', {
         if (hasUpgrade('l', 22)) mult = mult.times(upgradeEffect('l', 22));
         if (hasUpgrade('l', 32)) mult = mult.div(upgradeEffect('l', 32));
 
+        if (hasUpgrade('m', 31)) mult = mult.div(upgradeEffect('m', 31));
+
         mult = mult.div(item_effect('slime_injector').level);
         mult = mult.div(item_effect('bone_slate').level);
+        mult = mult.div(item_effect('tin_cache').level);
 
         return mult;
     },

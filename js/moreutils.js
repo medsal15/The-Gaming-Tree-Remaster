@@ -282,6 +282,21 @@ function rgb_split(color) {
 function random_string_alpha(length) {
     return Array.from({ length }, () => String.fromCharCode(Math.floor(Math.random() * 26) + 65)).join('');
 }
+/**
+ * Returns the result of 2 colors (as R, G, B) as per progress
+ *
+ * @param {[number, number, number]} low
+ * @param {[number, number, number]} high
+ * @param {number} progress Progress between low and high, between 0 and 1
+ * @returns {[number, number, number]}
+ */
+function color_between(low, high, progress) {
+    if (D.lte(progress, 0)) return low;
+    if (D.gte(progress, 1)) return high;
+
+    const unprogress = 1 - progress;
+    return Array.from({ length: 3 }, (_, i) => Math.floor(high[i] * progress + low[i] * unprogress));
+}
 
 // Layer methods
 /**
@@ -459,7 +474,7 @@ function handbook_content(ore) {
         ],
         ['display-text', capitalize(tore.name)],
         'blank',
-        ['display-text', `Mined ${resourceColor(tmp.m.color, formatWhole(player.m.ores[ore].broken))} times`],
+        ['display-text', `Mined ${resourceColor(tmp.m.broken.color, formatWhole(player.m.ores[ore].broken))} times`],
         'blank',
         ['display-text', `Maximum health: ${format(tore.health)}`],
         ['display-text', `Chance to find: ${format_chance(D.div(tore.weight, total_ore_weights()))}`],
@@ -472,6 +487,10 @@ function handbook_content(ore) {
     if (hasUpgrade('m', 14)) upgrade_lines.push([
         'display-text',
         `${resourceColor(tmp.items[tmp.m.upgrades[14].item].color, tmp.m.upgrades[14].title)} effect: *${format(upgradeEffect('m', 14)[ore])} drops`,
+    ]);
+    if (hasUpgrade('m', 24)) upgrade_lines.push([
+        'display-text',
+        `${resourceColor(tmp.items[tmp.m.upgrades[24].item].color, tmp.m.upgrades[24].title)} effect: *${format(upgradeEffect('m', 24)[ore])} drops`,
     ]);
 
     if (upgrade_lines.length > 0) lines.push(...upgrade_lines, 'blank');
