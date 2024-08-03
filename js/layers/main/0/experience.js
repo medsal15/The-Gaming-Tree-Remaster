@@ -860,5 +860,8 @@ addLayer('xp', {
         layerDataReset(this.layer, keep);
 
         player.xp.upgrades.push(...upgs);
+
+        // Correctly reset health
+        Object.values(layers.xp.monsters).forEach(data => player.xp.monsters[data.id].health = data.health(data.level(0)));
     },
 });

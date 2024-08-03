@@ -4,6 +4,7 @@ const ORE_SIZES = {
     width: 2,
     height: 2,
 };
+//todo support multiple parallel mining (shows all, drops from all, health is sum of all, may repeat)
 addLayer('m', {
     row: 0,
     position: 1,

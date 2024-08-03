@@ -1102,6 +1102,73 @@ const item_list = {
         },
         unlocked() { return inChallenge('b', 12) || hasChallenge('b', 12); },
     },
+    // Shop
+    'coin_copper': {
+        id: null,
+        color: '#FFAA11',
+        name: 'copper coin',
+        row: 2,
+        sources: {
+            //todo
+            other: ['shop'],
+        },
+        lore: `An orange coin.<br>
+            Worth little.`,
+        categories: ['shop'],
+        unlocked() { return tmp.s.layerShown; },
+    },
+    'coin_bronze': {
+        id: null,
+        color: '#BB7744',
+        name: 'bronze coin',
+        row: 2,
+        sources: {
+            other: ['shop'],
+        },
+        lore: `A brown coin.<br>
+            Commonly used everywhere.`,
+        categories: ['shop'],
+        unlocked() { return tmp.s.layerShown; },
+    },
+    'coin_silver': {
+        id: null,
+        color: '#BBBBFF',
+        name: 'silver coin',
+        row: 2,
+        sources: {
+            other: ['shop'],
+        },
+        lore: `A light gray coin.<br>
+            Uncommon, but still used everywhere.`,
+        categories: ['shop'],
+        unlocked() { return tmp.s.layerShown; },
+    },
+    'coin_gold': {
+        id: null,
+        color: '#FFFF44',
+        name: 'gold coin',
+        row: 2,
+        sources: {
+            other: ['shop'],
+        },
+        lore: `A yellow coin.<br>
+            Rare and valuable.`,
+        categories: ['shop'],
+        unlocked() { return tmp.s.layerShown; },
+    },
+    'coin_platinum': {
+        id: null,
+        color: '#FFFFFF',
+        name: 'platinum coin',
+        row: 2,
+        sources: {
+            other: ['shop'],
+        },
+        lore: `A white coin.<br>
+            Few people have seen it in their lives.`,
+        categories: ['shop'],
+        unlocked() { return tmp.s.layerShown; },
+    },
 };
 
 const ITEM_SIZES = {
@@ -1174,13 +1241,14 @@ function setupItem([id, item]) {
  * @returns {tile}
  */
 function item_tile(item) {
-    const itemp = tmp.items[item];
-
-    return {
-        text: `${capitalize(itemp.name)}`,
-        style: {
+    const itemp = tmp.items[item],
+        style = {
             'color': rgb_opposite_bw(itemp.color),
             'background-color': itemp.color,
+        };
+
+    if (itemp.icon) {
+        Object.assign(style, {
             'background-image': `url(./resources/images/items.png)`,
             'background-origin': `border-box`,
             'background-repeat': `no-repeat`,
@@ -1189,7 +1257,12 @@ function item_tile(item) {
             'background-position-x': `${itemp.icon[1] * -80}px`,
             'background-position-y': `${itemp.icon[0] * -80}px`,
             'transform': 'initial',
-        },
+        });
+    }
+
+    return {
+        text: `${capitalize(itemp.name)}`,
+        style,
     };
 }
 

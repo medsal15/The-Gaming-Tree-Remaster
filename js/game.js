@@ -156,7 +156,6 @@ function canReset(layer) {
 		return false
 }
 
-//todo reset items amount/total
 /**
  * @param {Number} row
  * @param {keyof Layers} layer

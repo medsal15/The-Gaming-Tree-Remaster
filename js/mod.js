@@ -11,7 +11,7 @@ let modInfo = {
 		'layers/main/side/achievement.js',
 		'layers/main/0/experience.js', 'layers/main/0/mining.js',
 		'layers/main/1/level.js', 'layers/main/1/crafting.js',
-		'layers/main/2/boss.js',
+		'layers/main/2/boss.js', 'layers/main/2/shop.js',
 	],
 
 	discordName: "",

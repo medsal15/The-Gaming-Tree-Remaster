@@ -165,12 +165,12 @@ addLayer('b', {
         12: {
             name: 'Captain Goldtooth',
             challengeDescription: `Fight Captain Goldtooth's pirate army.<br>
-                Monsters drop coins instead of items, which must be purchased at Captain Goldtooth's shop.`,
+                Monsters drop coins instead of items, which must be purchased at Captain Goldtooth's shop. Luck applies to coin gain.`,
             rewardDescription: `Keep Captain Goldtooth's shop unlocked, skeletons have a chance to drop gold nuggets.`,
             goalDescription: 'Spend ???',
             canComplete() { return false; },
             progress() { return D.dZero; },
-            display() { return `0 / ???`; },
+            display() { return `${formatWhole(tmp.s.coins.spent)} / ???`; },
             unlocked() { return player.b.shown && player.b.visible_challenges.includes(this.id); },
             group: 'boss',
             buttonStyle() {

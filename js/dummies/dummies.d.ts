@@ -1464,7 +1464,7 @@ declare class Item<I> {
     /** Position in the grid, 0-based */
     grid?: [number, number]
     /** Position of the icon, 0-based */
-    icon: Computable<[number, number]>
+    icon?: Computable<[number, number]>
     /** Amount is reset when that row is */
     row?: Layer<string>['row']
     unlocked?: boolean
@@ -1500,15 +1500,16 @@ type items = 'unknown' |
     'bone' | 'rib' | 'skull' | 'slimy_skull' |
     'bone_pick' | 'crystal_skull' | 'bone_slate' | 'magic_slime_ball' |
     'stone' | 'copper_ore' | 'tin_ore' | 'bronze_blend' | 'gold_nugget' |
-    'stone_mace' | 'copper_pick' | 'tin_cache' | 'bronze_cart' | 'doubloon';
+    'stone_mace' | 'copper_pick' | 'tin_cache' | 'bronze_cart' | 'doubloon' |
+    'coin_copper' | 'coin_bronze' | 'coin_silver' | 'coin_gold' | 'coin_platinum';
 
 type monsters = 'slime' | 'skeleton';
 
 type ores = 'stone' | 'copper' | 'tin';
 
-type drop_sources = `kill:${monsters}` | `kill:any` | 'crafting' | `mining:${ores}` | `mining:any`;
+type drop_sources = `kill:${monsters}` | 'kill:any' | 'crafting' | `mining:${ores}` | `mining:any` | 'shop';
 type drop_types = 'kill' | 'crafting' | 'mining';
-type categories = 'materials' | 'equipment' | 'mining' |
+type categories = 'materials' | 'equipment' | 'mining' | 'shop' |
     monsters;
 
 type Layers = {
@@ -1709,7 +1710,34 @@ type Layers = {
         }
         list(): string[]
     }
-    //todo shop
+    s: Layer<'s'> & {
+        modifiers: {
+            coin: {
+                mult(): Decimal
+            }
+            trade: {
+                /** Multiplier to buying costs */
+                buy_mult(): Decimal
+                /** Multiplier to selling gains */
+                sell_mult(): Decimal
+            }
+        }
+        coins: {
+            /** Total amount of money owned */
+            total(): Decimal
+            spent(): Decimal
+            /** Coins and amount needed to upgrade (if it can improve) */
+            list: [items, DecimalSource?][]
+        }
+        trades: { [item in items]?: {
+            private _id: item | null
+            readonly id: item
+            unlocked?: Computable<boolean>
+            cost?: Computable<Decimal>
+            /** Time multiplier for buying one */
+            cost_time?: Computable<Decimal>
+        } }
+    }
 };
 type Temp = {
     displayThings: (string | (() => string))[]
@@ -1802,6 +1830,14 @@ type Player = {
         /** List of visible challenges */
         visible_challenges: string[]
         lore: string
+    }
+    s: LayerData & {
+        /** Total value spent */
+        spent: Decimal
+        buy: Decimal
+        buy_time: Decimal
+        sell: Decimal
+        sell_time: Decimal
     }
 };
 
