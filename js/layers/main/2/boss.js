@@ -183,11 +183,11 @@ addLayer('b', {
             name: 'Slime Monarch',
             challengeDescription: `Fight the Slime Monarch and anger the slimes, again.<br>\
                 Double slime health and half experience, slime items effects are nerfed.`,
-            rewardDescription: `???`,
+            rewardDescription: `Double damage, slime die level is increased by 1`,
             goalDescription: 'Kill 360 slimes',
-            canComplete() { return D.gte(tmp.xp.kill.total, 360); },
-            progress() { return D.div(tmp.xp.kill.total, 360); },
-            display() { return `${formatWhole(tmp.xp.kill.total)} / ${formatWhole(360)} kills`; },
+            canComplete() { return D.gte(player.xp.monsters.slime.kills, 360); },
+            progress() { return D.div(player.xp.monsters.slime.kills, 360); },
+            display() { return `${formatWhole(player.xp.monsters.slime.kills)} / ${formatWhole(360)} kills`; },
             unlocked() { return hasChallenge('b', 11); },
             group: 'mini',
             buttonStyle() {
@@ -196,6 +196,24 @@ addLayer('b', {
             },
         },
         // Relics
+        31: {
+            name: 'Broken Clock',
+            challengeDescription() {
+                return `Someone broke ${formatWhole(1000)} clocks, slowing down time to ${format(1 / 1000)} speed.<br>
+                    Repair them. Clock upgrades effects are squared`;
+            },
+            rewardDescription: 'Unlock the Clockwork.',
+            goalDescription: 'Restore time to its normal speed',
+            canComplete() { return D.gte(tmp.clo.time_speed, 1); },
+            progress() { return tmp.clo.time_speed; },
+            display() { return `${format(tmp.clo.time_speed)} / 1`; },
+            unlocked() { return hasChallenge('b', 21); },
+            group: 'relic',
+            buttonStyle() {
+                const group = tmp[this.layer].challenges[this.id].group
+                return { 'backgroundColor': tmp.b.groups[group].color, };
+            },
+        },
     },
     clickables: {
         // Bosstiary
@@ -281,7 +299,7 @@ addLayer('b', {
                     .reduce((sum, id) => D.add(sum, challengeCompletions('b', id)), D.dZero);
             },
             color: '#55CCCC',
-            rows: [],
+            rows: [3],
         },
     },
     branches: ['l'],
@@ -298,7 +316,7 @@ addLayer('b', {
         }
         if (!player.b.visible_challenges.includes('12') && D.gt(player.items.gold_nugget.amount, 0)) {
             player.b.visible_challenges.push('12');
-            doPopup('none', `${tmp.b.challenges[11].name}`, 'Boss unlocked', 5, tmp.b.color);
+            doPopup('none', `${tmp.b.challenges[12].name}`, 'Boss unlocked', 5, tmp.b.color);
         }
     },
     prestigeNotify() { return !activeChallenge('b') && [11].some(id => tmp.b.challenges[id].unlocked && !hasChallenge('b', id)); },
@@ -343,6 +361,7 @@ addLayer('b', {
                 Sends its personal guard to defeat you.`,
             challenge: 21,
         },
+        // Relics
     },
     list() { return Object.keys(layers.b.bosses).filter(boss => tmp.b.bosses[boss].unlocked ?? true); },
 });

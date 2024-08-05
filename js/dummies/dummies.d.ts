@@ -1509,7 +1509,7 @@ type ores = 'stone' | 'copper' | 'tin';
 
 type drop_sources = `kill:${monsters}` | 'kill:any' | 'crafting' | `mining:${ores}` | `mining:any` | 'shop';
 type drop_types = 'kill' | 'crafting' | 'mining';
-type categories = 'materials' | 'equipment' | 'mining' | 'shop' |
+type categories = 'materials' | 'equipment' | 'mining' | 'shop' | 'craftable' |
     monsters;
 
 type Layers = {
@@ -1529,6 +1529,11 @@ type Layers = {
                 owned(): number[]
             }
         }
+    }
+    clo: Layer<'clo'> & {
+        upgrades: { [id: string]: CurrencyUpgrade<any, 'clo'> & { kills: Decimal, show(): boolean } }
+        time_speed(layer: keyof Layers): Decimal
+        //todo apply time speed everywhere :(
     }
     // Row 0
     xp: Layer<'xp'> & {
@@ -1638,6 +1643,7 @@ type Layers = {
             color: string
             total(): Decimal
             remaining(): Decimal
+            skills(): Decimal
         }
     }
     c: Layer<'c'> & {
@@ -1779,6 +1785,7 @@ type Player = {
     ach: LayerData & {
         pool_balls: number[]
     }
+    clo: LayerData & {}
     // Row 0
     xp: LayerData & {
         selected: monsters

@@ -143,7 +143,7 @@ addLayer('l', {
 
                 return text;
             },
-            effect() { return D.div(player.l.upgrades.length, 4).add(1); },
+            effect() { return D.div(tmp.l.skill_points.skills, 4).add(1); },
             effectDisplay() { return `*${format(upgradeEffect(this.layer, this.id))}`; },
             style() {
                 let style = {};
@@ -299,6 +299,13 @@ addLayer('l', {
             }).reduce((sum, cost) => D.add(sum, cost), D.dZero);
 
             return D.minus(this.total(), spent);
+        },
+        skills() {
+            let skills = D(player.l.upgrades.length);
+
+            if (hasUpgrade('clo', 21)) skills = skills.add(1);
+
+            return skills;
         },
     },
     onPrestige(gain) {

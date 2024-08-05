@@ -1,5 +1,6 @@
 'use strict';
 
+//todo craftable filter
 addLayer('c', {
     name: 'crafting',
     row: 1,
@@ -123,6 +124,52 @@ addLayer('c', {
     },
     clickables: {
         ...crafting_toggles(),
+        'crafting_craftable': {
+            canClick() { return true; },
+            onClick() {
+                const vis = player.c.visiblity,
+                    /** @type {categories} */
+                    cat = 'craftable';
+
+                vis.crafting[cat] = {
+                    'show': 'hide',
+                    'hide': 'ignore',
+                    'ignore': 'show',
+                }[vis.crafting[cat] ??= 'ignore'];
+            },
+            display() {
+                const vis = player.c.visiblity,
+                    /** @type {categories} */
+                    cat = 'craftable',
+                    name = 'Craftable';
+
+                let visibility = {
+                    'show': 'Shown',
+                    'hide': 'Hidden',
+                    'ignore': 'Ignored',
+                }[vis.crafting[cat] ??= 'ignore'];
+
+                return `<span style="font-size:1.5em;">${name}</span><br>${visibility}`;
+            },
+            style: {
+                'backgroundColor'() {
+                    const vis = player.c.visiblity,
+                        /** @type {categories} */
+                        cat = 'craftable',
+                        color = tmp.c.color;
+
+                    switch (vis.crafting[cat]) {
+                        case 'show':
+                            return color;
+                        case 'hide':
+                            return rgb_negative(color);
+                        case 'ignore':
+                            return rgb_grayscale(color);
+                    }
+                },
+            },
+            unlocked: true,
+        },
     },
     crafting: {
         max() { return D.dTen; },
@@ -299,8 +346,8 @@ addLayer('c', {
 
                 /** @type {[items, Decimal][]} */
                 let costs = [
-                    ['copper_ore', D.times(9, count)],
-                    ['tin_ore', D.times(3, count)],
+                    ['copper_ore', D.times(6, count)],
+                    ['tin_ore', D.times(2, count)],
                 ];
 
                 if (hasUpgrade('m', 34)) costs.forEach(([, c], i) => costs[i][1] = D.div(c, upgradeEffect('m', 34)));
@@ -316,8 +363,8 @@ addLayer('c', {
             },
             formulas: {
                 consumes: {
-                    'copper_ore': '9 * count',
-                    'tin_ore': '3 * count',
+                    'copper_ore': '6 * count',
+                    'tin_ore': '2 * count',
                 },
                 produces: {
                     'bronze_blend': 'count',
@@ -666,7 +713,7 @@ addLayer('c', {
 
                 return [
                     ['bone', D.sumGeometricSeries(count, 5, 1.8, all)],
-                    ['stone', D.sumGeometricSeries(count, 20, 2, all)],
+                    ['stone', D.sumGeometricSeries(count, 12, 2, all)],
                 ];
             },
             produces(amount) {
@@ -687,7 +734,7 @@ addLayer('c', {
             formulas: {
                 consumes: {
                     'bone': '5 * 1.8 ^ amount',
-                    'stone': '20 * 2 ^ amount',
+                    'stone': '12 * 2 ^ amount',
                 },
                 produces: {
                     'stone_mace': 'amount',
@@ -706,9 +753,9 @@ addLayer('c', {
                     all = crafting_default_all_time(this.id, all_time);
 
                 return [
-                    ['bone', D.sumGeometricSeries(count, 9, 1.8, all)],
+                    ['bone', D.sumGeometricSeries(count, 6, 1.8, all)],
                     ['slime_goo', D.sumGeometricSeries(count, 15, 1.8, all)],
-                    ['copper_ore', D.sumGeometricSeries(count, 20, 1.5, all)],
+                    ['copper_ore', D.sumGeometricSeries(count, 12, 1.5, all)],
                 ];
             },
             produces(amount) {
@@ -728,9 +775,9 @@ addLayer('c', {
             },
             formulas: {
                 consumes: {
-                    'bone': '9 * 1.8 ^ amount',
+                    'bone': '6 * 1.8 ^ amount',
                     'slime_goo': '15 * 1.8 ^ amount',
-                    'copper_ore': '20 * 1.5 ^ amount',
+                    'copper_ore': '12 * 1.5 ^ amount',
                 },
                 produces: {
                     'copper_pick': 'amount',
@@ -749,8 +796,8 @@ addLayer('c', {
                     all = crafting_default_all_time(this.id, all_time);
 
                 return [
-                    ['copper_ore', D.sumGeometricSeries(count, 10, 1.5, all)],
-                    ['tin_ore', D.sumGeometricSeries(count, 20, 1.25, all)],
+                    ['copper_ore', D.sumGeometricSeries(count, 8, 1.5, all)],
+                    ['tin_ore', D.sumGeometricSeries(count, 12, 1.25, all)],
                 ];
             },
             produces(amount) {
@@ -770,8 +817,8 @@ addLayer('c', {
             },
             formulas: {
                 consumes: {
-                    'copper_ore': '10 * 1.5 ^ amount',
-                    'tin_ore': '20 * 1.25 ^ amount',
+                    'copper_ore': '8 * 1.5 ^ amount',
+                    'tin_ore': '12 * 1.25 ^ amount',
                 },
                 produces: {
                     'tin_cache': 'amount',
@@ -790,8 +837,8 @@ addLayer('c', {
                     all = crafting_default_all_time(this.id, all_time);
 
                 return [
-                    ['copper_ore', D.sumGeometricSeries(count, 25, 1.5, all)],
-                    ['bronze_blend', D.sumGeometricSeries(count, 10, 1.1, all)],
+                    ['copper_ore', D.sumGeometricSeries(count, 24, 1.5, all)],
+                    ['bronze_blend', D.sumGeometricSeries(count, 8, 1.1, all)],
                 ];
             },
             produces(amount) {
@@ -811,8 +858,8 @@ addLayer('c', {
             },
             formulas: {
                 consumes: {
-                    'copper_ore': '25 * 1.5 ^ amount',
-                    'bronze_blend': '10 * 1.1 ^ amount',
+                    'copper_ore': '24 * 1.5 ^ amount',
+                    'bronze_blend': '8 * 1.1 ^ amount',
                 },
                 produces: {
                     'bronze_cart': 'amount',
@@ -891,7 +938,7 @@ addLayer('c', {
     shouldNotify() {
         return canBuyBuyable('c', 11) ||
             Object.values(tmp.c.recipes).filter(rec => (rec.unlocked ?? true) &&
-                rec.categories.includes('equipment') && crafting_can(rec.id, D.dOne)).length;
+                rec.categories.includes('equipment') && crafting_can(rec.id, D.dOne) && D.lte(player.c.recipes[rec.id].making, 0)).length;
     },
     nodeStyle: {
         'backgroundColor'() {

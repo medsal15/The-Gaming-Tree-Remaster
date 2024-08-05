@@ -1,3 +1,4 @@
+//todo lower mining numbers
 /**
  * @type {{[id in items]: Item<id>}}
  */
@@ -431,7 +432,9 @@ const item_list = {
         },
         categories: ['equipment', 'slime'],
         effect(amount) {
-            const x = D(amount ?? player.items[this.id].amount);
+            let x = D(amount ?? player.items[this.id].amount);
+
+            if (hasChallenge('b', 21)) x = x.add(1);
 
             let luck, core_chance;
 
@@ -775,8 +778,8 @@ const item_list = {
         row: 0,
         sources: {
             range() {
-                let min = D(5),
-                    max = D(15);
+                let min = D(1),
+                    max = D(4);
 
                 min = D.times(min, tmp.m.modifiers.range.mult);
                 max = D.times(max, tmp.m.modifiers.range.mult);
@@ -804,8 +807,8 @@ const item_list = {
         row: 0,
         sources: {
             range() {
-                let min = D(3),
-                    max = D(10);
+                let min = D(1),
+                    max = D(4);
 
                 min = D.times(min, tmp.m.modifiers.range.mult);
                 max = D.times(max, tmp.m.modifiers.range.mult);
@@ -834,7 +837,7 @@ const item_list = {
         sources: {
             range() {
                 let min = D(1),
-                    max = D(5);
+                    max = D(2);
 
                 min = D.times(min, tmp.m.modifiers.range.mult);
                 max = D.times(max, tmp.m.modifiers.range.mult);
@@ -939,7 +942,7 @@ const item_list = {
         color() {
             const high = [0xFF, 0xAA, 0x11],
                 low = [0x11, 0xFF, 0xAA],
-                progress = D.minus(1, item_effect(this.id).decay).toNumber();
+                progress = D.minus(2, D.log10(item_effect(this.id).decay)).toNumber();
 
             return `#${color_between(low, high, progress).map(n => n.toString(16).padStart(2, '0')).join('')}`;
         },
@@ -1029,7 +1032,7 @@ const item_list = {
     },
     'bronze_cart': {
         id: null,
-        color: '#FFFFCC',
+        color: '#BB7744',
         name: 'bronze cart',
         grid: [3, 3],
         icon: [5, 3],
@@ -1058,7 +1061,7 @@ const item_list = {
                 const x = D(amount ?? player.items[this.id].amount),
                     effect = item_list[this.id].effect(x);
 
-                xp_drop = formatWhole(effect.xp_drop);
+                xp_drop = format(effect.xp_drop);
                 m_drop = format(effect.m_drop);
             }
 
@@ -1201,6 +1204,8 @@ function reset_items(row) {
             player.items[item].total = D.dZero;
         })
     }
+
+    updateTempData(item_list, tmp.items, funcs);
 }
 
 function setupItems() {

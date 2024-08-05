@@ -737,6 +737,8 @@ function crafting_show_recipe(recipe) {
         trecipe = tmp.c.recipes[recipe],
         vis = player.c.visiblity.crafting;
 
+    if (vis.craftable == 'show' && !crafting_can(recipe, D.dOne)) return []
+
     if (!(trecipe.unlocked ?? true) || (
         trecipe.categories.some(cat => vis[cat] == 'hide') &&
         !trecipe.categories.some(cat => vis[cat] == 'show')

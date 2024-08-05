@@ -128,7 +128,7 @@ addLayer('m', {
             effect() { return D.dOne; },
             effectDisplay() { return `+${format(upgradeEffect(this.layer, this.id))}`; },
             item: 'stone',
-            cost: D(7.5),
+            cost: D(8),
             style() {
                 if (!hasUpgrade(this.layer, this.id) && canAffordUpgrade(this.layer, this.id)) {
                     const selftmp = tmp[this.layer].upgrades[this.id];
@@ -158,7 +158,7 @@ addLayer('m', {
             effect() { return D.dTwo; },
             effectDisplay() { return `*${format(upgradeEffect(this.layer, this.id))}`; },
             item: 'copper_ore',
-            cost: D(5),
+            cost: D(4),
             style() {
                 if (!hasUpgrade(this.layer, this.id) && canAffordUpgrade(this.layer, this.id)) {
                     const selftmp = tmp[this.layer].upgrades[this.id];
@@ -188,7 +188,7 @@ addLayer('m', {
             effect() { return D(1.5); },
             effectDisplay() { return `*${format(upgradeEffect(this.layer, this.id))}`; },
             item: 'tin_ore',
-            cost: D(2.5),
+            cost: D(2),
             style() {
                 if (!hasUpgrade(this.layer, this.id) && canAffordUpgrade(this.layer, this.id)) {
                     const selftmp = tmp[this.layer].upgrades[this.id];
@@ -229,7 +229,7 @@ addLayer('m', {
             },
             effectDisplay() { return `*${format(upgradeEffect(this.layer, this.id)[player.m.target])}`; },
             item: 'bronze_blend',
-            cost: D(1.5),
+            cost: D(1),
             style() {
                 if (!hasUpgrade(this.layer, this.id) && canAffordUpgrade(this.layer, this.id)) {
                     const selftmp = tmp[this.layer].upgrades[this.id];
@@ -271,7 +271,7 @@ addLayer('m', {
             },
             show() { return hasUpgrade(this.layer, this.id - 10); },
             item: 'stone',
-            cost: D(50),
+            cost: D(32),
             style() {
                 if (!tmp[this.layer].upgrades[this.id].show) {
                     return {
@@ -320,7 +320,7 @@ addLayer('m', {
             },
             show() { return hasUpgrade(this.layer, this.id - 10); },
             item: 'copper_ore',
-            cost: D(15),
+            cost: D(16),
             style() {
                 if (!tmp[this.layer].upgrades[this.id].show) {
                     return {
@@ -376,7 +376,7 @@ addLayer('m', {
             },
             show() { return hasUpgrade(this.layer, this.id - 10); },
             item: 'tin_ore',
-            cost: D(5),
+            cost: D(4),
             style() {
                 if (!tmp[this.layer].upgrades[this.id].show) {
                     return {
@@ -432,7 +432,7 @@ addLayer('m', {
             },
             show() { return hasUpgrade(this.layer, this.id - 10); },
             item: 'bronze_blend',
-            cost: D(2.5),
+            cost: D(2),
             style() {
                 if (!tmp[this.layer].upgrades[this.id].show) {
                     return {
@@ -483,7 +483,7 @@ addLayer('m', {
             },
             show() { return hasUpgrade(this.layer, this.id - 10); },
             item: 'stone',
-            cost: D(500),
+            cost: D(256),
             style() {
                 if (!tmp[this.layer].upgrades[this.id].show) {
                     return {
@@ -534,7 +534,7 @@ addLayer('m', {
             },
             show() { return hasUpgrade(this.layer, this.id - 10); },
             item: 'copper_ore',
-            cost: D(50),
+            cost: D(32),
             style() {
                 if (!tmp[this.layer].upgrades[this.id].show) {
                     return {
@@ -585,7 +585,7 @@ addLayer('m', {
             },
             show() { return hasUpgrade(this.layer, this.id - 10); },
             item: 'tin_ore',
-            cost: D(25),
+            cost: D(16),
             style() {
                 if (!tmp[this.layer].upgrades[this.id].show) {
                     return {
@@ -634,7 +634,7 @@ addLayer('m', {
             },
             show() { return hasUpgrade(this.layer, this.id - 10); },
             item: 'bronze_blend',
-            cost: D(7.5),
+            cost: D(8),
             style() {
                 if (!tmp[this.layer].upgrades[this.id].show) {
                     return {

@@ -777,6 +777,8 @@ addLayer('xp', {
 
                 mult = mult.times(item_effect('slime_knife').damage);
 
+                if (hasChallenge('b', 21)) mult = mult.times(2);
+
                 return mult;
             },
         },
