@@ -384,6 +384,21 @@ addLayer('ach', {
             },
             unlocked() { return hasAchievement(this.layer, this.id); },
         },
+        24: {
+            name: 'No Stone Left Unturned',
+            tooltip: 'Get the odds of mining stone lower than tin',
+            done() { return D.gte(tmp.m.ores.tin.weight, tmp.m.ores.stone.weight); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Secret Completed!', 3, tmp.ach.categories.secret.color); },
+            style() {
+                let style = {};
+
+                style['background-color'] = tmp.c.color;
+                style['border'] = `solid 3px ${tmp.ach.categories.secret.color}`;
+
+                return style;
+            },
+            unlocked() { return hasAchievement(this.layer, this.id); },
+        },
         61: {
             // Not implemented
             name: 'Cueless',

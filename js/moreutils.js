@@ -331,8 +331,14 @@ function bestiary_content(monster) {
         ['display-text', `Gives ${resourceColor(tmp.xp.color, format(tmonst.experience))} XP on kill`],
         'blank',
         ['display-text', `Health: ${format(player.xp.monsters[monster].health)} / ${format(tmonst.health)}`],
-        'blank',
     ];
+
+    if (D.gt(tmonst.damage_per_second, 0)) lines.push(['display-text', `Damage per second: ${format(tmonst.damage_per_second)}`]);
+    if (inChallenge('b', 31)) {
+        lines.push(['display-text', `Damage: ${format(tmp.dea.monsters[monster].damage)}`]);
+    }
+
+    lines.push('blank');
 
     /** @type {TabFormatEntries<'xp'>[]} */
     const upgrade_lines = [];
@@ -426,6 +432,8 @@ function bestiary_content(monster) {
  * @returns {ores}
  */
 function random_ore() {
+    if (!tmp.m) return 'stone';
+
     /** @type {[ores, Decimal][]} */
     const list = Object.values(tmp.m.ores)
         .filter(ore => (ore.unlocked ?? true) && D.gt(ore.weight, 0))

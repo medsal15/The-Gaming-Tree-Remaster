@@ -1325,7 +1325,7 @@ declare class TreeNode {
     position?: number
 }
 
-declare class Upgrade<L extends string> {
+declare class Upgrade<L extends keyof Layer> {
     /**
      * **assigned automagically**
      *
@@ -1424,7 +1424,7 @@ declare class Upgrade<L extends string> {
      */
     currencyDisplayName?: string
 }
-declare class CurrencyUpgrade<T, L extends string> extends Upgrade<L> {
+declare class CurrencyUpgrade<T, L extends keyof Layer> extends Upgrade<L> {
     /**
      * The internal name for that currency.
      */
@@ -1512,6 +1512,8 @@ type drop_types = 'kill' | 'crafting' | 'mining';
 type categories = 'materials' | 'equipment' | 'mining' | 'shop' | 'craftable' |
     monsters;
 
+type death_resources = 'karma' | 'souls';
+
 type Layers = {
     // Side
     ach: Layer<'ach'> & {
@@ -1527,6 +1529,45 @@ type Layers = {
                 rows: number[]
                 visible(): number[]
                 owned(): number[]
+            }
+        }
+    }
+    dea: Layer<'dea'> & {
+        upgrades: { [id: string]: CurrencyUpgrade<Player['dea'], 'dea'> }
+        monsters: { [monster in monsters]: {
+            private _id: monster | null
+            readonly id: monster
+            damage(): Decimal
+            damage_per_second(): Decimal
+        } }
+        player: {
+            health(): Decimal
+            regen(): Decimal
+            /** How many times the player survives fatal damage */
+            survives(): Decimal
+        }
+        modifiers: {
+            damage: {
+                base(): Decimal
+                mult(): Decimal
+            }
+            health: {
+                base(): Decimal
+                mult(): Decimal
+            }
+            regen: {
+                base(): Decimal
+                mult(): Decimal
+            }
+        }
+        currencies: {
+            [res in death_resources]: {
+                private _id: res | null
+                readonly id: res
+                color: string
+                name: Computable<string>
+                reset_gain(): Decimal
+                formula: Computable<string>
             }
         }
     }
@@ -1563,6 +1604,10 @@ type Layers = {
             damage: {
                 base(): Decimal
                 mult(): Decimal
+                /** Passive damage multiplier */
+                passive(): Decimal
+                /** Passive damage multiplier to selected enemy */
+                passive_active(): Decimal
             }
             xp: {
                 base(): Decimal
@@ -1780,6 +1825,10 @@ type Player = {
     ach: LayerData & {
         pool_balls: number[]
     }
+    dea: LayerData & {
+        health: Decimal
+        survives: Decimal
+    } & { [res in death_resources]: Decimal }
     // Row 0
     xp: LayerData & {
         selected: monsters

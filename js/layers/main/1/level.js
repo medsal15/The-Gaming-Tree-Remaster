@@ -377,8 +377,6 @@ addLayer('l', {
         skills() {
             let skills = D(player.l.upgrades.length);
 
-            if (hasUpgrade('clo', 21)) skills = skills.add(1);
-
             return skills;
         },
     },
@@ -392,7 +390,13 @@ addLayer('l', {
         if (hasUpgrade('l', 32)) mult = mult.div(upgradeEffect('l', 32));
         if (hasUpgrade('l', 34)) mult = mult.div(upgradeEffect('l', 34));
 
+        if (hasUpgrade('xp', 42)) mult = mult.div(upgradeEffect('xp', 42));
+        if (hasUpgrade('xp', 61)) mult = mult.div(upgradeEffect('xp', 61));
+
         if (hasUpgrade('m', 31)) mult = mult.div(upgradeEffect('m', 31));
+
+        if (hasUpgrade('dea', 13)) mult = mult.div(upgradeEffect('dea', 13));
+        if (hasUpgrade('dea', 33)) mult = mult.div(upgradeEffect('dea', 33));
 
         mult = mult.div(item_effect('slime_injector').level);
         mult = mult.div(item_effect('bone_slate').level);

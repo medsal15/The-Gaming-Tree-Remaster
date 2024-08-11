@@ -17,14 +17,14 @@ addLayer('m', {
         const sum = tmp.m.items
             .reduce(
                 /**@param{Decimal}sum @param{items}item*/
-                (sum, item) => D.add(sum, player.items[item].amount)
-                , D.dZero);
+                (sum, item) => D.add(sum, player.items[item].amount),
+                D.dZero);
         return `${formatWhole(player.items.stone.amount)} stone<br>${formatWhole(sum)} ores`;
     },
     startData() {
         return {
             lore: 'stone',
-            target: 'stone',
+            target: random_ore(),
             previous: 'stone',
             ores: Object.fromEntries(Object.keys(layers.m.ores).map(ore => [ore, {
                 broken: D.dZero,
@@ -530,7 +530,7 @@ addLayer('m', {
             effect() { return D.add(player.m.upgrades.length, 2).root(2.5); },
             effectDisplay() {
                 if (!tmp[this.layer].upgrades[this.id].show) return '';
-                return `*${format(tmp.m.ores[player.m.target].damage_per_second)}`;
+                return `*${format(upgradeEffect(this.layer, this.id))}`;
             },
             show() { return hasUpgrade(this.layer, this.id - 10); },
             item: 'copper_ore',
@@ -696,6 +696,8 @@ addLayer('m', {
                 ore.health = D.minus(ore.health, damage);
             },
             canClick() {
+                if (inChallenge('b', 31) && D.lte(player.dea.health, 0)) return false;
+
                 const target = player.m.target;
 
                 return D.gt(player.m.ores[target].health, 0);
@@ -871,10 +873,16 @@ addLayer('m', {
 
                 if (hasAchievement('ach', 54)) base = base.add(achievementEffect('ach', 54));
 
+                if (hasUpgrade('dea', 12)) base = base.add(upgradeEffect('dea', 12));
+
                 return base;
             },
             mult() {
                 let mult = D.dOne;
+
+                if (hasUpgrade('xp', 41)) mult = mult.times(upgradeEffect('xp', 41));
+                if (hasUpgrade('xp', 53)) mult = mult.times(upgradeEffect('xp', 53));
+                if (hasUpgrade('xp', 62)) mult = mult.times(upgradeEffect('xp', 62));
 
                 if (hasUpgrade('m', 12)) mult = mult.times(upgradeEffect('m', 12));
 
@@ -887,6 +895,8 @@ addLayer('m', {
         range: {
             mult() {
                 let mult = D.dOne;
+
+                if (hasUpgrade('xp', 63)) mult = mult.times(upgradeEffect('xp', 63));
 
                 if (hasUpgrade('m', 13)) mult = mult.times(upgradeEffect('m', 13));
                 if (hasUpgrade('m', 14)) mult = mult.times(upgradeEffect('m', 14)[player.m.target]);
@@ -901,7 +911,15 @@ addLayer('m', {
             },
         },
         health: {
-            mult() { return D.dOne; },
+            mult() {
+                let mult = D.dOne;
+
+                if (hasUpgrade('xp', 43)) mult = mult.times(upgradeEffect('xp', 43));
+
+                if (hasUpgrade('dea', 31)) mult = mult.div(upgradeEffect('dea', 31));
+
+                return mult;
+            },
         },
     },
     broken: {
@@ -943,6 +961,8 @@ addLayer('m', {
             });
     },
     update(diff) {
+        if (inChallenge('b', 31) && D.lte(player.dea.health, 0)) return;
+
         Object.values(tmp.m.ores)
             .forEach(ore => {
                 const pore = player.m.ores[ore.id];

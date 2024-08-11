@@ -1,6 +1,5 @@
 'use strict';
 
-//todo craftable filter
 addLayer('c', {
     name: 'crafting',
     row: 1,
@@ -82,6 +81,8 @@ addLayer('c', {
         if (hasAchievement('ach', 44)) mult = mult.add(achievementEffect('ach', 44));
         if (hasAchievement('ach', 55)) mult = mult.add(achievementEffect('ach', 55));
 
+        if (hasUpgrade('dea', 22)) mult = mult.times(upgradeEffect('dea', 22));
+
         mult = mult.times(item_effect('slime_die').luck);
         mult = mult.times(item_effect('magic_slime_ball').luck);
 
@@ -102,7 +103,11 @@ addLayer('c', {
             cost(x) {
                 if (tmp[this.layer].deactivated) x = D.dZero;
 
-                return D.add(x, 2).times(100);
+                let cost = D.add(x, 2).times(100);
+
+                if (hasUpgrade('dea', 32)) cost = cost.div(upgradeEffect('dea', 32));
+
+                return cost;
             },
             canAfford() { return D.gte(tmp.xp.kill.total, tmp[this.layer].buyables[this.id].cost); },
             effect(x) {
@@ -131,8 +136,7 @@ addLayer('c', {
                     cat = 'craftable';
 
                 vis.crafting[cat] = {
-                    'show': 'hide',
-                    'hide': 'ignore',
+                    'show': 'ignore',
                     'ignore': 'show',
                 }[vis.crafting[cat] ??= 'ignore'];
             },
@@ -144,7 +148,6 @@ addLayer('c', {
 
                 let visibility = {
                     'show': 'Shown',
-                    'hide': 'Hidden',
                     'ignore': 'Ignored',
                 }[vis.crafting[cat] ??= 'ignore'];
 
@@ -160,8 +163,6 @@ addLayer('c', {
                     switch (vis.crafting[cat]) {
                         case 'show':
                             return color;
-                        case 'hide':
-                            return rgb_negative(color);
                         case 'ignore':
                             return rgb_grayscale(color);
                     }

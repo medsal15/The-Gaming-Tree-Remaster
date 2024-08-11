@@ -2,7 +2,7 @@
 
 const BOSS_SIZES = {
     width: 2,
-    height: 2,
+    height: 3,
 };
 
 addLayer('b', {
@@ -149,8 +149,8 @@ addLayer('b', {
             name: 'Slime Sovereign',
             challengeDescription: `Fight the Slime Sovereign and anger the slimes.<br>\
                 Double slime health and experience, slime items effects are boosted.`,
-            rewardDescription: `+50% slime experience, slime items effects boost is kept, unlock a new enemy, and XP upgrades stay unlocked`,
             goalDescription: 'Kill 490 slimes',
+            rewardDescription: `+50% slime experience, slime items effects boost is kept, unlock a new enemy, and XP upgrades stay unlocked`,
             canComplete() { return D.gte(tmp.xp.kill.total, 490); },
             progress() { return D.div(tmp.xp.kill.total, 490); },
             display() { return `${formatWhole(tmp.xp.kill.total)} / ${formatWhole(490)} kills`; },
@@ -166,8 +166,8 @@ addLayer('b', {
             name: 'Captain Goldtooth',
             challengeDescription: `Fight Captain Goldtooth's pirate army.<br>
                 Monsters drop coins instead of items, which must be purchased at Captain Goldtooth's shop. Luck applies to coin gain.`,
-            rewardDescription: `Keep Captain Goldtooth's shop unlocked, skeletons have a chance to drop gold nuggets.`,
             goalDescription: 'Spend ???',
+            rewardDescription: `Keep Captain Goldtooth's shop unlocked, skeletons have a chance to drop gold nuggets.`,
             canComplete() { return false; },
             progress() { return D.dZero; },
             display() { return `${formatWhole(tmp.s.coins.spent)} / ???`; },
@@ -183,8 +183,8 @@ addLayer('b', {
             name: 'Slime Monarch',
             challengeDescription: `Fight the Slime Monarch and anger the slimes, again.<br>\
                 Double slime health and half experience, slime items effects are nerfed.`,
-            rewardDescription: `Double damage, slime die level is increased by 1`,
             goalDescription: 'Kill 360 slimes',
+            rewardDescription: `Double damage, slime die level is increased by 1`,
             canComplete() { return D.gte(player.xp.monsters.slime.kills, 360); },
             progress() { return D.div(player.xp.monsters.slime.kills, 360); },
             display() { return `${formatWhole(player.xp.monsters.slime.kills)} / ${formatWhole(360)} kills`; },
@@ -196,7 +196,21 @@ addLayer('b', {
             },
         },
         // Relics
-        //todo 31: ???
+        31: {
+            name: 'Thanatos',
+            challengeDescription: `Enemies can strike back and kill you.`,
+            goalDescription: 'Kill 500 enemies',
+            rewardDescription: 'Unlock kill upgrades',
+            canComplete() { return D.gte(tmp.xp.kill.total, 500); },
+            progress() { return D.div(tmp.xp.kill.total, 500); },
+            display() { return `${formatWhole(tmp.xp.kill.total)} / 500`; },
+            unlocked() { return hasChallenge('b', 21); },
+            group: 'relic',
+            buttonStyle() {
+                const group = tmp[this.layer].challenges[this.id].group
+                return { 'backgroundColor': tmp.b.groups[group].color, };
+            },
+        },
     },
     clickables: {
         // Bosstiary
@@ -345,6 +359,17 @@ addLayer('b', {
             challenge: 21,
         },
         // Relics
+        'thanatos': {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.b.bosses).find(([, r]) => r == this)[0]; },
+            unlocked() { return tmp.b.challenges[31].unlocked; },
+            name: 'thanatos',
+            position: [0, 2],
+            lore: `An ancient god that presides over death.<br>
+                Unhappy over the large amount of souls sent over to him.<br>
+                Do you understand how much paperwork has to be filled for each soul?`,
+            challenge: 31,
+        },
     },
     list() { return Object.keys(layers.b.bosses).filter(boss => tmp.b.bosses[boss].unlocked ?? true); },
 });

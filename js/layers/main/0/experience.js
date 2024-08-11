@@ -88,6 +88,7 @@ addLayer('xp', {
                     return `Attack for ${format(damage)} damage`;
                 }],
                 ['display-text', 'Hold to click 5 times per second'],
+                ['bar', 'player_health'],
                 'blank',
                 ['display-text', () => {
                     if (D.lte(tmp.c.chance_multiplier, 0)) return '';
@@ -114,9 +115,19 @@ addLayer('xp', {
                 }],
                 ['display-text', () => `You have killed ${resourceColor(tmp.xp.kill.color, formatWhole(tmp.xp.kill.total), 'font-size:1.5em;')} enemies`],
                 'blank',
-                'upgrades',
+                ['upgrades', [1, 2, 3]],
             ],
-            shouldNotify() { return canAffordLayerUpgrade('xp'); },
+            shouldNotify() { return canAffordLayerUpgrade('xp', [1, 2, 3]); },
+        },
+        'Kill Upgrades': {
+            content: [
+                ['display-text', () => `You have killed ${resourceColor(tmp.xp.kill.color, formatWhole(tmp.xp.kill.total), 'font-size:1.5em;')} enemies`],
+                'blank',
+                ['upgrades', [4, 5, 6]],
+            ],
+            shouldNotify() { return canAffordLayerUpgrade('xp', [4, 5, 6]); },
+            unlocked() { return hasChallenge('b', 31); },
+            buttonStyle() { return { borderColor: tmp.xp.kill.color }; },
         },
         'Bestiary': {
             content: [
@@ -129,6 +140,7 @@ addLayer('xp', {
         },
     },
     upgrades: {
+        // Normal
         11: {
             title: 'Larger Sword',
             kills: D.dOne,
@@ -279,7 +291,8 @@ addLayer('xp', {
                 }
 
                 let text = `Kills boost damage dealt`;
-                if (shiftDown) text += `<br>log15(experience + 15)`;
+
+                if (shiftDown) text += `<br>log15(kills + 15)`;
 
                 return text;
             },
@@ -310,6 +323,7 @@ addLayer('xp', {
                 }
 
                 let text = `Experience lowers enemy health`;
+
                 if (shiftDown) text += `<br>1.1 ^ log5(experience + 5)`;
 
                 return text;
@@ -341,6 +355,7 @@ addLayer('xp', {
                 }
 
                 let text = `Experience boosts damage dealt`;
+
                 if (shiftDown) text += `<br>log20(experience + 20)`;
 
                 return text;
@@ -391,6 +406,202 @@ addLayer('xp', {
                 return `*${format(upgradeEffect(this.layer, this.id))}`;
             },
         },
+        // Kill
+        41: {
+            title: 'Second Sword',
+            description: 'Deal +50% mining damage',
+            effect() { return D(1.5); },
+            effectDisplay() { return `*${format(upgradeEffect(this.layer, this.id))}`; },
+            cost: D(3),
+            currencyDisplayName: 'kills',
+            currencyLocation() { return tmp.xp.kill; },
+            currencyInternalName: 'total',
+            style() {
+                if (!hasUpgrade(this.layer, this.id) && canAffordUpgrade(this.layer, this.id)) {
+                    return {
+                        'backgroundColor': tmp.xp.kill.color,
+                    };
+                }
+            },
+            pay() { },
+            unlocked() { return hasChallenge('b', 31); },
+        },
+        42: {
+            title: 'Bone Recording',
+            description: 'Divide level costs by 1.5',
+            effect() { return D(1.5); },
+            effectDisplay() { return `/${format(upgradeEffect(this.layer, this.id))}`; },
+            cost: D(7),
+            currencyDisplayName: 'kills',
+            currencyLocation() { return tmp.xp.kill; },
+            currencyInternalName: 'total',
+            style() {
+                if (!hasUpgrade(this.layer, this.id) && canAffordUpgrade(this.layer, this.id)) {
+                    return {
+                        'backgroundColor': tmp.xp.kill.color,
+                    };
+                }
+            },
+            pay() { },
+            unlocked() { return hasChallenge('b', 31); },
+        },
+        43: {
+            title: 'Hardness Down',
+            description: 'Ores lose a third of their health',
+            effect() { return D(2 / 3); },
+            effectDisplay() { return `*${format(upgradeEffect(this.layer, this.id))}`; },
+            cost: D(12),
+            currencyDisplayName: 'kills',
+            currencyLocation() { return tmp.xp.kill; },
+            currencyInternalName: 'total',
+            style() {
+                if (!hasUpgrade(this.layer, this.id) && canAffordUpgrade(this.layer, this.id)) {
+                    return {
+                        'backgroundColor': tmp.xp.kill.color,
+                    };
+                }
+            },
+            pay() { },
+            unlocked() { return hasChallenge('b', 31); },
+        },
+        51: {
+            title: 'Bloodstone',
+            description() {
+                let text = `Kills boost stone gain`;
+
+                if (shiftDown) text += `<br>log10(kills + 15)`;
+
+                return text;
+            },
+            effect() { return D.add(tmp.xp.kill.total, 15).log10(); },
+            effectDisplay() { return `*${format(upgradeEffect(this.layer, this.id))}`; },
+            cost: D(25),
+            currencyDisplayName: 'kills',
+            currencyLocation() { return tmp.xp.kill; },
+            currencyInternalName: 'total',
+            style() {
+                if (!hasUpgrade(this.layer, this.id) && canAffordUpgrade(this.layer, this.id)) {
+                    return {
+                        'backgroundColor': tmp.xp.kill.color,
+                    };
+                }
+            },
+            pay() { },
+            unlocked() { return hasChallenge('b', 31); },
+        },
+        52: {
+            title: 'Pitfall',
+            description: 'Passively deal 25% of your damage to all enemies',
+            effect() { return D(.1); },
+            effectDisplay() { return `${format(tmp.xp.monsters[player.xp.selected].damage_per_second)} /s`; },
+            cost: D(40),
+            currencyDisplayName: 'kills',
+            currencyLocation() { return tmp.xp.kill; },
+            currencyInternalName: 'total',
+            style() {
+                if (!hasUpgrade(this.layer, this.id) && canAffordUpgrade(this.layer, this.id)) {
+                    return {
+                        'backgroundColor': tmp.xp.kill.color,
+                    };
+                }
+            },
+            pay() { },
+            unlocked() { return hasChallenge('b', 31); },
+        },
+        53: {
+            title: 'Deadly Pick',
+            description() {
+                let text = `Kills boost mining damage`;
+
+                if (shiftDown) text += `<br>log15(kills + 15)`;
+
+                return text;
+            },
+            effect() { return D.add(tmp.xp.kill.total, 15).log(15); },
+            effectDisplay() { return `*${format(upgradeEffect(this.layer, this.id))}`; },
+            cost: D(55),
+            currencyDisplayName: 'kills',
+            currencyLocation() { return tmp.xp.kill; },
+            currencyInternalName: 'total',
+            style() {
+                if (!hasUpgrade(this.layer, this.id) && canAffordUpgrade(this.layer, this.id)) {
+                    return {
+                        'backgroundColor': tmp.xp.kill.color,
+                    };
+                }
+            },
+            pay() { },
+            unlocked() { return hasChallenge('b', 31); },
+        },
+        61: {
+            title: 'Lowered Levels',
+            description() {
+                let text = `Experience lowers level costs`;
+
+                if (shiftDown) text += `<br>1.1 ^ log5(experience + 5)`;
+
+                return text;
+            },
+            effect() { return D.add(player.xp.points, 5).log(5).pow_base(1.1); },
+            effectDisplay() { return `/${format(upgradeEffect(this.layer, this.id))}`; },
+            cost: D(100),
+            currencyDisplayName: 'kills',
+            currencyLocation() { return tmp.xp.kill; },
+            currencyInternalName: 'total',
+            style() {
+                if (!hasUpgrade(this.layer, this.id) && canAffordUpgrade(this.layer, this.id)) {
+                    return {
+                        'backgroundColor': tmp.xp.kill.color,
+                    };
+                }
+            },
+            pay() { },
+            unlocked() { return hasChallenge('b', 31); },
+        },
+        62: {
+            title: 'Soft Spot',
+            description() {
+                let text = `Experience boosts mining damage`;
+
+                if (shiftDown) text += `<br>log20(experience + 20)`;
+
+                return text;
+            },
+            effect() { return D.add(player.xp.points, 20).log(20); },
+            effectDisplay() { return `*${format(upgradeEffect(this.layer, this.id))}`; },
+            cost: D(125),
+            currencyDisplayName: 'kills',
+            currencyLocation() { return tmp.xp.kill; },
+            currencyInternalName: 'total',
+            style() {
+                if (!hasUpgrade(this.layer, this.id) && canAffordUpgrade(this.layer, this.id)) {
+                    return {
+                        'backgroundColor': tmp.xp.kill.color,
+                    };
+                }
+            },
+            pay() { },
+            unlocked() { return hasChallenge('b', 31); },
+        },
+        63: {
+            title: 'Power in Riches',
+            description: 'Double mining gains',
+            effect() { return D.dTwo; },
+            effectDisplay() { return `*${format(upgradeEffect(this.layer, this.id))}`; },
+            cost: D(175),
+            currencyDisplayName: 'kills',
+            currencyLocation() { return tmp.xp.kill; },
+            currencyInternalName: 'total',
+            style() {
+                if (!hasUpgrade(this.layer, this.id) && canAffordUpgrade(this.layer, this.id)) {
+                    return {
+                        'backgroundColor': tmp.xp.kill.color,
+                    };
+                }
+            },
+            pay() { },
+            unlocked() { return hasChallenge('b', 31); },
+        },
     },
     bars: {
         health: {
@@ -436,6 +647,45 @@ addLayer('xp', {
             baseStyle: { 'border-radius': 0, },
             borderStyle: { 'border-radius': 0, },
         },
+        player_health: {
+            direction: RIGHT,
+            progress() { return D.div(player.dea.health, tmp.dea.player.health); },
+            display() {
+                let regen = '';
+                if (D.gt(tmp.dea.player.regen, 0)) regen = ` (+${format(tmp.dea.player.regen)} /s)`;
+
+                return `${format(player.dea.health)} / ${format(tmp.dea.player.health)}${regen}`;
+            },
+            height: 40,
+            width: 320,
+            fillStyle() {
+                const prog = D.min(tmp[this.layer].bars[this.id].progress, 1).max(0),
+                    /** @type {[DecimalSource, number[]][]} */
+                    colors = [
+                        [0, [0x77, 0x00, 0x00]],
+                        [.5, [0x66, 0xCC, 0x00]],
+                        [1, [0x00, 0xAA, 0x00]],
+                    ],
+                    i = Math.max(colors.findIndex(([n]) => D.gte(n, prog)), 0);
+                let backgroundColor;
+                if (i == 0) {
+                    backgroundColor = `#${colors[i][1].map(n => n.toString(16).padStart(2, '0')).join('')}`;
+                } else {
+                    const min = colors[i - 1],
+                        max = colors[i],
+                        diff = D.minus(max[0], min[0]),
+                        fraction = D.minus(prog, min[0]).div(diff).clamp(0, 1).toNumber();
+
+                    backgroundColor = `#${Array.from(
+                        { length: 3 },
+                        (_, i) => Math.floor(max[1][i] * fraction + min[1][i] * (1 - fraction))
+                            .toString(16).padStart(2, '0'))
+                        .join('')}`;
+                }
+                return { backgroundColor, };
+            },
+            unlocked() { return inChallenge('b', 31); },
+        },
     },
     clickables: {
         // Fight
@@ -477,6 +727,16 @@ addLayer('xp', {
                     monster = player.xp.monsters[selected];
 
                 monster.health = D.minus(monster.health, damage);
+
+                if (inChallenge('b', 31)) {
+                    const damage = tmp.dea.monsters[selected].damage;
+                    player.dea.health = D.minus(player.dea.health, damage);
+
+                    if (D.lte(player.dea.health, 0) && D.lt(player.dea.survives, tmp.dea.player.survives)) {
+                        player.dea.health = D.dOne;
+                        player.dea.survives = D.add(player.dea.survives, 1);
+                    }
+                }
             },
             onHold() {
                 const selected = player.xp.selected,
@@ -485,8 +745,20 @@ addLayer('xp', {
                     monster = player.xp.monsters[selected];
 
                 monster.health = D.minus(monster.health, damage);
+
+                if (inChallenge('b', 31)) {
+                    const damage = D.div(tmp.dea.monsters[selected].damage, 20 / 5);
+                    player.dea.health = D.minus(player.dea.health, damage);
+
+                    if (D.lte(player.dea.health, 0) && D.lt(player.dea.survives, tmp.dea.player.survives)) {
+                        player.dea.health = D.dOne;
+                        player.dea.survives = D.add(player.dea.survives, 1);
+                    }
+                }
             },
             canClick() {
+                if (inChallenge('b', 31) && D.lte(player.dea.health, 0)) return false;
+
                 const selected = player.xp.selected;
 
                 return D.gt(player.xp.monsters[selected].health, 0);
@@ -605,12 +877,24 @@ addLayer('xp', {
             });
     },
     update(diff) {
+        if (inChallenge('b', 31) && D.lte(player.dea.health, 0)) return;
+
         Object.values(tmp.xp.monsters)
             .forEach(monster => {
                 const pmon = player.xp.monsters[monster.id];
                 if (D.gt(monster.damage_per_second, 0)) {
                     const damage = D.times(monster.damage_per_second, diff);
-                    pmon.health = D.minus(pmon.health, damage);
+                    pmon.health = D.minus(pmon.health, damage).max(0);
+
+                    if (inChallenge('b', 31)) {
+                        const damage = D.times(tmp.dea.monsters[monster.id].damage_per_second, diff);
+                        player.dea.health = D.minus(player.dea.health, damage);
+
+                        if (D.lte(player.dea.health, 0) && D.lt(player.dea.survives, tmp.dea.player.survives)) {
+                            player.dea.health = D.dOne;
+                            player.dea.survives = D.add(player.dea.survives, 1);
+                        }
+                    }
                 }
             });
     },
@@ -671,7 +955,8 @@ addLayer('xp', {
             damage_per_second() {
                 let mult = D.dZero;
 
-                if (hasUpgrade('xp', 22) && this.id == player.xp.selected) mult = D.add(mult, upgradeEffect('xp', 22));
+                if (this.id == player.xp.selected && D.gt(tmp.xp.modifiers.damage.passive_active)) mult = D.add(mult, tmp.xp.modifiers.damage.passive_active);
+                if (D.gt(tmp.xp.modifiers.damage.passive)) mult = D.add(mult, tmp.xp.modifiers.damage.passive);
 
                 return D.times(mult, tmp.xp.monsters[this.id].damage);
             },
@@ -739,7 +1024,8 @@ addLayer('xp', {
             damage_per_second() {
                 let mult = D.dZero;
 
-                if (hasUpgrade('xp', 22) && this.id == player.xp.selected) mult = D.add(mult, upgradeEffect('xp', 22));
+                if (this.id == player.xp.selected && D.gt(tmp.xp.modifiers.damage.passive_active)) mult = D.add(mult, tmp.xp.modifiers.damage.passive_active);
+                if (D.gt(tmp.xp.modifiers.damage.passive)) mult = D.add(mult, tmp.xp.modifiers.damage.passive);
 
                 return D.times(mult, tmp.xp.monsters[this.id].damage);
             },
@@ -753,7 +1039,16 @@ addLayer('xp', {
     },
     kill: {
         color: '#DD4477',
-        total() { return Object.values(player.xp.monsters).map(data => data.kills).reduce((sum, kills) => D.add(sum, kills), D.dZero); },
+        total() {
+            const sum = Object.values(player.xp.monsters).map(data => data.kills).reduce((sum, kills) => D.add(sum, kills), D.dZero),
+                spent = player.xp.upgrades.reduce((sum, id) => {
+                    const upg = tmp.xp.upgrades[id];
+                    if (upg.currencyLocation == tmp.xp.kill && hasUpgrade('xp', id)) return sum.add(tmp.xp.upgrades[id]?.cost);
+                    return sum;
+                }, D.dZero);
+
+            return sum.minus(spent);
+        },
     },
     modifiers: {
         damage: {
@@ -763,6 +1058,8 @@ addLayer('xp', {
                 if (hasUpgrade('l', 11)) base = base.add(upgradeEffect('l', 11));
 
                 base = base.add(item_effect('bone_pick').xp_damage);
+
+                base = base.add(buyableEffect('dea', 13));
 
                 return base;
             },
@@ -779,7 +1076,23 @@ addLayer('xp', {
 
                 if (hasChallenge('b', 21)) mult = mult.times(2);
 
+                if (hasUpgrade('dea', 11)) mult = mult.times(upgradeEffect('dea', 11));
+
                 return mult;
+            },
+            passive() {
+                let passive = D.dZero;
+
+                if (hasUpgrade('xp', 52)) passive = passive.add(upgradeEffect('xp', 52));
+
+                return passive;
+            },
+            passive_active() {
+                let passive = D.dZero;
+
+                if (hasUpgrade('xp', 22)) passive = passive.add(upgradeEffect('xp', 22));
+
+                return passive;
             },
         },
         xp: {
@@ -798,6 +1111,8 @@ addLayer('xp', {
                 mult = mult.times(item_effect('crystal_skull').xp_mult);
 
                 if (hasAchievement('ach', 14)) mult = mult.times(achievementEffect('ach', 14));
+
+                mult = mult.times(buyableEffect('dea', 23));
 
                 return mult;
             },
@@ -829,6 +1144,8 @@ addLayer('xp', {
 
                 mult = mult.div(item_effect('slime_injector').health);
 
+                if (hasUpgrade('dea', 21)) mult = mult.div(upgradeEffect('dea', 21));
+
                 return mult;
             },
         },
@@ -856,7 +1173,7 @@ addLayer('xp', {
             /** @type {(keyof Player['xp'])[]} */
             keep = ['selected', 'lore'];
         if (D.gt(held, 0)) {
-            upgs.push(...player.xp.upgrades.slice(0, held));
+            upgs.push(...player.xp.upgrades.filter(id => tmp.xp.upgrades[id].currencyLocation != tmp.xp.kill).slice(0, held));
         }
 
         layerDataReset(this.layer, keep);

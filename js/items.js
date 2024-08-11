@@ -784,6 +784,10 @@ const item_list = {
                 min = D.times(min, tmp.m.modifiers.range.mult);
                 max = D.times(max, tmp.m.modifiers.range.mult);
 
+                if (hasUpgrade('xp', 51)) {
+                    min = D.times(min, upgradeEffect('xp', 51));
+                    max = D.times(max, upgradeEffect('xp', 51));
+                }
                 if (hasUpgrade('m', 23)) {
                     min = D.times(min, upgradeEffect('m', 23).stone);
                     max = D.times(max, upgradeEffect('m', 23).stone);
@@ -890,7 +894,7 @@ const item_list = {
 
                 chance = chance.times(tmp.c.chance_multiplier);
 
-                if (hasUpgrade('m', 23)) chance = chance.times(upgradeEffect('m', 23));
+                if (hasUpgrade('m', 23)) chance = chance.times(upgradeEffect('m', 23).stone);
 
                 return { 'mining:any': chance };
             },
