@@ -1628,8 +1628,6 @@ type Layers = {
     m: Layer<'m'> & {
         upgrades: {
             [id: string]: Upgrade<'m'> & {
-                /** @deprecated */
-                items: [items, Decimal][]
                 item: items
                 show?(): boolean
                 currencyInternalName: 'amount'
@@ -1646,10 +1644,6 @@ type Layers = {
             position: Computable<[number, number]>
             /** Total health of the ore */
             health(): Decimal
-            /** Damage on attack */
-            damage(): Decimal
-            /** Passive damage per second */
-            damage_per_second(): Decimal
             lore: Computable<string>
             unlocked?(): boolean
             /** Weighted chance to be selected */
@@ -1659,13 +1653,19 @@ type Layers = {
             damage: {
                 base(): Decimal
                 mult(): Decimal
+                total(): Decimal
+                per_second(): Decimal
             }
             range: {
                 mult(): Decimal
             }
             health: {
                 mult(): Decimal
+                /** Total health of target ores */
+                total(): Decimal
             }
+            /** Amount of mined ores */
+            size(): number
         }
         list(): ores[]
         /** Items counted as ores */
@@ -1841,14 +1841,13 @@ type Player = {
         } }
     }
     m: LayerData & {
-        target: ores
-        previous: ores
+        targets: ores[]
+        previous: ores[]
+        last_drops: [items, Decimal][]
+        health: Decimal
         lore: ores
         ores: { [ore in ores]: {
             broken: Decimal
-            health: Decimal
-            last_drops: [items, Decimal][]
-            last_drops_times: Decimal
         } }
     }
     // Row 1

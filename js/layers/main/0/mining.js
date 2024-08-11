@@ -4,7 +4,6 @@ const ORE_SIZES = {
     width: 2,
     height: 2,
 };
-//todo support multiple parallel mining (shows all, drops from all, health is sum of all, may repeat)
 addLayer('m', {
     row: 0,
     position: 1,
@@ -12,7 +11,10 @@ addLayer('m', {
     resource: 'rocks',
     name: 'mining',
     symbol: 'M',
-    color() { return tmp.m.ores[player.m.target].color; },
+    color() {
+        const target = player.m.targets[0] ?? 'stone';
+        return tmp.m.ores[target].color;
+    },
     tooltip() {
         const sum = tmp.m.items
             .reduce(
@@ -24,8 +26,10 @@ addLayer('m', {
     startData() {
         return {
             lore: 'stone',
-            target: random_ore(),
-            previous: 'stone',
+            targets: random_ores(1),
+            previous: ['stone'],
+            health: D(50),
+            last_drops: [],
             ores: Object.fromEntries(Object.keys(layers.m.ores).map(ore => [ore, {
                 broken: D.dZero,
                 health: D(50),
@@ -56,19 +60,21 @@ addLayer('m', {
                 }],
                 'blank',
                 ['display-text', () => {
-                    const target = player.m.target;
+                    const targets = player.m.targets.map(ore => tmp.m.ores[ore].name);
 
-                    return `You are mining ${tmp.m.ores[target].name}`;
+                    return `You are mining ${listFormat.format(targets)}`;
                 }],
-                ['raw-html', () => {
-                    return `<div style="width: 240px; height: 240px; overflow: hidden">
+                ['row', () => {
+                    const list = player.m.targets.map(ore => ['raw-html', `<div style="width: 240px; height: 240px; overflow: hidden">
                             <img src="./resources/images/ores.png"
                                 style="width: ${ORE_SIZES.width * 100}%;
                                     height: ${ORE_SIZES.height * 100}%;
-                                    margin-left: ${-240 * tmp.m.ores[player.m.target].position[0]}px;
-                                    margin-top: ${-240 * tmp.m.ores[player.m.target].position[1]}px;
+                                    margin-left: ${-240 * tmp.m.ores[ore].position[0]}px;
+                                    margin-top: ${-240 * tmp.m.ores[ore].position[1]}px;
                                     image-rendering: crisp-edges;"/>
-                        </div>`;
+                        </div>`]),
+                        sq = square(list);
+                    return sq.map(imgs => ['column', imgs])
                 }],
                 ['bar', 'health'],
                 'blank',
@@ -76,8 +82,7 @@ addLayer('m', {
                 ['clickables', [1]],
                 'blank',
                 ['display-text', () => {
-                    const target = player.m.target,
-                        damage = tmp.m.ores[target].damage;
+                    const damage = tmp.m.modifiers.damage.total;
 
                     return `Mine for ${format(damage)} damage`;
                 }],
@@ -86,14 +91,12 @@ addLayer('m', {
                 ['display-text', () => {
                     if (D.lte(tmp.m.modifiers.range.mult, 0)) return '';
 
-                    let drops = 'nothing',
-                        count = '';
-                    const last_drops = player.m.ores[player.m.previous].last_drops,
-                        last_count = player.m.ores[player.m.previous].last_drops_times;
+                    let drops = 'nothing';
+                    const last_drops = player.m.last_drops,
+                        previous = player.m.targets.map(ore => tmp.m.ores[ore].name);
                     if (last_drops.length) drops = listFormat.format(last_drops.map(([item, amount]) => `${format(amount)} ${tmp.items[item].name}`));
-                    if (last_count.gt(1)) count = ` (${formatWhole(last_count)})`;
 
-                    return `${capitalize(tmp.m.ores[player.m.previous].name)} dropped ${drops}${count}`;
+                    return `${capitalize(listFormat.format(previous))} dropped ${drops}`;
                 }],
             ],
         },
@@ -222,12 +225,17 @@ addLayer('m', {
                 return text;
             },
             effect() {
-                return Object.fromEntries(
+                /** @type {{[ore in ores]: Decimal}} */
+                const ores = Object.fromEntries(
                     Object.values(tmp.m.ores)
                         .map(ore => [ore.id, D.add(ore.health, 10).log10()]),
                 );
+
+                return Object.assign(ores, {
+                    current: player.m.targets.map(ore => ores[ore]).reduce((prod, mult) => D.times(prod, mult), D.dOne),
+                });
             },
-            effectDisplay() { return `*${format(upgradeEffect(this.layer, this.id)[player.m.target])}`; },
+            effectDisplay() { return `*${format(upgradeEffect(this.layer, this.id).current)}`; },
             item: 'bronze_blend',
             cost: D(1),
             style() {
@@ -316,7 +324,7 @@ addLayer('m', {
             effect() { return D.dOne; },
             effectDisplay() {
                 if (!tmp[this.layer].upgrades[this.id].show) return '';
-                return `${format(tmp.m.ores[player.m.target].damage_per_second)} /s`;
+                return `${format(tmp.m.modifiers.damage.per_second)} /s`;
             },
             show() { return hasUpgrade(this.layer, this.id - 10); },
             item: 'copper_ore',
@@ -421,14 +429,19 @@ addLayer('m', {
                 return text;
             },
             effect() {
-                return Object.fromEntries(
+                /** @type {{[ore in ores]: Decimal}} */
+                const ores = Object.fromEntries(
                     Object.keys(layers.m.ores)
                         .map(/**@param{ores}ore*/ore => [ore, D.add(player.m.ores[ore].broken, 4).log(4)]),
                 );
+
+                return Object.assign(ores, {
+                    current: player.m.targets.map(ore => ores[ore]).reduce((prod, mult) => D.times(prod, mult), D.dOne),
+                });
             },
             effectDisplay() {
                 if (!tmp[this.layer].upgrades[this.id].show) return '';
-                return `*${format(upgradeEffect(this.layer, this.id)[player.m.target])}`;
+                return `*${format(upgradeEffect(this.layer, this.id).current)}`;
             },
             show() { return hasUpgrade(this.layer, this.id - 10); },
             item: 'bronze_blend',
@@ -681,26 +694,20 @@ addLayer('m', {
                 'background-position-y': '-180px',
             },
             onClick() {
-                const target = player.m.target,
-                    damage = tmp.m.ores[target].damage,
-                    ore = player.m.ores[target];
+                const damage = tmp.m.modifiers.damage.total;
 
-                ore.health = D.minus(ore.health, damage);
+                player.m.health = D.minus(player.m.health, damage);
             },
             onHold() {
-                const target = player.m.target,
-                    // About 5 clicks per second
-                    damage = D.div(tmp.m.ores[target].damage, 20 / 5),
-                    ore = player.m.ores[target];
+                // About 5 clicks per second
+                const damage = D.div(tmp.m.modifiers.damage.total, 20 / 5);
 
-                ore.health = D.minus(ore.health, damage);
+                player.m.health = D.minus(player.m.health, damage);
             },
             canClick() {
                 if (inChallenge('b', 31) && D.lte(player.dea.health, 0)) return false;
 
-                const target = player.m.target;
-
-                return D.gt(player.m.ores[target].health, 0);
+                return D.gt(player.m.health, 0);
             },
         },
         // Handbook
@@ -767,14 +774,6 @@ addLayer('m', {
 
                 return D.times(base, tmp.m?.modifiers.health.mult);
             },
-            damage() { return D.times(tmp.m.modifiers.damage.base, tmp.m.modifiers.damage.mult); },
-            damage_per_second() {
-                let mult = D.dZero;
-
-                if (hasUpgrade('m', 22) && player.m.target == this.id) mult = mult.add(upgradeEffect('m', 22));
-
-                return D.times(mult, tmp.m.ores[this.id].damage);
-            },
             lore: `A large piece of rock.<br>
                 Makes up most of the minerals around.<br>
                 It would be weirder to not find any...`,
@@ -797,14 +796,6 @@ addLayer('m', {
 
                 return D.times(base, tmp.m?.modifiers.health.mult);
             },
-            damage() { return D.times(tmp.m.modifiers.damage.base, tmp.m.modifiers.damage.mult); },
-            damage_per_second() {
-                let mult = D.dZero;
-
-                if (hasUpgrade('m', 22) && player.m.target == this.id) mult = mult.add(upgradeEffect('m', 22));
-
-                return D.times(mult, tmp.m.ores[this.id].damage);
-            },
             lore: `A chunk of rock containing copper.<br>
                 Somewhat tough to break.<br>
                 Still contains large amounts of stone.`,
@@ -821,14 +812,6 @@ addLayer('m', {
 
                 return D.times(base, tmp.m?.modifiers.health.mult);
             },
-            damage() { return D.times(tmp.m.modifiers.damage.base, tmp.m.modifiers.damage.mult); },
-            damage_per_second() {
-                let mult = D.dZero;
-
-                if (hasUpgrade('m', 22) && player.m.target == this.id) mult = mult.add(upgradeEffect('m', 22));
-
-                return D.times(mult, tmp.m.ores[this.id].damage);
-            },
             lore: `A chunk of rock containing tin.<br>
                 Easy to break.<br>
                 Mostly contains stone.`,
@@ -838,21 +821,13 @@ addLayer('m', {
     bars: {
         health: {
             direction: RIGHT,
-            progress() {
-                const target = player.m.target;
-
-                return D.div(player.m.ores[target].health, tmp.m.ores[target].health);
-            },
-            display() {
-                const target = player.m.target;
-
-                return `${format(player.m.ores[target].health)} / ${format(tmp.m.ores[target].health)}`;
-            },
+            progress() { return D.div(player.m.health, tmp.m.modifiers.health.total); },
+            display() { return `${format(player.m.health)} / ${format(tmp.m.modifiers.health.total)}`; },
             height: 40,
             width: 320,
             fillStyle() {
-                const target = player.m.target,
-                    backgroundColor = tmp.m.ores[target].color;
+                const targets = player.m.targets,
+                    backgroundColor = tmp.m.ores[targets[0] ?? 'stone'].color;
                 return { backgroundColor, };
             },
             baseStyle: { 'border-radius': 0, },
@@ -891,6 +866,14 @@ addLayer('m', {
 
                 return mult;
             },
+            total() { return D.times(tmp.m.modifiers.damage.base, tmp.m.modifiers.damage.mult); },
+            per_second() {
+                let mult = D.dZero;
+
+                if (hasUpgrade('m', 22)) mult = mult.add(upgradeEffect('m', 22));
+
+                return D.times(mult, tmp.m.modifiers.damage.total);
+            },
         },
         range: {
             mult() {
@@ -899,8 +882,8 @@ addLayer('m', {
                 if (hasUpgrade('xp', 63)) mult = mult.times(upgradeEffect('xp', 63));
 
                 if (hasUpgrade('m', 13)) mult = mult.times(upgradeEffect('m', 13));
-                if (hasUpgrade('m', 14)) mult = mult.times(upgradeEffect('m', 14)[player.m.target]);
-                if (hasUpgrade('m', 24)) mult = mult.times(upgradeEffect('m', 24)[player.m.target]);
+                if (hasUpgrade('m', 14)) mult = mult.times(upgradeEffect('m', 14).current);
+                if (hasUpgrade('m', 24)) mult = mult.times(upgradeEffect('m', 24).current);
 
                 if (hasUpgrade('l', 24)) mult = mult.times(upgradeEffect('l', 24));
 
@@ -920,7 +903,9 @@ addLayer('m', {
 
                 return mult;
             },
+            total() { return player.m.targets.map(ore => tmp.m.ores[ore].health).reduce((sum, health) => D.add(sum, health), D.dZero); },
         },
+        size() { return 1; },
     },
     broken: {
         color: '#8855AA',
@@ -930,47 +915,36 @@ addLayer('m', {
     items: ['copper_ore', 'tin_ore', 'gold_nugget'],
     minerals: ['stone', 'copper_ore', 'tin_ore', 'bronze_blend', 'gold_nugget'],
     automate() {
-        Object.entries(player.m.ores)
-            .forEach(/**@param {[ores, Player['m']['ores'][ores]]}*/([id, data]) => {
-                if (D.gt(data.health, tmp.m.ores[id].health)) {
-                    data.health = tmp.m.ores[id].health;
-                }
-                if (D.lte(data.health, 0)) {
-                    data.health = tmp.m.ores[id].health;
+        if (player.m.targets.length != tmp.m.modifiers.size) {
+            const targets = random_ores(tmp.m.modifiers.size),
+                health = targets.map(ore => tmp.m.ores[ore].health).reduce((sum, health) => D.add(sum, health), D.dZero);
+            player.m.targets = targets;
+            player.m.health = health;
+        }
 
-                    data.broken = D.add(data.broken, 1);
+        if (D.lte(player.m.health, 0)) {
+            const drops = merge_drops(player.m.targets.map(ore => [get_source_drops(`mining:${ore}`), get_source_drops('mining:any')]).flat(2));
+            gain_items(drops);
+            player.m.last_drops = drops;
+            player.m.previous = player.m.targets;
+            player.m.targets.forEach(ore => player.m.ores[ore].broken = D.add(player.m.ores[ore].broken, 1));
 
-                    // Drops
-                    const own = get_source_drops(`mining:${id}`),
-                        any = get_source_drops('mining:any'),
-                        drops = merge_drops(own, any),
-                        equal = drops.length == data.last_drops.length &&
-                            drops.every(([item, amount]) => data.last_drops.some(([litem, lamount]) => litem == item && D.eq_tolerance(amount, lamount, 1e-3)));
-
-                    if (equal) {
-                        data.last_drops_times = D.add(data.last_drops_times, 1);
-                    } else {
-                        data.last_drops_times = D.dOne;
-                        data.last_drops = drops;
-                    }
-                    gain_items(drops);
-
-                    player.m.previous = id;
-                    player.m.target = random_ore();
-                }
-            });
+            const targets = random_ores(tmp.m.modifiers.size),
+                health = targets.map(ore => tmp.m.ores[ore].health).reduce((sum, health) => D.add(sum, health), D.dZero);
+            player.m.targets = targets;
+            player.m.health = health;
+        }
+        if (D.gt(player.m.health, tmp.m.modifiers.health.total)) {
+            player.m.health = tmp.m.modifiers.health.total;
+        }
     },
     update(diff) {
         if (inChallenge('b', 31) && D.lte(player.dea.health, 0)) return;
 
-        Object.values(tmp.m.ores)
-            .forEach(ore => {
-                const pore = player.m.ores[ore.id];
-                if (D.gt(ore.damage_per_second, 0)) {
-                    const damage = D.times(ore.damage_per_second, diff);
-                    pore.health = D.minus(pore.health, damage);
-                }
-            });
+        if (D.gt(tmp.m.modifiers.damage.per_second, 0)) {
+            const damage = D.times(tmp.m.modifiers.damage.per_second, diff);
+            player.m.health = D.minus(player.m.health, damage);
+        }
     },
     doReset(layer) {
         if (tmp[layer].row <= this.row) return;

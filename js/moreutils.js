@@ -297,6 +297,32 @@ function color_between(low, high, progress) {
     const unprogress = 1 - progress;
     return Array.from({ length: 3 }, (_, i) => Math.floor(high[i] * progress + low[i] * unprogress));
 }
+/**
+ * Returns a square of the given list
+ *
+ * @template T
+ * @param {T[]} list
+ * @param {number} [size]
+ * @returns {T[][]}
+ */
+function square(list, size) {
+    size ??= Math.ceil(Math.sqrt(list.length));
+    if (size <= 0) return [];
+
+    /** @type {T[][]} */
+    const sq = [];
+    let x = 0;
+
+    list.forEach(val => {
+        if (x >= sq.length) sq.push([val]);
+        else {
+            sq[x].push(val);
+            if (sq[x].length >= size) x++;
+        }
+    });
+
+    return sq;
+}
 
 // Layer methods
 // experience
@@ -447,6 +473,15 @@ function random_ore() {
     }
 
     return list[i - 1][0];
+}
+/**
+ * Gets a list of random ores
+ *
+ * @param {number} length
+ * @returns {ores[]}
+ */
+function random_ores(length) {
+    return Array.from({ length }, () => random_ore());
 }
 /**
  * Returns the total weight of all unlocked ores
@@ -757,25 +792,6 @@ function crafting_show_recipe(recipe) {
 
     const craft = D.gt(precipe.making, 0) ? `<br>Crafting ${formatWhole(precipe.making)}` : '',
         total = trecipe.static ? `<br>Crafted ${formatWhole(precipe.crafted)}` : '',
-        /** @template T @type {(list: T[], size?: number) => T[][]} */
-        square = (list, size) => {
-            size ??= Math.ceil(Math.sqrt(list.length));
-            if (size <= 0) return [];
-
-            /** @type {T[][]} */
-            const sq = [];
-            let x = 0;
-
-            list.forEach(val => {
-                if (x >= sq.length) sq.push([val]);
-                else {
-                    sq[x].push(val);
-                    if (sq[x].length >= size) x++;
-                }
-            });
-
-            return sq;
-        },
         /** @type {(list: ReturnType<square<['tile', tile]>>) => TabFormatEntries<'c'>} */
         line = list => {
             if (options.colCraft) return ['row', list.map(row => ['column', row])];

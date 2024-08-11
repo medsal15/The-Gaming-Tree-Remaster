@@ -2,6 +2,8 @@
 
 Add an export save to file
 
+Add modal to select theme
+
 ## Cleanup/Prettying up ##
 
 ## Challenges ##
@@ -11,5 +13,10 @@ Add an export save to file
 ### Alternates ###
 
 ## Enemies ##
+
+Golem
+
+- bs health
+- damage resistance
 
 ## Post endgame ##
