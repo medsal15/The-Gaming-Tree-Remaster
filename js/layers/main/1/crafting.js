@@ -80,11 +80,10 @@ addLayer('c', {
         mult = mult.add(buyableEffect('c', 11));
 
         if (hasAchievement('ach', 44)) mult = mult.add(achievementEffect('ach', 44));
+        if (hasAchievement('ach', 55)) mult = mult.add(achievementEffect('ach', 55));
 
         mult = mult.times(item_effect('slime_die').luck);
         mult = mult.times(item_effect('magic_slime_ball').luck);
-
-        if (hasAchievement('ach', 55)) mult = mult.times(achievementEffect('ach', 55));
 
         return mult;
     },

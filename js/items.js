@@ -789,7 +789,10 @@ const item_list = {
                     max = D.times(max, upgradeEffect('m', 23).stone);
                 }
 
-                return { 'mining:any': { min, max } };
+                return {
+                    'mining:any': { min, max },
+                    'mining:stone': { min, max },
+                };
             },
         },
         lore: `A piece of a large rock.<br>

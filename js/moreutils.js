@@ -299,6 +299,7 @@ function color_between(low, high, progress) {
 }
 
 // Layer methods
+// experience
 /**
  * Returns the content for lore in the XP tabFormat
  *
@@ -418,6 +419,7 @@ function bestiary_content(monster) {
     return lines;
 }
 
+// mining
 /**
  * Gets a random ore for mining
  *
@@ -539,6 +541,7 @@ function handbook_content(ore) {
     return lines;
 }
 
+// crafting
 /**
  * Returns a map of toggles for the crafting layer
  *
@@ -704,7 +707,7 @@ function inventory() {
             if (Object.entries(chance).filter(([, c]) => D.gt(c, 0)).length) tooltip_lines.push(...Object.entries(chance)
                 .map(/**@param{[string,Decimal]}*/([source, chance]) =>
                     `${capitalize(source_name(source))}: ${format_chance(chance)}`));
-            if (Object.entries(range).filter(([, r]) => D.gt(r.max, 0)).length) tooltip_lines.push(Object.entries(range)
+            if (Object.entries(range).filter(([, r]) => D.gt(r.max, 0)).length) tooltip_lines.push(...Object.entries(range)
                 .map(/**@param{[items,{min:Decimal,max:Decimal}]}*/([source, range]) => `${capitalize(source_name(source))}: ${format_range(range)}`));
             if (Object.entries(per_second).filter(([, ps]) => D.gt(ps, 0)).length) tooltip_lines.push(...Object.entries(per_second)
                 .map(/**@param{[string,Decimal]}*/([source, amount]) =>
@@ -737,7 +740,7 @@ function crafting_show_recipe(recipe) {
         trecipe = tmp.c.recipes[recipe],
         vis = player.c.visiblity.crafting;
 
-    if (vis.craftable == 'show' && !crafting_can(recipe, D.dOne)) return []
+    if (vis.craftable == 'show' && !crafting_can(recipe, D.dOne) && D.lte(precipe.making, 0)) return []
 
     if (!(trecipe.unlocked ?? true) || (
         trecipe.categories.some(cat => vis[cat] == 'hide') &&
@@ -908,6 +911,7 @@ function compendium_content(item) {
     return lines;
 }
 
+// boss
 /**
  * Returns the content for lore in the boss tabFormat
  *
@@ -942,4 +946,35 @@ function bosstiary_content(boss) {
     lines.push('blank', ['display-text', bosst.lore]);
 
     return lines;
+}
+
+// shop
+/**
+ * Spend an amount of coins
+ *
+ * @type {((amount: DecimalSource) => void) & {values: [items, Decimal][]}}
+ */
+const spend_coins = (amount) => {
+    if (D.lte(amount, 0)) return;
+
+    let values = spend_coins.values ??= [];
+    if (!values.length) {
+        let value = D.dOne;
+        tmp.s.coins.list.forEach(([item, cap]) => {
+            values.push([item, value]);
+            value = value.times(cap);
+        });
+    }
+
+    let left = D(amount);
+    const items = values.reduceRight(/**@param{Record<items,Decimal>}sum*/(sum, [item, value]) => {
+        if (D.gte(value, left)) {
+            const amount = D.div(left, value).floor();
+            left = left.mod(value);
+            sum[item] = amount.neg();
+        }
+        return sum;
+    }, {});
+
+    gain_items(Object.values(items));
 }

@@ -69,9 +69,9 @@ addLayer('l', {
                 'blank',
                 'respec-button',
                 ['upgrade-tree', [
-                    [11, 12, 13],
-                    [21, 22, 23],
-                    [31, 32, 33],
+                    [11, 12, 13, 14],
+                    [21, 22, 23, 24],
+                    [31, 32, 33, 34],
                 ]],
             ],
         },
@@ -139,7 +139,7 @@ addLayer('l', {
             description() {
                 let text = 'Skills increase experience cap';
 
-                if (shiftDown) text += 'Formula: skills / 4 + 1';
+                if (shiftDown) text += '<br>Formula: skills / 4 + 1';
 
                 return text;
             },
@@ -156,6 +156,30 @@ addLayer('l', {
             currencyDisplayName: 'skill points',
             canAfford() { return D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
             pay() { },
+        },
+        14: {
+            title: 'Straight Hit',
+            description() {
+                let text = 'Skills increase mining damage';
+
+                if (shiftDown) text += '<br>Formula: 2√(skills + 1)';
+
+                return text;
+            },
+            effect() { return D.add(tmp.l.skill_points.skills, 1).sqrt(); },
+            effectDisplay() { return `+${format(upgradeEffect(this.layer, this.id))}`; },
+            style() {
+                let style = {};
+
+                if (!hasUpgrade(this.layer, this.id) && canAffordUpgrade(this.layer, this.id)) style['backgroundColor'] = tmp.l.skill_points.color;
+
+                return style;
+            },
+            cost: D.dOne,
+            currencyDisplayName: 'skill points',
+            canAfford() { return D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
+            pay() { },
+            unlocked() { return tmp.m.layerShown; },
         },
         21: {
             title: 'Spin Blade',
@@ -217,6 +241,31 @@ addLayer('l', {
             pay() { },
             branches: [12, 13],
         },
+        24: {
+            title: 'Extra Loot',
+            description() {
+                let text = 'Levels boost mining drops';
+
+                if (shiftDown) text += '<br>Formula: log2(levels + 3)';
+
+                return text;
+            },
+            effect() { return D.add(player.l.points, 3).log2(); },
+            effectDisplay() { return `*${format(upgradeEffect(this.layer, this.id))}`; },
+            style() {
+                let style = {};
+
+                if (!hasUpgrade(this.layer, this.id) && canAffordUpgrade(this.layer, this.id)) style['backgroundColor'] = tmp.l.skill_points.color;
+
+                return style;
+            },
+            cost: D.dTwo,
+            currencyDisplayName: 'skill points',
+            canAfford() { return this.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
+            pay() { },
+            branches: [14, 13],
+            unlocked() { return tmp.m.layerShown; },
+        },
         31: {
             title: 'Lifesteal',
             description() {
@@ -270,6 +319,31 @@ addLayer('l', {
             pay() { },
             branches: [22, 23],
         },
+        34: {
+            title: 'Bronze Level',
+            description() {
+                let text = 'Bronze blend reduces level costs';
+
+                if (shiftDown) text += '<br>Formula: log10(bronze blend + 10)';
+
+                return text;
+            },
+            effect() { return D.add(player.items.bronze_blend.amount, 10).log10(); },
+            effectDisplay() { return `/${format(upgradeEffect(this.layer, this.id))}`; },
+            style() {
+                let style = {};
+
+                if (!hasUpgrade(this.layer, this.id) && canAffordUpgrade(this.layer, this.id)) style['backgroundColor'] = tmp.l.skill_points.color;
+
+                return style;
+            },
+            cost: D(3),
+            currencyDisplayName: 'skill points',
+            canAfford() { return this.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
+            pay() { },
+            branches: [23, 24],
+            unlocked() { return tmp.m.layerShown; },
+        },
     },
     type: 'static',
     baseResource: 'experience',
@@ -316,6 +390,7 @@ addLayer('l', {
 
         if (hasUpgrade('l', 22)) mult = mult.times(upgradeEffect('l', 22));
         if (hasUpgrade('l', 32)) mult = mult.div(upgradeEffect('l', 32));
+        if (hasUpgrade('l', 34)) mult = mult.div(upgradeEffect('l', 34));
 
         if (hasUpgrade('m', 31)) mult = mult.div(upgradeEffect('m', 31));
 

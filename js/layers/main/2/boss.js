@@ -196,24 +196,7 @@ addLayer('b', {
             },
         },
         // Relics
-        31: {
-            name: 'Broken Clock',
-            challengeDescription() {
-                return `Someone broke ${formatWhole(1000)} clocks, slowing down time to ${format(1 / 1000)} speed.<br>
-                    Repair them. Clock upgrades effects are squared`;
-            },
-            rewardDescription: 'Unlock the Clockwork.',
-            goalDescription: 'Restore time to its normal speed',
-            canComplete() { return D.gte(tmp.clo.time_speed, 1); },
-            progress() { return tmp.clo.time_speed; },
-            display() { return `${format(tmp.clo.time_speed)} / 1`; },
-            unlocked() { return hasChallenge('b', 21); },
-            group: 'relic',
-            buttonStyle() {
-                const group = tmp[this.layer].challenges[this.id].group
-                return { 'backgroundColor': tmp.b.groups[group].color, };
-            },
-        },
+        //todo 31: ???
     },
     clickables: {
         // Bosstiary

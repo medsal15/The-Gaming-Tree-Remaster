@@ -1530,11 +1530,6 @@ type Layers = {
             }
         }
     }
-    clo: Layer<'clo'> & {
-        upgrades: { [id: string]: CurrencyUpgrade<any, 'clo'> & { kills: Decimal, show(): boolean } }
-        time_speed(layer: keyof Layers): Decimal
-        //todo apply time speed everywhere :(
-    }
     // Row 0
     xp: Layer<'xp'> & {
         upgrades: { [id: string]: Upgrade<'xp'> & { kills: Decimal, show(): boolean } }
@@ -1785,7 +1780,6 @@ type Player = {
     ach: LayerData & {
         pool_balls: number[]
     }
-    clo: LayerData & {}
     // Row 0
     xp: LayerData & {
         selected: monsters

@@ -160,7 +160,7 @@ addLayer('ach', {
         34: {
             name: 'Advanced Skills',
             tooltip: 'Buy 5 skills<br>Reward: +1 skill point',
-            done() { return D.gte(player.l.upgrades.length, 5); },
+            done() { return D.gte(tmp.l.skill_points.skills, 5); },
             onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.l.color); },
             style() {
                 let style = {};
@@ -307,7 +307,7 @@ addLayer('ach', {
         },
         54: {
             name: 'A Bone to Pick',
-            tooltip: 'Obtain a bone pick<br>Reward: Increase mining damage by 0.1',
+            tooltip: 'Obtain a bone pick<br>Reward: Increase mining damage by 0.25',
             done() { return D.gte(player.items.bone_pick.amount, 1) },
             onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.xp.monsters.skeleton.color); },
             style() {
@@ -319,11 +319,11 @@ addLayer('ach', {
                 return style;
             },
             unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
-            effect() { return D(.1); },
+            effect() { return D(.25); },
         },
         55: {
             name: '24k Real',
-            tooltip: 'Get gold<br>Reward: Double luck',
+            tooltip: 'Get gold<br>Reward: +0.25',
             done() { return D.gt(player.items.gold_nugget.amount, 0); },
             onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.m.color); },
             style() {
@@ -335,7 +335,7 @@ addLayer('ach', {
                 return style;
             },
             unlocked() { return tmp.m.layerShown; },
-            effect() { return D.dTwo; },
+            effect() { return D(.25); },
         },
         //#endregion Normal
         //#region Secret

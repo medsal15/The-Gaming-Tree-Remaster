@@ -867,6 +867,8 @@ addLayer('m', {
                 if (hasUpgrade('m', 11)) base = base.add(upgradeEffect('m', 11));
                 if (hasUpgrade('m', 33)) base = base.add(upgradeEffect('m', 33));
 
+                if (hasUpgrade('l', 14)) base = base.add(upgradeEffect('l', 14));
+
                 if (hasAchievement('ach', 54)) base = base.add(achievementEffect('ach', 54));
 
                 return base;
@@ -889,6 +891,8 @@ addLayer('m', {
                 if (hasUpgrade('m', 13)) mult = mult.times(upgradeEffect('m', 13));
                 if (hasUpgrade('m', 14)) mult = mult.times(upgradeEffect('m', 14)[player.m.target]);
                 if (hasUpgrade('m', 24)) mult = mult.times(upgradeEffect('m', 24)[player.m.target]);
+
+                if (hasUpgrade('l', 24)) mult = mult.times(upgradeEffect('l', 24));
 
                 mult = mult.times(item_effect('copper_pick').ores);
                 mult = mult.times(item_effect('bronze_cart').m_drop);
