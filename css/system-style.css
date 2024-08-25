@@ -15,7 +15,8 @@
 	webkit-outline: none;
 }
 
-html, body {
+html,
+body {
 	min-height: 100%;
 	height: 100%;
 }
@@ -135,7 +136,7 @@ td {
 }
 
 .fast {
-	transition:color none
+	transition: color none
 }
 
 .col.right {
@@ -168,18 +169,18 @@ ul {
 	transition-duration: 0s
 }
 
-.tooltipBox { 
+.tooltipBox {
 	position: relative;
-  }
-  
-  .tooltipBox:hover .tooltip{
-	opacity: 1;
-  }
+}
 
-  .forceTooltip .tooltip{
+.tooltipBox:hover .tooltip {
 	opacity: 1;
-  }
-  
+}
+
+.forceTooltip .tooltip {
+	opacity: 1;
+}
+
 .respecCheckbox {
 	display: inline-block;
 }
@@ -192,8 +193,8 @@ ul {
 }
 
 .treeOverlay {
-	pointer-events:none;
-	overflow:hidden;
+	pointer-events: none;
+	overflow: hidden;
 }
 
 .front {
@@ -202,20 +203,20 @@ ul {
 
 .overlayThing {
 	z-index: 10000;
-	pointer-events:auto;
+	pointer-events: auto;
 }
 
 .sideLayers {
 	z-index: 10000;
-	pointer-events:auto;
+	pointer-events: auto;
 	position: absolute;
 	right: 55px;
 	top: 65px;
 	background-color: transparent;
 }
 
-button > * {
-	pointer-events:none;
+button>* {
+	pointer-events: none;
 }
 
 .ghost {
@@ -223,7 +224,7 @@ button > * {
 }
 
 #treeTab td button {
-    margin: 0 10px;
+	margin: 0 10px;
 }
 
 .bg {
@@ -248,4 +249,3 @@ button > * {
 	background-image: none !important;
 	--background: transparent !important;
 }
-

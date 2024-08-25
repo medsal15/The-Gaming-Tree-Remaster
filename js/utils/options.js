@@ -8,6 +8,7 @@ function getStartOptions() {
 		autosave: true,
 		/** @type {MS_DISPLAYS[number]} */
 		msDisplay: "always",
+		/** @type {keyof typeof colors} */
 		theme: "default",
 		hqTree: false,
 		offlineProd: true,

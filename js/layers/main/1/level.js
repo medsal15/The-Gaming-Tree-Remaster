@@ -162,11 +162,11 @@ addLayer('l', {
             description() {
                 let text = 'Skills increase mining damage';
 
-                if (shiftDown) text += '<br>Formula: 2√(skills + 1)';
+                if (shiftDown) text += '<br>Formula: 2√(skills)';
 
                 return text;
             },
-            effect() { return D.add(tmp.l.skill_points.skills, 1).sqrt(); },
+            effect() { return D.sqrt(tmp.l.skill_points.skills); },
             effectDisplay() { return `+${format(upgradeEffect(this.layer, this.id))}`; },
             style() {
                 let style = {};
@@ -195,9 +195,21 @@ addLayer('l', {
             },
             cost: D.dTwo,
             currencyDisplayName: 'skill points',
-            canAfford() { return this.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
+            canAfford() {
+                let thismp = tmp[this.layer].upgrades[this.id];
+
+                if (!Array.isArray(thismp.branches)) return false;
+
+                return thismp.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost);
+            },
             pay() { },
-            branches: [11, 12],
+            branches() {
+                let branches = [11, 12];
+
+                if (hasUpgrade('s', 23)) branches = [this.id - 10];
+
+                return branches;
+            },
         },
         22: {
             title: 'Unhealthy Levels',
@@ -213,7 +225,13 @@ addLayer('l', {
             },
             cost: D.dTwo,
             currencyDisplayName: 'skill points',
-            canAfford() { return this.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
+            canAfford() {
+                let thismp = tmp[this.layer].upgrades[this.id];
+
+                if (!Array.isArray(thismp.branches)) return false;
+
+                return thismp.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost);
+            },
             pay() { },
             branches: [12],
         },
@@ -237,9 +255,21 @@ addLayer('l', {
             },
             cost: D.dTwo,
             currencyDisplayName: 'skill points',
-            canAfford() { return this.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
+            canAfford() {
+                let thismp = tmp[this.layer].upgrades[this.id];
+
+                if (!Array.isArray(thismp.branches)) return false;
+
+                return thismp.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost);
+            },
             pay() { },
-            branches: [12, 13],
+            branches() {
+                let branches = [12, 13];
+
+                if (hasUpgrade('s', 23)) branches = [this.id - 10];
+
+                return branches;
+            },
         },
         24: {
             title: 'Extra Loot',
@@ -261,9 +291,21 @@ addLayer('l', {
             },
             cost: D.dTwo,
             currencyDisplayName: 'skill points',
-            canAfford() { return this.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
+            canAfford() {
+                let thismp = tmp[this.layer].upgrades[this.id];
+
+                if (!Array.isArray(thismp.branches)) return false;
+
+                return thismp.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost);
+            },
             pay() { },
-            branches: [14, 13],
+            branches() {
+                let branches = [14, 13];
+
+                if (hasUpgrade('s', 23)) branches = [this.id - 10];
+
+                return branches;
+            },
             unlocked() { return tmp.m.layerShown; },
         },
         31: {

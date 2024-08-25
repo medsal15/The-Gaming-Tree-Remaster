@@ -354,12 +354,17 @@ function bestiary_content(monster) {
         'blank',
         ['display-text', `Level ${resourceColor(tmp.l.color, formatWhole(tmonst.level))}`],
         ['display-text', `Killed ${resourceColor(tmp.xp.kill.color, formatWhole(player.xp.monsters[monster].kills))} times`],
+    ];
+
+    if (D.neq(tmonst.kills, 1)) lines.push(['display-text', `Each kill counts as ${resourceColor(tmp.xp.kill.color, format(tmonst.kills))} kills`]);
+
+    lines.push(
         ['display-text', `Gives ${resourceColor(tmp.xp.color, format(tmonst.experience))} XP on kill`],
         'blank',
         ['display-text', `Health: ${format(player.xp.monsters[monster].health)} / ${format(tmonst.health)}`],
-    ];
+    );
 
-    if (D.gt(tmonst.damage_per_second, 0)) lines.push(['display-text', `Damage per second: ${format(tmonst.damage_per_second)}`]);
+    if (D.gt(tmonst.damage_per_second, 0)) lines.push(['display-text', `Damage per second: ~${format(tmonst.damage_per_second)}`]);
     if (inChallenge('b', 31)) {
         lines.push(['display-text', `Damage: ${format(tmp.dea.monsters[monster].damage)}`]);
     }
@@ -395,6 +400,13 @@ function bestiary_content(monster) {
                 upgrade_lines.push([
                     'display-text',
                     `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[11].name)} reward effect: *${format(1.5)} experience`,
+                ]);
+            }
+            if (D.gt(player.items.densium_slime.amount, 0)) {
+                const itemp = tmp.items.densium_slime;
+                upgrade_lines.push([
+                    'display-text',
+                    `${resourceColor(itemp.color, capitalize(itemp.name))} effect: *${format(itemp.effect.slime_mult)} health, experience, kills, and drops`,
                 ]);
             }
         }; break;
@@ -520,11 +532,16 @@ function handbook_content(ore) {
         ['display-text', capitalize(tore.name)],
         'blank',
         ['display-text', `Mined ${resourceColor(tmp.m.broken.color, formatWhole(player.m.ores[ore].broken))} times`],
+    ];
+
+    if (D.neq(tore.breaks, 1)) lines.push(['display-text', `Each break counts as ${resourceColor(tmp.m.broken.color, format(tore.breaks))} breaks`]);
+
+    lines.push(
         'blank',
         ['display-text', `Maximum health: ${format(tore.health)}`],
         ['display-text', `Chance to find: ${format_chance(D.div(tore.weight, total_ore_weights()))}`],
         'blank',
-    ];
+    );
 
     /** @type {TabFormatEntries<'xp'>[]} */
     const upgrade_lines = [];
@@ -537,6 +554,18 @@ function handbook_content(ore) {
         'display-text',
         `${resourceColor(tmp.items[tmp.m.upgrades[24].item].color, tmp.m.upgrades[24].title)} effect: *${format(upgradeEffect('m', 24)[ore])} drops`,
     ]);
+    // Ore-specific upgrades
+    switch (ore) {
+        case 'stone': {
+            if (D.gt(player.items.densium_rock.amount, 0)) {
+                const itemp = tmp.items.densium_rock;
+                upgrade_lines.push([
+                    'display-text',
+                    `${resourceColor(itemp.color, capitalize(itemp.name))} effect: ${format(itemp.effect.rock_mult)} health, breaks, and drops`,
+                ]);
+            }
+        }; break;
+    }
 
     if (upgrade_lines.length > 0) lines.push(...upgrade_lines, 'blank');
 
@@ -976,12 +1005,42 @@ function bosstiary_content(boss) {
 /**
  * Spend an amount of coins
  *
- * @type {((amount: DecimalSource) => void) & {values: [items, Decimal][]}}
+ * @param {DecimalSource} amount
  */
-const spend_coins = (amount) => {
+function spend_coins(amount) {
     if (D.lte(amount, 0)) return;
 
-    let values = spend_coins.values ??= [];
+    /** @type {Record<items, Decimal>} */
+    const list = Object.fromEntries(value_coin(amount));
+
+    // Prevent negative coin amounts
+    let carry = D.dZero;
+    tmp.s.coins.list.forEach(([coin, cap]) => {
+        if (D.gt(carry, 0)) {
+            list[coin] = D.add(list[coin] ?? D.dZero, carry);
+        }
+
+        if (typeof cap == 'undefined') return;
+
+        carry = D.dZero;
+        let amount = list[coin] ?? D.dZero;
+        if (D.gt(amount, player.items[coin].amount)) {
+            list[coin] = amount = D.minus(amount, cap);
+            carry = D.add(carry, 1);
+        }
+    });
+
+    gain_items(Object.entries(list).map(([i, v]) => [i, v.neg()]));
+}
+/**
+ * Convert a value into coins
+ *
+ * @type {((amount: DecimalSource) => [items, Decimal][]) & {values: [items, Decimal][]}}
+ */
+const value_coin = (amount) => {
+    if (D.lte(amount, 0)) return [];
+
+    let values = value_coin.values ??= [];
     if (!values.length) {
         let value = D.dOne;
         tmp.s.coins.list.forEach(([item, cap]) => {
@@ -991,14 +1050,120 @@ const spend_coins = (amount) => {
     }
 
     let left = D(amount);
+    /** @type {Record<items, Decimal>} */
     const items = values.reduceRight(/**@param{Record<items,Decimal>}sum*/(sum, [item, value]) => {
-        if (D.gte(value, left)) {
+        if (D.gte(left, value)) {
             const amount = D.div(left, value).floor();
             left = left.mod(value);
-            sum[item] = amount.neg();
+            sum[item] = amount;
         }
         return sum;
     }, {});
 
-    gain_items(Object.values(items));
+    // Ensure all of the amount is accounted
+    if (left.gt(0)) {
+        items.coin_copper = D.add(left, items.coin_copper ?? 0);
+    }
+
+    return Object.entries(items).filter(([, val]) => D.gt(val, 0));
+}
+/**
+ * Returns the full display for item purchases in the shop
+ *
+ * @returns {TabFormatEntries<'s'>[]}
+ */
+function shop_display_buy() {
+    if (!tmp.s.layerShown) return [];
+
+    /** @type {{[row: number]: items[]}} */
+    const grid = {};
+
+    Object.entries(tmp.s.trades)
+        .filter(/**@param {[items, Layers['s']['trades'][items]]}*/([item, trade]) => {
+            if (!(trade.unlocked ?? true) || !('cost' in trade)) return false;
+            const itemp = tmp.items[item];
+            if (!('grid' in itemp) || !(itemp.unlocked ?? true)) return false;
+            return true;
+        })
+        .forEach(/**@param {[items, Layers['s']['trades'][items]]}*/([item]) => {
+            const [row, col] = tmp.items[item].grid;
+            (grid[row] ??= [])[col] = item;
+        });
+
+    return Object.values(grid).map(items => ['row', items.map(item => {
+        const trademp = tmp.s.trades[item],
+            tile = item_tile(item, 90),
+            cost = D.times(trademp.cost, player.s.buy_amount)
+                .times(tmp.s.modifiers.trade.buy_mult),
+            list = value_coin(cost);
+
+        let cost_txt = 'free';
+        if (list.length > 2) list.length = 2;
+        if (list.length > 0) cost_txt = listFormat.format(list.map(([item, amount]) => `${formatWhole(amount)} ${tmp.items[item].name}`));
+
+        tile.text = `${formatWhole(player.s.buy_amount)} ${capitalize(tmp.items[item].name)}<br>
+            You have ${formatWhole(player.items[item].amount)}<br><br>
+            Cost: ${cost_txt}`;
+        tile.canClick = () => D.gte(player.s.buy_amount, 1) && D.gte(tmp.s.coins.total, cost);
+        tile.onClick = () => {
+            const buy_amount = D.floor(player.s.buy_amount),
+                cost = buy_amount.times(trademp.cost).times(tmp.s.modifiers.trade.buy_mult);
+            gain_items(item, buy_amount);
+            spend_coins(cost);
+            player.s.spent = D.add(player.s.spent, cost);
+            player.s.trades[item].bought = D.add(player.s.trades[item].bought, 1);
+        };
+
+        return ['tile', tile];
+    })]);
+}
+/**
+ * Returns the full display for item sales in the shop
+ *
+ * @returns {TabFormatEntries<'s'>[]}
+ */
+function shop_display_sell() {
+    if (!tmp.s.layerShown) return [];
+
+    /** @type {{[row: number]: items[]}} */
+    const grid = {};
+
+    Object.entries(tmp.s.trades)
+        .filter(/**@param {[items, Layers['s']['trades'][items]]}*/([item, trade]) => {
+            if (!(trade.unlocked ?? true) || !('value' in trade)) return false;
+            const itemp = tmp.items[item];
+            if (!('grid' in itemp) || !(itemp.unlocked ?? true)) return false;
+            return true;
+        })
+        .forEach(/**@param {[items, Layers['s']['trades'][items]]}*/([item]) => {
+            const [row, col] = tmp.items[item].grid;
+            (grid[row] ??= [])[col] = item;
+        });
+
+    return Object.values(grid).map(items => ['row', items.map(item => {
+        const trademp = tmp.s.trades[item],
+            tile = item_tile(item, 90),
+            value = D.times(trademp.value, player.s.sell_amount)
+                .times(tmp.s.modifiers.trade.sell_mult)
+                .times(tmp.s.modifiers.coin.mult),
+            list = value_coin(value);
+
+        let value_txt = 'free';
+        if (list.length > 2) list.length = 2;
+        if (list.length > 0) value_txt = listFormat.format(list.map(([item, amount]) => `${formatWhole(amount)} ${tmp.items[item].name}`));
+
+        tile.text = `${formatWhole(player.s.sell_amount)} ${capitalize(tmp.items[item].name)}<br>
+            You have ${formatWhole(player.items[item].amount)}<br><br>
+            Value: ${value_txt}`;
+        tile.canClick = () => D.gte(player.s.sell_amount, 1) && D.gte(player.items[item].amount, player.s.sell_amount);
+        tile.onClick = () => {
+            const sell_amount = D.floor(player.s.sell_amount),
+                value = D.times(trademp.value, sell_amount).times(tmp.s.modifiers.trade.sell_mult).times(tmp.s.modifiers.coin.mult);
+            gain_items(item, sell_amount.neg());
+            gain_items(value_coin(value));
+            player.s.trades[item].sold = D.add(player.s.trades[item].sold, 1);
+        };
+
+        return ['tile', tile];
+    })]);
 }

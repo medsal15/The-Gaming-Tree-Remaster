@@ -31,6 +31,21 @@ addLayer('ach', {
         'Secrets': {
             content: [
                 ['display-text', () => {
+                    const color = tmp.ach.categories.bonus.color,
+                        owned = tmp.ach.categories.bonus.owned.length,
+                        visible = tmp.ach.categories.bonus.visible.length;
+
+                    return `You have ${resourceColor(color, formatWhole(owned), 'font-size:1.5em;')} /${resourceColor(color, formatWhole(visible))} achievements`;
+                }],
+                'blank',
+                ['achievements', () => tmp.ach.categories.bonus.rows],
+            ],
+            buttonStyle: { 'border-color'() { return tmp.ach.categories.bonus.color; } },
+            unlocked() { return D.gt(tmp.ach.categories.bonus.visible.length, 0); },
+        },
+        'Secrets': {
+            content: [
+                ['display-text', () => {
                     const color = tmp.ach.categories.secret.color,
                         owned = tmp.ach.categories.secret.owned.length,
                         visible = tmp.ach.categories.secret.visible.length;
@@ -295,11 +310,11 @@ addLayer('ach', {
             name: 'Brown Metal',
             tooltip: 'Make some bronze',
             done() { return D.gt(player.items.bronze_blend.amount, 0); },
-            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.m.color); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.m.nodeStyle.backgroundColor); },
             style() {
                 let style = {};
 
-                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.m.color;
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.m.nodeStyle.backgroundColor;
 
                 return style;
             },
@@ -325,11 +340,11 @@ addLayer('ach', {
             name: '24k Real',
             tooltip: 'Get gold<br>Reward: +0.25',
             done() { return D.gt(player.items.gold_nugget.amount, 0); },
-            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.m.color); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.m.nodeStyle.backgroundColor); },
             style() {
                 let style = {};
 
-                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.m.color;
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.m.nodeStyle.backgroundColor;
                 style['border'] = `solid 3px ${tmp.ach.color}`;
 
                 return style;
@@ -337,7 +352,154 @@ addLayer('ach', {
             unlocked() { return tmp.m.layerShown; },
             effect() { return D(.25); },
         },
+        71: {
+            name: 'PayDay',
+            tooltip: 'Fight Captain Goldtooth<br>Reward: The handbook stays unlocked',
+            done() { return inChallenge('b', 12); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.b.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.b.color;
+                style['border'] = `solid 3px ${tmp.ach.color}`;
+
+                return style;
+            },
+            unlocked() { return hasChallenge('b', 11); },
+        },
+        72: {
+            name: 'What a sale',
+            tooltip: 'Sell something',
+            done() { return Object.values(player.s.trades).some(data => D.gt(data.sold, 0)); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.s.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.s.color;
+
+                return style;
+            },
+            unlocked() { return inChallenge('b', 12) || hasChallenge('b', 12); },
+        },
+        73: {
+            name: 'Read It Again',
+            tooltip: 'Buy ROI.<br>It says coins. Coins!',
+            done() { return hasUpgrade('s', 21); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.s.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.s.color;
+
+                return style;
+            },
+            unlocked() { return inChallenge('b', 12) || hasChallenge('b', 12); },
+        },
+        74: {
+            name: 'Lot of money',
+            tooltip: 'Get a gold coin<br>Reward: Double gold nugget chance',
+            done() { return D.gte(player.items.coin_gold, 1); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.s.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.s.color;
+                style['border'] = `solid 3px ${tmp.ach.color}`;
+
+                return style;
+            },
+            unlocked() { return inChallenge('b', 12) || hasChallenge('b', 12); },
+            effect() { return D.dTwo; },
+        },
+        75: {
+            name: 'Scammed',
+            tooltip: 'Buy a map<br>Reward: Keep the compactor unlocked',
+            done() { return D.gte(player.items.coin_gold, 1); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.s.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.s.color;
+                style['border'] = `solid 3px ${tmp.ach.color}`;
+
+                return style;
+            },
+            unlocked() { return inChallenge('b', 12) || hasChallenge('b', 12); },
+        },
+        //todo deep mining achievements
         //#endregion Normal
+        //#region Bonus
+        81: {
+            name: 'Regicide',
+            tooltip: 'Defeat the Slime Monarch',
+            done() { return hasChallenge('b', 21); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.b.groups.mini.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.b.groups.mini.color;
+
+                return style;
+            },
+            unlocked() { return hasChallenge('b', 11); },
+        },
+        82: {
+            name: 'You Died',
+            tooltip: 'Die',
+            done() { return D.lte(player.dea.health, 0); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.dea.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.dea.color;
+
+                return style;
+            },
+            unlocked() { return hasChallenge('b', 21); },
+        },
+        83: {
+            name: 'Another Chance',
+            tooltip: 'Undie',
+            done() { return D.gt(player.dea.points, 0); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.dea.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.dea.color;
+
+                return style;
+            },
+            unlocked() { return hasChallenge('b', 21); },
+        },
+        84: {
+            name: 'Riskless',
+            tooltip: 'Start regenerating health',
+            done() { return D.gt(tmp.dea.player.regen, 0); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.dea.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.dea.color;
+
+                return style;
+            },
+            unlocked() { return hasChallenge('b', 21); },
+        },
+        85: {
+            name: 'Undying',
+            tooltip: 'Survive a fatal hit',
+            done() { return D.gt(player.dea.survives, 0); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.dea.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.dea.color;
+
+                return style;
+            },
+            unlocked() { return hasChallenge('b', 21); },
+        },
+        //#endregion Bonus
         //#region Secret
         21: {
             name: 'Overkill',
@@ -420,8 +582,17 @@ addLayer('ach', {
     achievementPopups: false, // This is done manually
     categories: {
         normal: {
-            rows: [1, 3, 4, 5],
+            rows: [1, 3, 4, 5, 7],
             color() { return tmp.ach.color; },
+            visible() {
+                return Object.values(tmp.ach.achievements)
+                    .filter(ach => typeof ach == 'object' && this.rows.includes(Math.floor(ach.id / 10)) && (ach.unlocked ?? true));
+            },
+            owned() { return player.ach.achievements.filter(id => this.rows.includes(Math.floor(id / 10))); },
+        },
+        bonus: {
+            rows: [8],
+            color: '#0077FF',
             visible() {
                 return Object.values(tmp.ach.achievements)
                     .filter(ach => typeof ach == 'object' && this.rows.includes(Math.floor(ach.id / 10)) && (ach.unlocked ?? true));
@@ -445,6 +616,9 @@ addLayer('ach', {
             else if (inChallenge('b', 21)) num = 21;
 
             if (!player.ach.pool_balls.includes(num)) player.ach.pool_balls.push(num);
+        }
+        if (D.gte(player.items.magic_densium_ball, 1) && !player.ach.pool_balls.includes(8)) {
+            player.ach.pool_balls.push(8);
         }
     },
 });

@@ -1499,16 +1499,21 @@ type items = 'unknown' |
     'slime_crystal' | 'slime_knife' | 'slime_injector' | 'slime_die' |
     'bone' | 'rib' | 'skull' | 'slimy_skull' |
     'bone_pick' | 'crystal_skull' | 'bone_slate' | 'magic_slime_ball' |
-    'stone' | 'copper_ore' | 'tin_ore' | 'bronze_blend' | 'gold_nugget' |
+    'stone' | 'copper_ore' | 'tin_ore' | 'bronze_blend' | 'gold_nugget' | 'densium' |
+    'coal' | 'iron_ore' | 'clear_iron_ore' | 'silver_ore' | 'electrum_blend' |
     'stone_mace' | 'copper_pick' | 'tin_cache' | 'bronze_cart' | 'doubloon' |
-    'coin_copper' | 'coin_bronze' | 'coin_silver' | 'coin_gold' | 'coin_platinum';
+    'coin_copper' | 'coin_bronze' | 'coin_silver' | 'coin_gold' | 'coin_platinum' |
+    'densium_slime' | 'densium_rock' | 'magic_densium_ball' |
+    'cueball';
+//todo ??? (coal), ??? (clean iron ore), ??? (silver ore), ??? (electrum blend)
 
 type monsters = 'slime' | 'skeleton';
 
-type ores = 'stone' | 'copper' | 'tin';
+type ores = 'stone' | 'copper' | 'tin' |
+    'coal' | 'iron' | 'silver';
 
-type drop_sources = `kill:${monsters}` | 'kill:any' | 'crafting' | `mining:${ores}` | `mining:any` | 'shop';
-type drop_types = 'kill' | 'crafting' | 'mining';
+type drop_sources = `kill:${monsters}` | 'kill:any' | 'crafting' | `mining:${ores}` | 'mining:any' | 'mining:compactor' | 'shop';
+type drop_types = 'kill' | 'crafting' | 'mining' | 'shop';
 type categories = 'materials' | 'equipment' | 'mining' | 'shop' | 'craftable' |
     monsters;
 
@@ -1519,6 +1524,12 @@ type Layers = {
     ach: Layer<'ach'> & {
         categories: {
             normal: {
+                color: Computable<string>
+                rows: number[]
+                visible(): number[]
+                owned(): number[]
+            }
+            bonus: {
                 color: Computable<string>
                 rows: number[]
                 visible(): number[]
@@ -1538,7 +1549,6 @@ type Layers = {
             private _id: monster | null
             readonly id: monster
             damage(): Decimal
-            damage_per_second(): Decimal
         } }
         player: {
             health(): Decimal
@@ -1588,9 +1598,11 @@ type Layers = {
             health(level?: DecimalSource): Decimal
             /** XP gained on kill */
             experience(level?: DecimalSource): Decimal
+            /** How many kills on kill (affects item gain) */
+            kills(): Decimal
             /** Damage on attack */
             damage(): Decimal
-            /** Passive damage per second */
+            /** Passive damage per second (theorical) */
             damage_per_second(): Decimal
             lore: Computable<string>
             unlocked?(): boolean
@@ -1604,10 +1616,14 @@ type Layers = {
             damage: {
                 base(): Decimal
                 mult(): Decimal
-                /** Passive damage multiplier */
-                passive(): Decimal
-                /** Passive damage multiplier to selected enemy */
-                passive_active(): Decimal
+                /**
+                 * Auto attacks to target enemy per second
+                 */
+                active_speed(): Decimal
+                /**
+                 * Auto attacks to all enemies per second
+                 */
+                passive_speed(): Decimal
             }
             xp: {
                 base(): Decimal
@@ -1648,13 +1664,18 @@ type Layers = {
             unlocked?(): boolean
             /** Weighted chance to be selected */
             weight(): Decimal
+            /** How many breaks on destruction (affects item gain) */
+            breaks(): Decimal
         } }
         modifiers: {
             damage: {
                 base(): Decimal
                 mult(): Decimal
                 total(): Decimal
-                per_second(): Decimal
+                /**
+                 * Auto mine to ore per second
+                 */
+                speed(): Decimal
             }
             range: {
                 mult(): Decimal
@@ -1675,6 +1696,11 @@ type Layers = {
         broken: {
             color: Computable<string>
             total(): Decimal
+        }
+        compactor: {
+            materials(): Decimal
+            time(): Decimal
+            unlocked(): boolean
         }
     }
     // Row 1
@@ -1718,6 +1744,17 @@ type Layers = {
                  */
                 static?: boolean
                 categories: categories[]
+            }
+        }
+        modifiers: {
+            craft: {
+                cost_mult(): Decimal
+            }
+            materials: {
+                cost_mult(): Decimal
+            }
+            equipment: {
+                cost_mult(): Decimal
             }
         }
     }
@@ -1779,10 +1816,29 @@ type Layers = {
             private _id: item | null
             readonly id: item
             unlocked?: Computable<boolean>
+            /** Cost for buying */
             cost?: Computable<Decimal>
-            /** Time multiplier for buying one */
+            /**
+             * Time multiplier for buying one
+             *
+             * @default D.dOne
+             */
             cost_time?: Computable<Decimal>
+            /** Value for selling one */
+            value?: Computable<Decimal>
+            /**
+             * Time multiplier for buying one
+             *
+             * @default D.dOne
+             */
+            value_time?: Computable<Decimal>
         } }
+        upgrades: {
+            [id: string]: Upgrade<'s'> & {
+                currencyInternalName: 'total'
+                currencyLocation(): Layers['s']['coins']
+            }
+        }
     }
 };
 type Temp = {
@@ -1839,6 +1895,8 @@ type Player = {
             last_drops: [items, Decimal][]
             last_drops_times: Decimal
         } }
+        attack_time_selected: Decimal
+        attack_time_all: Decimal
     }
     m: LayerData & {
         targets: ores[]
@@ -1849,6 +1907,17 @@ type Player = {
         ores: { [ore in ores]: {
             broken: Decimal
         } }
+        mine_time: Decimal
+        compactor: {
+            enabled: boolean
+            /** Amount of times the compactor has completed */
+            runs: Decimal
+            time: Decimal
+            /** Material currently in the compactor */
+            materials: Decimal
+            /** If true, the compactor is compacting */
+            running: boolean
+        }
     }
     // Row 1
     l: LayerData & {}
@@ -1884,9 +1953,13 @@ type Player = {
         /** Total value spent */
         spent: Decimal
         buy: Decimal
-        buy_time: Decimal
+        buy_amount: Decimal
         sell: Decimal
-        sell_time: Decimal
+        sell_amount: Decimal
+        trades: { [item in items]?: {
+            bought?: Decimal
+            sold?: Decimal
+        } }
     }
 };
 

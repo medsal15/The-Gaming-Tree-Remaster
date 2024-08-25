@@ -21,6 +21,8 @@ addLayer('xp', {
             total: D.dZero,
             selected: 'slime',
             lore: 'slime',
+            attack_time_selected: D.dZero,
+            attack_time_all: D.dZero,
             monsters: Object.fromEntries(Object.keys(layers.xp.monsters)
                 .map(mon => [mon, {
                     kills: D.dZero,
@@ -51,9 +53,11 @@ addLayer('xp', {
                 ['display-text', () => {
                     const current = player.xp.monsters[player.xp.selected].kills,
                         /** @type {string[]} */
-                        kill_ext = [];
+                        kill_ext = [],
+                        tmonst = tmp.xp.monsters[player.xp.selected];
                     let kill_txt = '';
 
+                    if (D.neq(tmonst.kills, 1)) kill_ext.push(resourceColor(tmp.xp.kill.color, `+${formatWhole(tmonst.kills)}`));
                     if (D.neq(current, tmp.xp.kill.total)) kill_ext.push(resourceColor(tmp.xp.kill.color, formatWhole(current)));
 
                     if (kill_ext.length) kill_txt = ` (${kill_ext.join(',')})`;
@@ -78,6 +82,8 @@ addLayer('xp', {
                 }],
                 ['bar', 'health'],
                 'blank',
+                ['bar', 'attack_selected'],
+                ['bar', 'attack_all'],
                 'blank',
                 ['clickables', [1]],
                 'blank',
@@ -262,7 +268,7 @@ addLayer('xp', {
                 if (!tmp[this.layer].upgrades[this.id].show) {
                     return `Unlocked at ${formatWhole(this.kills)} kills`;
                 }
-                return 'Passively deal 100% of your damage';
+                return 'Automatically attack current enemy once per second';
             },
             canAfford() { return tmp[this.layer].upgrades[this.id].show; },
             cost: D(75),
@@ -278,7 +284,7 @@ addLayer('xp', {
             effect() { return D.dOne; },
             effectDisplay() {
                 if (!tmp[this.layer].upgrades[this.id].show) return '';
-                return `${format(tmp.xp.monsters[player.xp.selected].damage_per_second)} /s`;
+                return `+${formatWhole(upgradeEffect(this.layer, this.id))}`;
             },
         },
         23: {
@@ -491,9 +497,9 @@ addLayer('xp', {
         },
         52: {
             title: 'Pitfall',
-            description: 'Passively deal 25% of your damage to all enemies',
-            effect() { return D(.1); },
-            effectDisplay() { return `${format(tmp.xp.monsters[player.xp.selected].damage_per_second)} /s`; },
+            description: 'Automatically attack all enemies every 4 seconds',
+            effect() { return D(.25); },
+            effectDisplay() { return `+ ${formatWhole(D.pow(upgradeEffect(this.layer, this.id), -1))}`; },
             cost: D(40),
             currencyDisplayName: 'kills',
             currencyLocation() { return tmp.xp.kill; },
@@ -646,6 +652,26 @@ addLayer('xp', {
             },
             baseStyle: { 'border-radius': 0, },
             borderStyle: { 'border-radius': 0, },
+        },
+        attack_selected: {
+            direction: RIGHT,
+            progress() { return player.xp.attack_time_selected; },
+            height: 10,
+            width: 320,
+            fillStyle: {
+                backgroundColor() { return tmp.xp.color; },
+            },
+            unlocked() { return D.gt(tmp.xp.modifiers.damage.active_speed, 0); },
+        },
+        attack_all: {
+            direction: RIGHT,
+            progress() { return player.xp.attack_time_all; },
+            height: 10,
+            width: 320,
+            fillStyle: {
+                backgroundColor() { return tmp.xp.kill.color; },
+            },
+            unlocked() { return D.gt(tmp.xp.modifiers.damage.passive_speed, 0); },
         },
         player_health: {
             direction: RIGHT,
@@ -846,8 +872,29 @@ addLayer('xp', {
                 if (D.gt(data.health, tmp.xp.monsters[id].health)) {
                     data.health = tmp.xp.monsters[id].health;
                 }
+                let damage = D.dZero;
+                if (id == player.xp.selected && D.gte(player.xp.attack_time_selected, 1)) {
+                    damage = damage.add(tmp.xp.monsters[id].damage);
+                }
+                if (D.gte(player.xp.attack_time_all, 1)) {
+                    damage = damage.add(tmp.xp.monsters[id].damage);
+                }
+                if (damage.gt(0)) {
+                    data.health = D.minus(data.health, damage);
+
+                    if (inChallenge('b', 31)) {
+                        const damage = tmp.dea.monsters[id].damage;
+                        player.dea.health = D.minus(player.dea.health, damage);
+
+                        if (D.lte(player.dea.health, 0) && D.lt(player.dea.survives, tmp.dea.player.survives)) {
+                            player.dea.health = D.dOne;
+                            player.dea.survives = D.add(player.dea.survives, 1);
+                        }
+                    }
+                }
                 if (D.lte(data.health, 0)) {
-                    const monster = layers.xp.monsters[id];
+                    const monster = layers.xp.monsters[id],
+                        kills = tmp.xp.monsters[id].kills;
 
                     let gain = tmp.xp.monsters[id].experience;
                     // limit XP gain to prevent going over the cap
@@ -855,14 +902,14 @@ addLayer('xp', {
                     addPoints('xp', gain);
                     limit = D.minus(limit, gain).max(0);
 
-                    data.kills = D.add(data.kills, 1);
+                    data.kills = D.add(data.kills, kills);
                     const level = monster.level(data.kills);
 
-                    data.health = D.add(data.health, monster.health(level));
+                    data.health = monster.health(level);
 
                     // Drops
-                    const own = get_source_drops(`kill:${id}`),
-                        any = get_source_drops('kill:any'),
+                    const own = get_source_drops(`kill:${id}`, kills),
+                        any = get_source_drops('kill:any', kills),
                         drops = merge_drops(own, any),
                         equal = drops.length == data.last_drops.length &&
                             drops.every(([item, amount]) => data.last_drops.some(([litem, lamount]) => litem == item && D.eq_tolerance(amount, lamount, 1e-3)));
@@ -875,28 +922,15 @@ addLayer('xp', {
                     gain_items(drops);
                 }
             });
+
+        if (D.gte(player.xp.attack_time_selected, 1)) player.xp.attack_time_selected = D.minus(player.xp.attack_time_selected, 1);
+        if (D.gte(player.xp.attack_time_all, 1)) player.xp.attack_time_all = D.minus(player.xp.attack_time_all, 1);
     },
     update(diff) {
         if (inChallenge('b', 31) && D.lte(player.dea.health, 0)) return;
 
-        Object.values(tmp.xp.monsters)
-            .forEach(monster => {
-                const pmon = player.xp.monsters[monster.id];
-                if (D.gt(monster.damage_per_second, 0)) {
-                    const damage = D.times(monster.damage_per_second, diff);
-                    pmon.health = D.minus(pmon.health, damage).max(0);
-
-                    if (inChallenge('b', 31)) {
-                        const damage = D.times(tmp.dea.monsters[monster.id].damage_per_second, diff);
-                        player.dea.health = D.minus(player.dea.health, damage);
-
-                        if (D.lte(player.dea.health, 0) && D.lt(player.dea.survives, tmp.dea.player.survives)) {
-                            player.dea.health = D.dOne;
-                            player.dea.survives = D.add(player.dea.survives, 1);
-                        }
-                    }
-                }
-            });
+        player.xp.attack_time_selected = D.times(diff, tmp.xp.modifiers.damage.active_speed).add(player.xp.attack_time_selected).min(1);
+        player.xp.attack_time_all = D.times(diff, tmp.xp.modifiers.damage.passive_speed).add(player.xp.attack_time_all).min(1);
     },
     monsters: {
         slime: {
@@ -931,6 +965,8 @@ addLayer('xp', {
 
                 if (inChallenge('b', 11) || inChallenge('b', 21)) health = health.times(2);
 
+                health = D.times(health, item_effect('densium_slime')?.slime_mult);
+
                 return health;
             },
             experience(level) {
@@ -943,7 +979,16 @@ addLayer('xp', {
                 if (hasChallenge('b', 11)) xp = xp.times(1.5);
                 if (inChallenge('b', 21)) xp = xp.div(2);
 
+                xp = D.times(xp, item_effect('densium_slime').slime_mult);
+
                 return xp;
+            },
+            kills() {
+                let kills = D.dOne;
+
+                kills = D.times(kills, item_effect('densium_slime').slime_mult);
+
+                return kills;
             },
             damage() {
                 let base = tmp.xp.modifiers.damage.base;
@@ -955,8 +1000,8 @@ addLayer('xp', {
             damage_per_second() {
                 let mult = D.dZero;
 
-                if (this.id == player.xp.selected && D.gt(tmp.xp.modifiers.damage.passive_active)) mult = D.add(mult, tmp.xp.modifiers.damage.passive_active);
-                if (D.gt(tmp.xp.modifiers.damage.passive)) mult = D.add(mult, tmp.xp.modifiers.damage.passive);
+                if (this.id == player.xp.selected && D.gt(tmp.xp.modifiers.damage.active_speed, 0)) mult = D.add(mult, tmp.xp.modifiers.damage.active_speed);
+                if (D.gt(tmp.xp.modifiers.damage.passive_speed, 0)) mult = D.add(mult, tmp.xp.modifiers.damage.passive_speed);
 
                 return D.times(mult, tmp.xp.monsters[this.id].damage);
             },
@@ -1014,6 +1059,7 @@ addLayer('xp', {
 
                 return xp;
             },
+            kills() { return D.dOne; },
             damage() {
                 let base = tmp.xp.modifiers.damage.base;
 
@@ -1024,8 +1070,8 @@ addLayer('xp', {
             damage_per_second() {
                 let mult = D.dZero;
 
-                if (this.id == player.xp.selected && D.gt(tmp.xp.modifiers.damage.passive_active)) mult = D.add(mult, tmp.xp.modifiers.damage.passive_active);
-                if (D.gt(tmp.xp.modifiers.damage.passive)) mult = D.add(mult, tmp.xp.modifiers.damage.passive);
+                if (this.id == player.xp.selected && D.gt(tmp.xp.modifiers.damage.active_speed, 0)) mult = D.add(mult, tmp.xp.modifiers.damage.active_speed);
+                if (D.gt(tmp.xp.modifiers.damage.passive_speed, 0)) mult = D.add(mult, tmp.xp.modifiers.damage.passive_speed);
 
                 return D.times(mult, tmp.xp.monsters[this.id].damage);
             },
@@ -1080,19 +1126,19 @@ addLayer('xp', {
 
                 return mult;
             },
-            passive() {
-                let passive = D.dZero;
+            active_speed() {
+                let speed = D.dZero;
 
-                if (hasUpgrade('xp', 52)) passive = passive.add(upgradeEffect('xp', 52));
+                if (hasUpgrade('xp', 22)) speed = speed.add(upgradeEffect('xp', 22));
 
-                return passive;
+                return speed;
             },
-            passive_active() {
-                let passive = D.dZero;
+            passive_speed() {
+                let speed = D.dZero;
 
-                if (hasUpgrade('xp', 22)) passive = passive.add(upgradeEffect('xp', 22));
+                if (hasUpgrade('xp', 52)) speed = speed.add(upgradeEffect('xp', 52));
 
-                return passive;
+                return speed;
             },
         },
         xp: {
@@ -1125,6 +1171,8 @@ addLayer('xp', {
 
                 if (hasUpgrade('l', 13)) cap = cap.times(upgradeEffect('l', 13));
                 if (hasUpgrade('l', 23)) cap = cap.times(upgradeEffect('l', 23));
+
+                if (hasUpgrade('s', 12)) cap = cap.times(upgradeEffect('s', 12));
 
                 cap = cap.times(tmp.l.effect);
 

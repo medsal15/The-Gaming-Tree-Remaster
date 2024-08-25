@@ -52,6 +52,19 @@ addLayer('c', {
                     .filter(id => id.startsWith('crafting_'))
                     .map(id => [['clickable', id], 'blank']).flat()
                 ],
+                ['column', () => {
+                    /** @type {TabFormatEntries<'c'>[]} */
+                    const lines = ['blank'];
+
+                    if (D.neq_tolerance(tmp.c.modifiers.equipment.cost_mult, 1, 1e-3)) {
+                        lines.push(['display-text', `Equipment cost multiplier: *${format(tmp.c.modifiers.equipment.cost_mult)}`],);
+                    }
+                    if (D.neq_tolerance(tmp.c.modifiers.materials.cost_mult, 1, 1e-3)) {
+                        lines.push(['display-text', `Material cost multiplier: *${format(tmp.c.modifiers.materials.cost_mult)}`],);
+                    }
+
+                    return lines;
+                }],
                 'blank',
                 ['column', () => Object.keys(layers.c.recipes).map(id => crafting_show_recipe(id))],
             ],
@@ -196,7 +209,7 @@ addLayer('c', {
                     ['slime_core_shard', D.times(3, count)],
                 ];
 
-                if (hasUpgrade('m', 34)) costs.forEach(([, c], i) => costs[i][1] = D.div(c, upgradeEffect('m', 34)));
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
 
                 return costs;
             },
@@ -231,7 +244,7 @@ addLayer('c', {
                     ['slime_core', D.times(2, count)],
                 ];
 
-                if (hasUpgrade('m', 34)) costs.forEach(([, c], i) => costs[i][1] = D.div(c, upgradeEffect('m', 34)));
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
 
                 return costs;
             },
@@ -272,7 +285,7 @@ addLayer('c', {
                     ['rib', D.times(4, count)],
                 ];
 
-                if (hasUpgrade('m', 34)) costs.forEach(([, c], i) => costs[i][1] = D.div(c, upgradeEffect('m', 34)));
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
 
                 return costs;
             },
@@ -308,7 +321,7 @@ addLayer('c', {
                     ['skull', D.times(2, count)],
                 ];
 
-                if (hasUpgrade('m', 34)) costs.forEach(([, c], i) => costs[i][1] = D.div(c, upgradeEffect('m', 34)));
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
 
                 return costs;
             },
@@ -350,7 +363,7 @@ addLayer('c', {
                     ['tin_ore', D.times(2, count)],
                 ];
 
-                if (hasUpgrade('m', 34)) costs.forEach(([, c], i) => costs[i][1] = D.div(c, upgradeEffect('m', 34)));
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
 
                 return costs;
             },
@@ -373,6 +386,8 @@ addLayer('c', {
             categories: ['materials', 'mining',],
             unlocked() { return tmp.m.layerShown; },
         },
+        //todo clean_iron_ore (coal + iron ore + slime goo)
+        //todo electrum blend (gold nugget + silver ore)
         // Equipment
         slime_crystal: {
             _id: null,
@@ -381,10 +396,14 @@ addLayer('c', {
                 const count = crafting_default_amount(this.id, amount),
                     all = crafting_default_all_time(this.id, all_time);
 
-                return [
+                let costs = [
                     ['slime_goo', D.sumGeometricSeries(count, 15, 1.8, all)],
                     ['slime_core', D.sumGeometricSeries(count, 1, 1.2, all)],
                 ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
             },
             produces(amount) {
                 const count = crafting_default_amount(this.id, amount);
@@ -421,10 +440,14 @@ addLayer('c', {
                 const count = crafting_default_amount(this.id, amount),
                     all = crafting_default_all_time(this.id, all_time);
 
-                return [
+                let costs = [
                     ['slime_goo', D.sumGeometricSeries(count, 5, 1.8, all)],
                     ['slime_core_shard', D.sumGeometricSeries(count, 10, 1.4, all)],
                 ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
             },
             produces(amount) {
                 const count = crafting_default_amount(this.id, amount);
@@ -461,11 +484,15 @@ addLayer('c', {
                 const count = crafting_default_amount(this.id, amount),
                     all = crafting_default_all_time(this.id, all_time);
 
-                return [
+                let costs = [
                     ['slime_goo', D.sumGeometricSeries(count, 25, 1.8, all)],
                     ['slime_core', D.sumGeometricSeries(count, 2, 1.2, all)],
                     ['dense_slime_core', D.sumGeometricSeries(count, 1, 1.1, all)],
                 ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
             },
             produces(amount) {
                 const count = crafting_default_amount(this.id, amount);
@@ -503,11 +530,15 @@ addLayer('c', {
                 const count = crafting_default_amount(this.id, amount),
                     all = crafting_default_all_time(this.id, all_time);
 
-                return [
+                let costs = [
                     ['slime_goo', D.sumGeometricSeries(count, 50, 1.8, all)],
                     ['slime_core_shard', D.sumGeometricSeries(count, 25, 1.4, all)],
                     ['dense_slime_core', D.sumGeometricSeries(count, 1, 1.1, all)],
                 ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
             },
             produces(amount) {
                 const count = crafting_default_amount(this.id, amount);
@@ -586,11 +617,15 @@ addLayer('c', {
                 const count = crafting_default_amount(this.id, amount),
                     all = crafting_default_all_time(this.id, all_time);
 
-                return [
+                let costs = [
                     ['skull', D.sumGeometricSeries(count, 1, 1.2, all)],
                     ['slime_goo', D.sumGeometricSeries(count, 25, 1.8, all)],
                     ['slime_crystal', D.sumGeometricSeries(count, 1, 1.05, all)],
                 ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
             },
             produces(amount) {
                 const count = crafting_default_amount(this.id, amount);
@@ -609,7 +644,7 @@ addLayer('c', {
             },
             formulas: {
                 consumes: {
-                    'skull': '1 * 1.2 ^ amount',
+                    'skull': '1.2 ^ amount',
                     'slime_goo': '25 * 1.8 ^ amount',
                     'slime_crystal': '1.05 ^ amount',
                 },
@@ -629,10 +664,14 @@ addLayer('c', {
                 const count = crafting_default_amount(this.id, amount),
                     all = crafting_default_all_time(this.id, all_time);
 
-                return [
+                let costs = [
                     ['rib', D.sumGeometricSeries(count, 10, 1.4, all)],
                     ['slime_core_shard', D.sumGeometricSeries(count, 12, 1.4, all)],
                 ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
             },
             produces(amount) {
                 const count = crafting_default_amount(this.id, amount);
@@ -670,10 +709,14 @@ addLayer('c', {
                 const count = crafting_default_amount(this.id, amount),
                     all = crafting_default_all_time(this.id, all_time);
 
-                return [
+                let costs = [
                     ['dense_slime_core', D.sumGeometricSeries(count, 2, 1.1, all)],
                     ['slimy_skull', D.sumGeometricSeries(count, 1, 1.1, all)],
                 ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
             },
             produces(amount) {
                 const count = crafting_default_amount(this.id, amount);
@@ -711,10 +754,14 @@ addLayer('c', {
                 const count = crafting_default_amount(this.id, amount),
                     all = crafting_default_all_time(this.id, all_time);
 
-                return [
+                let costs = [
                     ['bone', D.sumGeometricSeries(count, 5, 1.8, all)],
                     ['stone', D.sumGeometricSeries(count, 12, 2, all)],
                 ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
             },
             produces(amount) {
                 const count = crafting_default_amount(this.id, amount);
@@ -752,11 +799,15 @@ addLayer('c', {
                 const count = crafting_default_amount(this.id, amount),
                     all = crafting_default_all_time(this.id, all_time);
 
-                return [
+                let costs = [
                     ['bone', D.sumGeometricSeries(count, 6, 1.8, all)],
                     ['slime_goo', D.sumGeometricSeries(count, 15, 1.8, all)],
                     ['copper_ore', D.sumGeometricSeries(count, 12, 1.5, all)],
                 ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
             },
             produces(amount) {
                 const count = crafting_default_amount(this.id, amount);
@@ -795,10 +846,14 @@ addLayer('c', {
                 const count = crafting_default_amount(this.id, amount),
                     all = crafting_default_all_time(this.id, all_time);
 
-                return [
+                let costs = [
                     ['copper_ore', D.sumGeometricSeries(count, 8, 1.5, all)],
                     ['tin_ore', D.sumGeometricSeries(count, 12, 1.25, all)],
                 ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
             },
             produces(amount) {
                 const count = crafting_default_amount(this.id, amount);
@@ -836,10 +891,14 @@ addLayer('c', {
                 const count = crafting_default_amount(this.id, amount),
                     all = crafting_default_all_time(this.id, all_time);
 
-                return [
+                let costs = [
                     ['copper_ore', D.sumGeometricSeries(count, 24, 1.5, all)],
                     ['bronze_blend', D.sumGeometricSeries(count, 8, 1.1, all)],
                 ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
             },
             produces(amount) {
                 const count = crafting_default_amount(this.id, amount);
@@ -877,9 +936,13 @@ addLayer('c', {
                 const count = crafting_default_amount(this.id, amount),
                     all = crafting_default_all_time(this.id, all_time);
 
-                return [
+                let costs = [
                     ['gold_nugget', D.sumGeometricSeries(count, 4, 1.125, all)],
                 ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
             },
             produces(amount) {
                 const count = crafting_default_amount(this.id, amount);
@@ -908,6 +971,33 @@ addLayer('c', {
             categories: ['equipment', 'mining',],
             static: true,
             unlocked() { return inChallenge('b', 12) || hasChallenge('b', 12); },
+        },
+        //todo densium_slime, densium_rock, magic_densium_ball
+        //todo extended mining equipement
+    },
+    modifiers: {
+        craft: { cost_mult() { return D.dOne; }, },
+        materials: {
+            cost_mult() {
+                let mult = D.dOne;
+
+                mult = mult.times(tmp.c.modifiers.craft.cost_mult);
+
+                if (hasUpgrade('m', 34)) mult = mult.div(upgradeEffect('m', 34));
+
+                return mult;
+            },
+        },
+        equipment: {
+            cost_mult() {
+                let mult = D.dOne;
+
+                mult = mult.times(tmp.c.modifiers.craft.cost_mult);
+
+                if (hasUpgrade('s', 13)) mult = mult.times(upgradeEffect('s', 13));
+
+                return mult;
+            },
         },
     },
     doReset(layer) {

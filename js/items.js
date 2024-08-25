@@ -30,7 +30,7 @@ const item_list = {
         row: 1,
         sources: {
             chance() {
-                if (D.eq(tmp.c.chance_multiplier, 0)) return {};
+                if (D.eq(tmp.c.chance_multiplier, 0) || inChallenge('b', 12)) return {};
 
                 let chance = D(1 / 2);
 
@@ -38,6 +38,14 @@ const item_list = {
                 chance = chance.times(tmp.xp.modifiers.drops.mult);
 
                 return { 'kill:slime': chance };
+            },
+            other() {
+                /** @type {drop_sources[]} */
+                const other = [];
+
+                if (inChallenge('b', 12)) other.push('shop');
+
+                return other;
             },
         },
         lore() {
@@ -71,7 +79,7 @@ const item_list = {
         row: 1,
         sources: {
             chance() {
-                if (D.eq(tmp.c.chance_multiplier, 0)) return {};
+                if (D.eq(tmp.c.chance_multiplier, 0) || inChallenge('b', 12)) return {};
 
                 let chance = D(1 / 7);
 
@@ -79,6 +87,14 @@ const item_list = {
                 chance = chance.times(tmp.xp.modifiers.drops.mult);
 
                 return { 'kill:slime': chance };
+            },
+            other() {
+                /** @type {drop_sources[]} */
+                const other = [];
+
+                if (inChallenge('b', 12)) other.push('shop');
+
+                return other;
             },
         },
         lore() {
@@ -112,7 +128,7 @@ const item_list = {
         row: 1,
         sources: {
             chance() {
-                if (D.eq(tmp.c.chance_multiplier, 0)) return {};
+                if (D.eq(tmp.c.chance_multiplier, 0) || inChallenge('b', 12)) return {};
 
                 let chance = D(1 / 24);
 
@@ -123,7 +139,14 @@ const item_list = {
 
                 return { 'kill:slime': chance };
             },
-            other: ['crafting'],
+            other() {
+                /** @type {drop_sources[]} */
+                const other = ['crafting'];
+
+                if (inChallenge('b', 12)) other.push('shop');
+
+                return other;
+            },
         },
         lore() {
             if (inChallenge('b', 11)) return `The very core of a slime.<br>
@@ -156,7 +179,14 @@ const item_list = {
         },
         row: 1,
         sources: {
-            other: ['crafting'],
+            other() {
+                /** @type {drop_sources[]} */
+                const other = ['crafting'];
+
+                if (inChallenge('b', 12)) other.push('shop');
+
+                return other;
+            },
         },
         lore() {
             if (inChallenge('b', 11)) return `Are you sure this is a good idea?<br>
@@ -481,7 +511,7 @@ const item_list = {
         row: 1,
         sources: {
             chance() {
-                if (D.eq(tmp.c.chance_multiplier, 0)) return {};
+                if (D.eq(tmp.c.chance_multiplier, 0) || inChallenge('b', 12)) return {};
 
                 let chance = D(1 / 3);
 
@@ -489,6 +519,14 @@ const item_list = {
                 chance = chance.times(tmp.xp.modifiers.drops.mult);
 
                 return { 'kill:skeleton': chance };
+            },
+            other() {
+                /** @type {drop_sources[]} */
+                const other = [];
+
+                if (inChallenge('b', 12)) other.push('shop');
+
+                return other;
             },
         },
         lore: `A big rod mostly made of calcium.<br>
@@ -505,7 +543,7 @@ const item_list = {
         row: 1,
         sources: {
             chance() {
-                if (D.eq(tmp.c.chance_multiplier, 0)) return {};
+                if (D.eq(tmp.c.chance_multiplier, 0) || inChallenge('b', 12)) return {};
 
                 let chance = D(1 / 10);
 
@@ -513,6 +551,14 @@ const item_list = {
                 chance = chance.times(tmp.xp.modifiers.drops.mult);
 
                 return { 'kill:skeleton': chance };
+            },
+            other() {
+                /** @type {drop_sources[]} */
+                const other = [];
+
+                if (inChallenge('b', 12)) other.push('shop');
+
+                return other;
             },
         },
         lore: `A curved bone.<br>
@@ -529,7 +575,7 @@ const item_list = {
         row: 1,
         sources: {
             chance() {
-                if (D.eq(tmp.c.chance_multiplier, 0)) return {};
+                if (D.eq(tmp.c.chance_multiplier, 0) || inChallenge('b', 12)) return {};
 
                 let chance = D(1 / 33);
 
@@ -540,7 +586,14 @@ const item_list = {
 
                 return { 'kill:skeleton': chance };
             },
-            other: ['crafting'],
+            other() {
+                /** @type {drop_sources[]} */
+                const other = ['crafting'];
+
+                if (inChallenge('b', 12)) other.push('shop');
+
+                return other;
+            },
         },
         lore: `The head of a skeleton.<br>
             Used to store one of the most important organs in the body.<br>
@@ -562,7 +615,14 @@ const item_list = {
         },
         row: 1,
         sources: {
-            other: ['crafting'],
+            other() {
+                /** @type {drop_sources[]} */
+                const other = ['crafting'];
+
+                if (inChallenge('b', 12)) other.push('shop');
+
+                return other;
+            },
         },
         lore: `A slimy skull.<br>
             The goo is slowly flowing from its sockets...<br>
@@ -781,17 +841,13 @@ const item_list = {
                 let min = D(1),
                     max = D(4);
 
-                min = D.times(min, tmp.m.modifiers.range.mult);
-                max = D.times(max, tmp.m.modifiers.range.mult);
+                let mult = tmp.m.modifiers.range.mult;
+                if (hasUpgrade('xp', 51)) mult = mult.times(upgradeEffect('xp', 51));
+                if (hasUpgrade('m', 23)) mult = mult.times(upgradeEffect('m', 23).stone);
+                if (hasUpgrade('m', 51)) mult = mult.times(upgradeEffect('m', 51));
 
-                if (hasUpgrade('xp', 51)) {
-                    min = D.times(min, upgradeEffect('xp', 51));
-                    max = D.times(max, upgradeEffect('xp', 51));
-                }
-                if (hasUpgrade('m', 23)) {
-                    min = D.times(min, upgradeEffect('m', 23).stone);
-                    max = D.times(max, upgradeEffect('m', 23).stone);
-                }
+                min = D.times(min, mult);
+                max = D.times(max, mult);
 
                 return {
                     'mining:any': { min, max },
@@ -890,13 +946,20 @@ const item_list = {
             chance() {
                 if (D.eq(tmp.c.chance_multiplier, 0)) return {};
 
-                let chance = D(1 / 100);
+                let chance = D(1 / 100),
+                    skeleton_chance = D.dZero;
 
                 chance = chance.times(tmp.c.chance_multiplier);
 
                 if (hasUpgrade('m', 23)) chance = chance.times(upgradeEffect('m', 23).stone);
+                if (hasAchievement('ach', 65)) chance = chance.times(achievementEffect('ach', 65));
 
-                return { 'mining:any': chance };
+                if (hasChallenge('b', 12)) skeleton_chance = D.div(chance, 10);
+
+                return {
+                    'mining:any': chance,
+                    'kill:skeleton': skeleton_chance,
+                };
             },
         },
         lore: `An extremely rare mineral.<br>
@@ -904,6 +967,141 @@ const item_list = {
             Some people would kill for one of these.`,
         categories: ['materials', 'mining'],
         unlocked() { return D.gte(player.items.gold_nugget.amount, 1) || player.b.visible_challenges.includes('12'); },
+    },
+    'densium': {
+        id: null,
+        color: '#445566',
+        name: 'densium',
+        grid: [2, 5],
+        icon: [4, 5],
+        row: 0,
+        sources: {
+            other: ['mining:compactor'],
+        },
+        lore: `An extremely dense piece of stone.<br>
+            Perfectly circular and smooth.<br>
+            Rarely used, except in expensive industries.`,
+        categories: ['materials', 'mining'],
+        unlocked() { return tmp.m.compactor.unlocked; },
+    },
+    'coal': {
+        id: null,
+        color: '#333344',
+        name: 'coal',
+        grid: [2, 6],
+        icon: [4, 6],
+        row: 0,
+        sources: {
+            range() {
+                let min = D(2),
+                    max = D(4);
+
+                let mult = tmp.m.modifiers.range.mult;
+                if (hasUpgrade('xp', 51)) mult = mult.times(upgradeEffect('xp', 51));
+                if (hasUpgrade('m', 23)) mult = mult.times(upgradeEffect('m', 23).stone);
+                if (hasUpgrade('m', 51)) mult = mult.times(upgradeEffect('m', 51));
+
+                min = D.times(min, mult);
+                max = D.times(max, mult);
+
+                return { 'mining:coal': { min, max } };
+            },
+        },
+        lore: `A piece of flammable rock.<br>
+            Of low value, but required for any fire.<br>
+            Surely that's not the only use, right?`,
+        categories: ['materials', 'mining'],
+        unlocked() { return hasUpgrade('m', 61); },
+    },
+    'iron_ore': {
+        id: null,
+        color: '#333344',
+        name: 'iron ore',
+        grid: [2, 6],
+        icon: [4, 6],
+        row: 0,
+        sources: {
+            range() {
+                let min = D(1),
+                    max = D(4);
+
+                min = D.times(min, tmp.m.modifiers.range.mult);
+                max = D.times(max, tmp.m.modifiers.range.mult);
+
+                if (hasUpgrade('m', 23)) {
+                    min = D.times(min, upgradeEffect('m', 23).ore);
+                    max = D.times(max, upgradeEffect('m', 23).ore);
+                }
+
+                return { 'mining:iron': { min, max } };
+            },
+        },
+        lore: `A piece of red metal.<br>
+            Worthless without removing all this rust.<br>
+            Careful when handling, as cuts may lead to infections.`,
+        categories: ['materials', 'mining'],
+        unlocked() { return hasUpgrade('m', 61); },
+    },
+    'clean_iron_ore': {
+        id: null,
+        color: '#333344',
+        name: 'rustless iron ore',
+        grid: [2, 7],
+        icon: [4, 7],
+        row: 0,
+        sources: {
+            other: ['crafting'],
+        },
+        lore: `A piece of gray metal.<br>
+            Durable, tough, common. The perfect material?<br>
+            Slowly turns red over time, lowering its usefulness.`,
+        categories: ['materials', 'mining'],
+        unlocked() { return hasUpgrade('m', 61); },
+    },
+    'silver_ore': {
+        id: null,
+        color: '#333344',
+        name: 'silver ore',
+        grid: [2, 8],
+        icon: [4, 8],
+        row: 0,
+        sources: {
+            range() {
+                let min = D(1),
+                    max = D(4);
+
+                min = D.times(min, tmp.m.modifiers.range.mult);
+                max = D.times(max, tmp.m.modifiers.range.mult);
+
+                if (hasUpgrade('m', 23)) {
+                    min = D.times(min, upgradeEffect('m', 23).ore);
+                    max = D.times(max, upgradeEffect('m', 23).ore);
+                }
+
+                return { 'mining:silver': { min, max } };
+            },
+        },
+        lore: `A (mostly) white chunk of metal.<br>
+            Useful for jewelry.<br>
+            After a bit of treatment, it can reflect light like no other mineral.`,
+        categories: ['materials', 'mining'],
+        unlocked() { return hasUpgrade('m', 61); },
+    },
+    'electrum_blend': {
+        id: null,
+        color: '#EEDDAA',
+        name: 'electrum blend',
+        grid: [2, 9],
+        icon: [4, 9],
+        row: 0,
+        sources: {
+            other: ['crafting'],
+        },
+        lore: `A pretty light yellow alloy.<br>
+            Useful for jewelry.<br>
+            Also very valuable.`,
+        categories: ['materials', 'mining'],
+        unlocked() { return tmp.m.layerShown; },
     },
     'stone_mace': {
         id: null,
@@ -1009,7 +1207,7 @@ const item_list = {
             other: ['crafting'],
         },
         lore: `A big box made of copper and tin.<br>
-            Each one improves your level up.<br>
+            Each one improves your leveling up.<br>
             It can even hold things!`,
         categories: ['equipment', 'mining'],
         effect(amount) {
@@ -1079,7 +1277,7 @@ const item_list = {
     'doubloon': {
         id: null,
         color: '#FFFF44',
-        name: 'gold nugget',
+        name: 'doubloon',
         grid: [3, 4],
         icon: [5, 4],
         row: 1,
@@ -1112,14 +1310,140 @@ const item_list = {
         },
         unlocked() { return inChallenge('b', 12) || hasChallenge('b', 12); },
     },
+    'densium_slime': {
+        id: null,
+        color: '#445566',
+        name: 'densium slime',
+        grid: [4, 0],
+        icon: [7, 0],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        lore: `An extremely dense slime.<br>
+            Its smaller size hides an extreme weight.<br>
+            Did you know it cannot move on its own?`,
+        categories: ['equipment', 'mining'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let slime_mult = D.add(x, 1);
+
+            return { slime_mult, };
+        },
+        effectDescription(amount) {
+            let slime_mult;
+            if (shiftDown) {
+                slime_mult = '[amount + 1]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                slime_mult = format(effect.slime_mult);
+            }
+
+            return `Multiplies slime health, experience, kills, and drops by ${slime_mult}`;
+        },
+        unlocked() { return tmp.m.compactor.unlocked || D.gt(player.items[this.id].amount, 0); },
+    },
+    'densium_rock': {
+        id: null,
+        color: '#445566',
+        name: 'densium slime',
+        grid: [4, 1],
+        icon: [7, 1],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        lore: `An extremely dense piece of rock.<br>
+            It's also very hard!<br>
+            Just... Break... Already!`,
+        categories: ['equipment', 'mining'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let rock_mult = D.add(x, 1);
+
+            return { rock_mult, };
+        },
+        effectDescription(amount) {
+            let rock_mult;
+            if (shiftDown) {
+                rock_mult = '[amount + 1]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                rock_mult = format(effect.rock_mult);
+            }
+
+            return `Multiplies stone health, breaks, and drops by ${rock_mult}`;
+        },
+        unlocked() { return tmp.m.compactor.unlocked || D.gt(player.items[this.id].amount, 0); },
+    },
+    'magic_densium_ball': {
+        id: null,
+        color: '#445566',
+        name: 'magic densium ball',
+        grid: [4, 2],
+        icon: [7, 2],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        lore: `A very heavy magic 8 ball that can predict the past!<br>
+            Just ask a simple yes or no question to get an answer.<br>
+            Despite its weight, you still have to hold <b>and</b> shake it. Good luck.`,
+        categories: ['equipment', 'mining'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let comp_mult = D.div(x, 8).add(1),
+                coin_mult = D.div(x, 10).add(1);
+
+            return { comp_mult, coin_mult, };
+        },
+        effectDescription(amount) {
+            let comp_mult, coin_mult;
+            if (shiftDown) {
+                comp_mult = '[amount / 8 + 1]';
+                coin_mult = '[amount / 10 + 1]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                comp_mult = format(effect.comp_mult);
+                coin_mult = format(effect.coin_mult);
+            }
+
+            return `Divides compactor time by ${comp_mult}, and multiplies coin gain by ${coin_mult}`;
+        },
+        unlocked() { return tmp.m.compactor.unlocked || D.gt(player.items[this.id].amount, 0); },
+    },
     // Shop
     'coin_copper': {
         id: null,
         color: '#FFAA11',
         name: 'copper coin',
+        icon: [6, 0],
         row: 2,
         sources: {
-            //todo
+            range() {
+                if (inChallenge('b', 12)) {
+                    let min = D.dOne,
+                        max = D.dTwo;
+
+                    min = min.times(tmp.s.modifiers.coin.mult);
+                    max = max.times(tmp.s.modifiers.coin.mult);
+
+                    return {
+                        'kill:slime': { min, max, },
+                        'kill:skeleton': { min: min.times(2), max: max.times(2), },
+                    };
+                }
+                return {};
+            },
             other: ['shop'],
         },
         lore: `An orange coin.<br>
@@ -1131,6 +1455,7 @@ const item_list = {
         id: null,
         color: '#BB7744',
         name: 'bronze coin',
+        icon: [6, 1],
         row: 2,
         sources: {
             other: ['shop'],
@@ -1142,8 +1467,9 @@ const item_list = {
     },
     'coin_silver': {
         id: null,
-        color: '#BBBBFF',
+        color: '#DDEEEE',
         name: 'silver coin',
+        icon: [6, 2],
         row: 2,
         sources: {
             other: ['shop'],
@@ -1157,6 +1483,7 @@ const item_list = {
         id: null,
         color: '#FFFF44',
         name: 'gold coin',
+        icon: [6, 3],
         row: 2,
         sources: {
             other: ['shop'],
@@ -1170,6 +1497,7 @@ const item_list = {
         id: null,
         color: '#FFFFFF',
         name: 'platinum coin',
+        icon: [6, 4],
         row: 2,
         sources: {
             other: ['shop'],
@@ -1179,11 +1507,24 @@ const item_list = {
         categories: ['shop'],
         unlocked() { return tmp.s.layerShown; },
     },
+    // Special
+    'cueball': {
+        id: null,
+        color: '#FFFFFF',
+        name: 'platinum coin',
+        //todo icon & grid
+        row: 'side',
+        lore: `A spherical white ball.<br>
+            Where did it come from? You don't remember picking it up...<br>
+            Grants access to the Pool.`,
+        categories: [],
+        unlocked() { return D.gt(player.items[this.id].amount, 0); },
+    },
 };
 
 const ITEM_SIZES = {
     width: 12,
-    height: 6,
+    height: 8,
 };
 /**
  * @type {{[row in Layer['row']]: items[]}}
@@ -1250,13 +1591,16 @@ function setupItem([id, item]) {
  * The tile text is already set to the item name
  *
  * @param {items} item
+ * @param {number} [size=80] Size of the tile
  * @returns {tile}
  */
-function item_tile(item) {
+function item_tile(item, size = 80) {
     const itemp = tmp.items[item],
         style = {
             'color': rgb_opposite_bw(itemp.color),
             'background-color': itemp.color,
+            'width': `${size}px`,
+            'height': `${size}px`,
         };
 
     if (itemp.icon) {
@@ -1265,9 +1609,9 @@ function item_tile(item) {
             'background-origin': `border-box`,
             'background-repeat': `no-repeat`,
             'image-rendering': 'crisp-edges',
-            'background-size': `${ITEM_SIZES.width * 80}px ${ITEM_SIZES.height * 80}px`,
-            'background-position-x': `${itemp.icon[1] * -80}px`,
-            'background-position-y': `${itemp.icon[0] * -80}px`,
+            'background-size': `${ITEM_SIZES.width * size}px ${ITEM_SIZES.height * size}px`,
+            'background-position-x': `${itemp.icon[1] * -size}px`,
+            'background-position-y': `${itemp.icon[0] * -size}px`,
             'transform': 'initial',
         });
     }
@@ -1334,11 +1678,14 @@ function source_name(source) {
         case 'crafting':
             return 'crafting';
         case 'mining': {
-            /** @type {ores|'any'} */
+            /** @type {ores|'any'|'compactor'} */
             const ore = sub[0];
             if (ore == 'any') return 'mine anything';
+            if (ore == 'compactor') return 'mining compactor'
             return tmp.m.ores[ore].name;
         };
+        case 'shop':
+            return 'shop';
     }
 }
 /**
@@ -1462,4 +1809,4 @@ function get_source_drops(source, chance_multiplier = D.dOne) {
  *
  * @param {items} item
  */
-function item_effect(item) { return tmp.items[item].effect; }
+function item_effect(item) { return tmp.items?.[item].effect; }

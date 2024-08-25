@@ -164,18 +164,42 @@ addLayer('b', {
         },
         12: {
             name: 'Captain Goldtooth',
-            challengeDescription: `Fight Captain Goldtooth's pirate army.<br>
+            challengeDescription: `Fight Captain Goldtooth's debt...?<br>
                 Monsters drop coins instead of items, which must be purchased at Captain Goldtooth's shop. Luck applies to coin gain.`,
-            goalDescription: 'Spend ???',
+            goalDescription: 'Spend a total of 1 silver coin',
             rewardDescription: `Keep Captain Goldtooth's shop unlocked, skeletons have a chance to drop gold nuggets.`,
-            canComplete() { return false; },
-            progress() { return D.dZero; },
-            display() { return `${formatWhole(tmp.s.coins.spent)} / ???`; },
+            canComplete() { return D.gte(tmp.s.coins.spent, 1e4); },
+            progress() { return D.div(tmp.s.coins.spent, 1e4); },
+            display() {
+                const spent = tmp.s.coins.spent,
+                    progress_list = value_coin(spent),
+                    goal_list = value_coin(1e4);
+
+                if (!progress_list.length) progress_list.push(['coin_copper', D.dZero]);
+                if (!goal_list.length) goal_list.push(['coin_copper', D.dZero]);
+
+                const progress_txt = listFormat.format(progress_list.map(([coin, spent]) => `${formatWhole(spent)} ${tmp.items[coin].name}`)),
+                    goal_txt = listFormat.format(goal_list.map(([coin, spent]) => `${formatWhole(spent)} ${tmp.items[coin].name}`));
+
+                return `${progress_txt} / ${goal_txt}`;
+            },
             unlocked() { return player.b.shown && player.b.visible_challenges.includes(this.id); },
             group: 'boss',
             buttonStyle() {
                 const group = tmp[this.layer].challenges[this.id].group
                 return { 'backgroundColor': tmp.b.groups[group].color, };
+            },
+            onExit() {
+                const has_33 = hasUpgrade('s', 33);
+                layerDataReset('s');
+                if (has_33) player.s.upgrades.push(33);
+                tmp.s.coins.list.forEach(([item]) => player.items[item].amount = D.dZero);
+            },
+            onEnter() {
+                const has_33 = hasUpgrade('s', 33);
+                layerDataReset('s');
+                if (has_33) player.s.upgrades.push(33);
+                tmp.s.coins.list.forEach(([item]) => player.items[item].amount = D.dZero);
             },
         },
         // Mini
@@ -195,6 +219,7 @@ addLayer('b', {
                 return { 'backgroundColor': tmp.b.groups[group].color, };
             },
         },
+        //todo 22: license (no monster killing)
         // Relics
         31: {
             name: 'Thanatos',

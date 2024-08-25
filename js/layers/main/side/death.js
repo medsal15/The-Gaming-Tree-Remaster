@@ -541,13 +541,6 @@ addLayer('dea', {
 
                 return damage.max(0);
             },
-            damage_per_second() {
-                let mult = D.dZero;
-
-                if (hasUpgrade('xp', 22) && this.id == player.xp.selected) mult = D.add(mult, 1);
-
-                return D.times(mult, tmp.dea.monsters[this.id].damage);
-            },
         },
         'skeleton': {
             _id: null,
@@ -560,13 +553,6 @@ addLayer('dea', {
                 damage = damage.times(mod.mult);
 
                 return damage.max(0);
-            },
-            damage_per_second() {
-                let mult = D.dZero;
-
-                if (hasUpgrade('xp', 22) && this.id == player.xp.selected) mult = D.add(mult, 1);
-
-                return D.times(mult, tmp.dea.monsters[this.id].damage);
             },
         },
     },
