@@ -262,7 +262,7 @@ addLayer('s', {
                     return `Captain Goodtooth isn't letting you take a good look.<br>\
                         You can make out a strange humanoid figure...`;
                 }
-                let text = 'Unlock a new enemy to fight.'
+                let text = 'Unlock a new enemy to fight.';
                 if (hasUpgrade(this.layer, this.id)) text += `<br>This isn't even worth the paper it's printed on!`;
                 return text;
             },
@@ -565,6 +565,40 @@ addLayer('s', {
                 return D.div(base, loss);
             },
         },
+        densium_slime: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
+            value() {
+                let base = D(1_000);
+
+                const loss = D.add(player.s.trades[this.id].sold, 10).log10();
+
+                return D.div(base, loss);
+            },
+        },
+        densium_rock: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
+            value() {
+                let base = D(750);
+
+                const loss = D.add(player.s.trades[this.id].sold, 10).log10();
+
+                return D.div(base, loss);
+            },
+        },
+        magic_densium_ball: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
+            value() {
+                let base = D(888);
+
+                const loss = D.add(player.s.trades[this.id].sold, 10).log10();
+
+                return D.div(base, loss);
+            },
+        },
+        //todo extended ores equipment
         // Mined ores
         copper_ore: {
             _id: null,

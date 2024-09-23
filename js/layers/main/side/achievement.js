@@ -28,7 +28,7 @@ addLayer('ach', {
                 ['achievements', () => tmp.ach.categories.normal.rows],
             ],
         },
-        'Secrets': {
+        'Bonus': {
             content: [
                 ['display-text', () => {
                     const color = tmp.ach.categories.bonus.color,
@@ -47,10 +47,13 @@ addLayer('ach', {
             content: [
                 ['display-text', () => {
                     const color = tmp.ach.categories.secret.color,
-                        owned = tmp.ach.categories.secret.owned.length,
-                        visible = tmp.ach.categories.secret.visible.length;
+                        owned = tmp.ach.categories.secret.owned.length;
 
                     return `You have ${resourceColor(color, formatWhole(owned), 'font-size:1.5em;')} secrets`;
+                }],
+                ['display-text', () => {
+                    const owned = player.ach.pool_balls.length;
+                    if (owned > 0) return `???: ${resourceColor(tmp.items.cueball.color, formatWhole(owned))} /${resourceColor(tmp.items.cueball.color, formatWhole(15))}`;
                 }],
                 'blank',
                 ['achievements', () => tmp.ach.categories.secret.rows],
@@ -310,11 +313,11 @@ addLayer('ach', {
             name: 'Brown Metal',
             tooltip: 'Make some bronze',
             done() { return D.gt(player.items.bronze_blend.amount, 0); },
-            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.m.nodeStyle.backgroundColor); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.items.bronze_blend.color); },
             style() {
                 let style = {};
 
-                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.m.nodeStyle.backgroundColor;
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.items.bronze_blend.color;
 
                 return style;
             },
@@ -338,13 +341,13 @@ addLayer('ach', {
         },
         55: {
             name: '24k Real',
-            tooltip: 'Get gold<br>Reward: +0.25',
+            tooltip: 'Get gold<br>Reward: +0.25 drop chance multiplier',
             done() { return D.gt(player.items.gold_nugget.amount, 0); },
-            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.m.nodeStyle.backgroundColor); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.items.gold_nugget.color); },
             style() {
                 let style = {};
 
-                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.m.nodeStyle.backgroundColor;
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.items.gold_nugget.color;
                 style['border'] = `solid 3px ${tmp.ach.color}`;
 
                 return style;
@@ -412,7 +415,10 @@ addLayer('ach', {
             effect() { return D.dTwo; },
         },
         75: {
-            name: 'Scammed',
+            name() {
+                if (!hasAchievement(this.layer, this.id)) return 'A Great Deal';
+                return 'Scammed';
+            },
             tooltip: 'Buy a map<br>Reward: Keep the compactor unlocked',
             done() { return D.gte(player.items.coin_gold, 1); },
             onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.s.color); },
@@ -425,6 +431,81 @@ addLayer('ach', {
                 return style;
             },
             unlocked() { return inChallenge('b', 12) || hasChallenge('b', 12); },
+        },
+        91: {
+            name: 'Not Quite A Black Hole',
+            tooltip: 'Use the Compactor to turn ore into a strange mineral',
+            done() { return D.gt(player.m.compactor.runs, 0); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.items.densium.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.items.densium.color;
+
+                return style;
+            },
+            unlocked() { return tmp.m.compactor.unlocked; },
+        },
+        92: {
+            name: 'Darkstone',
+            tooltip: 'Obtain Coal',
+            done() { return D.gt(player.items.coal.amount, 0); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.items.coal.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.items.coal.color;
+
+                return style;
+            },
+            unlocked() { return tmp.m.compactor.unlocked; },
+        },
+        93: {
+            name: 'Red Metal',
+            tooltip: 'Get some iron... rust???',
+            done() { return D.gt(player.items.iron_ore.amount, 0); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.items.iron_ore.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.items.iron_ore.color;
+
+                return style;
+            },
+            unlocked() { return tmp.m.compactor.unlocked; },
+        },
+        94: {
+            name: 'Rustless',
+            tooltip: 'Get some iron<br>Reward: Mining upgrades stay unlocked',
+            done() { return D.gt(player.items.clear_iron_ore.amount, 0); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.items.clear_iron_ore.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.items.clear_iron_ore.color;
+                style['border'] = `solid 3px ${tmp.ach.color}`;
+
+                return style;
+            },
+            unlocked() { return tmp.m.compactor.unlocked; },
+        },
+        95: {
+            name: 'Shocking!',
+            tooltip() {
+                return `Craft some electrum<br>
+                    Reward: Keep ${resourceColor(tmp.items.densium.color, tmp.m.upgrades[61].title)} on all resets`;
+            },
+            done() { return D.gt(player.items.electrum_blend.amount, 0); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.items.electrum_blend.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.items.electrum_blend.color;
+                style['border'] = `solid 3px ${tmp.ach.color}`;
+
+                return style;
+            },
+            unlocked() { return tmp.m.compactor.unlocked; },
         },
         //todo deep mining achievements
         //#endregion Normal
@@ -554,7 +635,7 @@ addLayer('ach', {
             style() {
                 let style = {};
 
-                style['background-color'] = tmp.c.color;
+                style['background-color'] = tmp.m.nodeStyle.backgroundColor;
                 style['border'] = `solid 3px ${tmp.ach.categories.secret.color}`;
 
                 return style;
@@ -582,7 +663,7 @@ addLayer('ach', {
     achievementPopups: false, // This is done manually
     categories: {
         normal: {
-            rows: [1, 3, 4, 5, 7],
+            rows: [1, 3, 4, 5, 7, 9],
             color() { return tmp.ach.color; },
             visible() {
                 return Object.values(tmp.ach.achievements)

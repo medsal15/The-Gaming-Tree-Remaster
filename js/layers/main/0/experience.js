@@ -26,7 +26,7 @@ addLayer('xp', {
             monsters: Object.fromEntries(Object.keys(layers.xp.monsters)
                 .map(mon => [mon, {
                     kills: D.dZero,
-                    health: layers.xp.monsters[mon].health(1),
+                    health: D(100),
                     last_drops: [],
                     last_drops_times: D.dZero,
                 }])),

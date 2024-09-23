@@ -386,8 +386,84 @@ addLayer('c', {
             categories: ['materials', 'mining',],
             unlocked() { return tmp.m.layerShown; },
         },
-        //todo clean_iron_ore (coal + iron ore + slime goo)
-        //todo electrum blend (gold nugget + silver ore)
+        clear_iron_ore: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                /** @type {[items, Decimal][]} */
+                let costs = [
+                    ['iron_ore', D.times(8, count)],
+                    ['coal', D.times(16, count)],
+                    ['slime_goo', D.times(15, count)],
+                ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['clear_iron_ore', D.times(count, 2)],
+                ];
+            },
+            duration() {
+                let duration = D(20);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'iron_ore': '8 * count',
+                    'coal': '16 * count',
+                    'slime_goo': '15 * count',
+                },
+                produces: {
+                    'clear_iron_ore': 'count * 2',
+                },
+                duration: '20 seconds',
+            },
+            categories: ['materials', 'mining',],
+            unlocked() { return hasUpgrade('m', 61); },
+        },
+        electrum_blend: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                /** @type {[items, Decimal][]} */
+                let costs = [
+                    ['silver_ore', D.times(5, count)],
+                    ['gold_nugget', count],
+                ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['electrum_blend', count],
+                ];
+            },
+            formulas: {
+                consumes: {
+                    'silver_ore': '5 * count',
+                    'gold_nugget': 'count',
+                },
+                produces: {
+                    'electrum_blend': 'count',
+                }
+            },
+            categories: ['materials', 'mining',],
+            unlocked() { return hasUpgrade('m', 61); },
+        },
         // Equipment
         slime_crystal: {
             _id: null,
@@ -972,7 +1048,141 @@ addLayer('c', {
             static: true,
             unlocked() { return inChallenge('b', 12) || hasChallenge('b', 12); },
         },
-        //todo densium_slime, densium_rock, magic_densium_ball
+        densium_slime: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                /** @type {[items, Decimal][]} */
+                let costs = [
+                    ['densium', D.sumGeometricSeries(count, 1, 1.05, all)],
+                    ['slime_goo', D.sumGeometricSeries(count, 30, 2.7, all)],
+                    ['slime_core', D.sumGeometricSeries(count, 5, 1.8, all)],
+                ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['densium_slime', count],
+                ];
+            },
+            duration(amount, all_time) {
+                let duration = D(30);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'densium': '1.05 ^ amount',
+                    'slime_goo': '30 * 2.7 ^ amount',
+                    'slime_core': '5 * 1.8 ^ amount',
+                },
+                produces: {
+                    'densium_slime': 'amount',
+                },
+                duration: '30 seconds',
+            },
+            categories: ['equipment', 'mining', 'slime',],
+            static: true,
+            unlocked() { return tmp.m.compactor.unlocked; },
+        },
+        densium_rock: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                /** @type {[items, Decimal][]} */
+                let costs = [
+                    ['densium', D.sumGeometricSeries(count, 1, 1.05, all)],
+                    ['stone', D.sumGeometricSeries(count, 50, 3, all)],
+                    ['slime_core_shard', D.sumGeometricSeries(count, 10, 2.1, all)],
+                ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['densium_rock', count],
+                ];
+            },
+            duration(amount, all_time) {
+                let duration = D(30);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'densium': '1.05 ^ amount',
+                    'stone': '50 * 3 ^ amount',
+                    'slime_core_shard': '5 * 2.1 ^ amount',
+                },
+                produces: {
+                    'densium_rock': 'amount',
+                },
+                duration: '30 seconds',
+            },
+            categories: ['equipment', 'mining',],
+            static: true,
+            unlocked() { return tmp.m.compactor.unlocked; },
+        },
+        magic_densium_ball: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                /** @type {[items, Decimal][]} */
+                let costs = [
+                    ['densium', D.sumGeometricSeries(count, 1, 1.05, all)],
+                    ['slime_goo', D.sumGeometricSeries(count, 40, 2.7, all)],
+                    ['bone', D.sumGeometricSeries(count, 15, 2.7, all)],
+                ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['magic_densium_ball', count],
+                ];
+            },
+            duration(amount, all_time) {
+                let duration = D(30);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'densium': '1.05 ^ amount',
+                    'slime_goo': '30 * 2.7 ^ amount',
+                    'bone': '5 * 2.7 ^ amount',
+                },
+                produces: {
+                    'magic_densium_ball': 'amount',
+                },
+                duration: '30 seconds',
+            },
+            categories: ['equipment', 'mining',],
+            static: true,
+            unlocked() { return tmp.m.compactor.unlocked; },
+        },
         //todo extended mining equipement
     },
     modifiers: {
@@ -1026,10 +1236,10 @@ addLayer('c', {
         });
     },
     shouldNotify() {
-        return canBuyBuyable('c', 11) ||
-            Object.values(tmp.c.recipes).filter(rec => (rec.unlocked ?? true) &&
-                rec.categories.includes('equipment') && crafting_can(rec.id, D.dOne) && D.lte(player.c.recipes[rec.id].making, 0)).length;
+        return Object.values(tmp.c.recipes).filter(rec => (rec.unlocked ?? true) &&
+            rec.categories.includes('equipment') && crafting_can(rec.id, D.dOne) && D.lte(player.c.recipes[rec.id].making, 0)).length;
     },
+    prestigeNotify() { return canBuyBuyable('c', 11); },
     nodeStyle: {
         'backgroundColor'() {
             if (!player.c.shown && !canBuyBuyable('c', 11)) return colors[options.theme].locked;

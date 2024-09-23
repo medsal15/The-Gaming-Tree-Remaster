@@ -871,7 +871,7 @@ const item_list = {
         sources: {
             range() {
                 let min = D(1),
-                    max = D(4);
+                    max = D(3);
 
                 min = D.times(min, tmp.m.modifiers.range.mult);
                 max = D.times(max, tmp.m.modifiers.range.mult);
@@ -951,8 +951,11 @@ const item_list = {
 
                 chance = chance.times(tmp.c.chance_multiplier);
 
-                if (hasUpgrade('m', 23)) chance = chance.times(upgradeEffect('m', 23).stone);
+                if (hasUpgrade('m', 23)) chance = chance.times(upgradeEffect('m', 23).ore);
+                if (hasUpgrade('m', 43)) chance = chance.times(upgradeEffect('m', 43));
                 if (hasAchievement('ach', 65)) chance = chance.times(achievementEffect('ach', 65));
+
+                chance = chance.div(player.items[this.id].amount.add(1).max(1));
 
                 if (hasChallenge('b', 12)) skeleton_chance = D.div(chance, 10);
 
@@ -963,7 +966,7 @@ const item_list = {
             },
         },
         lore: `An extremely rare mineral.<br>
-            Also very valuable.<br>
+            Somehow, the more you have, the harder it is to find.<br>
             Some people would kill for one of these.`,
         categories: ['materials', 'mining'],
         unlocked() { return D.gte(player.items.gold_nugget.amount, 1) || player.b.visible_challenges.includes('12'); },
@@ -1015,15 +1018,15 @@ const item_list = {
     },
     'iron_ore': {
         id: null,
-        color: '#333344',
+        color: '#BB2222',
         name: 'iron ore',
-        grid: [2, 6],
-        icon: [4, 6],
+        grid: [2, 7],
+        icon: [4, 7],
         row: 0,
         sources: {
             range() {
-                let min = D(1),
-                    max = D(4);
+                let min = D(.5),
+                    max = D(3);
 
                 min = D.times(min, tmp.m.modifiers.range.mult);
                 max = D.times(max, tmp.m.modifiers.range.mult);
@@ -1042,12 +1045,12 @@ const item_list = {
         categories: ['materials', 'mining'],
         unlocked() { return hasUpgrade('m', 61); },
     },
-    'clean_iron_ore': {
+    'clear_iron_ore': {
         id: null,
-        color: '#333344',
+        color: '#8899AA',
         name: 'rustless iron ore',
-        grid: [2, 7],
-        icon: [4, 7],
+        grid: [2, 8],
+        icon: [4, 8],
         row: 0,
         sources: {
             other: ['crafting'],
@@ -1060,15 +1063,15 @@ const item_list = {
     },
     'silver_ore': {
         id: null,
-        color: '#333344',
+        color: '#DDEEEE',
         name: 'silver ore',
-        grid: [2, 8],
-        icon: [4, 8],
+        grid: [2, 9],
+        icon: [4, 9],
         row: 0,
         sources: {
             range() {
-                let min = D(1),
-                    max = D(4);
+                let min = D(.5),
+                    max = D(2);
 
                 min = D.times(min, tmp.m.modifiers.range.mult);
                 max = D.times(max, tmp.m.modifiers.range.mult);
@@ -1091,8 +1094,8 @@ const item_list = {
         id: null,
         color: '#EEDDAA',
         name: 'electrum blend',
-        grid: [2, 9],
-        icon: [4, 9],
+        grid: [2, 10],
+        icon: [4, 10],
         row: 0,
         sources: {
             other: ['crafting'],
@@ -1101,7 +1104,7 @@ const item_list = {
             Useful for jewelry.<br>
             Also very valuable.`,
         categories: ['materials', 'mining'],
-        unlocked() { return tmp.m.layerShown; },
+        unlocked() { return hasUpgrade('m', 61); },
     },
     'stone_mace': {
         id: null,
@@ -1165,7 +1168,7 @@ const item_list = {
         effect(amount) {
             const x = D(amount ?? player.items[this.id].amount);
 
-            let decay = D.add(player.m.resetTime, 10).log10(),
+            let decay = D.add(player.m.resetTime, 1).log10().max(1),
                 damage = D.pow(1.1, x),
                 ores = D.div(x, 10).add(1);
 
@@ -1180,7 +1183,7 @@ const item_list = {
                 ores,
                 decay;
             if (shiftDown) {
-                decay = 'log10(reset time + 10)'
+                decay = 'max(log10(reset time + 1), 1)'
                 ores = '[decay√(amount / 10 + 1)]';
                 damage = '[decay√(1.1 ^ amount)]';
             } else {
@@ -1323,7 +1326,7 @@ const item_list = {
         lore: `An extremely dense slime.<br>
             Its smaller size hides an extreme weight.<br>
             Did you know it cannot move on its own?`,
-        categories: ['equipment', 'mining'],
+        categories: ['equipment', 'mining', 'slime',],
         effect(amount) {
             const x = D(amount ?? player.items[this.id].amount);
 
@@ -1349,7 +1352,7 @@ const item_list = {
     'densium_rock': {
         id: null,
         color: '#445566',
-        name: 'densium slime',
+        name: 'densium rock',
         grid: [4, 1],
         icon: [7, 1],
         row: 1,

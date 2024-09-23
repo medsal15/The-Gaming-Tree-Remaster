@@ -156,7 +156,7 @@ addLayer('m', {
 
                     return `You have ${listFormat.format(list)}.`;
                 }],
-                ['display-text', () => `The compactor has run ${formatWhole(player.m.compactor.runs)} times.`],
+                ['display-text', () => `The compactor has run ${resourceColor(tmp.items.densium.color, formatWhole(player.m.compactor.runs))} times.`],
                 'blank',
                 ['clickable', 31],
                 'blank',
@@ -173,7 +173,7 @@ addLayer('m', {
                 ['column', () => handbook_content(player.m.lore)],
             ],
             buttonStyle: { borderColor() { return tmp.m.nodeStyle.backgroundColor; }, },
-            unlocked() { return hasUpgrade('m', 22) || hasAchievement('ach', 61); },
+            unlocked() { return hasUpgrade('m', 22) || hasAchievement('ach', 71); },
         },
     },
     upgrades: {
@@ -272,7 +272,7 @@ addLayer('m', {
             description() {
                 let text = 'Maximum ore health boosts mining amount';
 
-                if (shiftDown) text += `<br>log10(health + 10)`;
+                if (shiftDown) text += `<br>Formula: log16(health + 16)`;
 
                 return text;
             },
@@ -280,7 +280,7 @@ addLayer('m', {
                 /** @type {{[ore in ores]: Decimal}} */
                 const ores = Object.fromEntries(
                     Object.values(tmp.m.ores)
-                        .map(ore => [ore.id, D.add(ore.health, 10).log10()]),
+                        .map(ore => [ore.id, D.add(ore.health, 16).log(16)]),
                 );
 
                 return Object.assign(ores, {
@@ -329,7 +329,7 @@ addLayer('m', {
                 if (!tmp[this.layer].upgrades[this.id].show) return '';
                 return `/${format(upgradeEffect(this.layer, this.id))}`;
             },
-            show() { return hasUpgrade(this.layer, this.id - 10); },
+            show() { return hasUpgrade(this.layer, this.id - 10) || hasAchievement('ach', 94); },
             item: 'stone',
             cost: D(32),
             style() {
@@ -371,7 +371,7 @@ addLayer('m', {
 
                 let text = 'Automatically mine current ore once per second';
 
-                if (!hasAchievement('ach', 61)) text += '<br>Unlock the mining handbook';
+                if (!hasAchievement('ach', 71)) text += '<br>Unlock the mining handbook';
 
                 return text;
             },
@@ -380,7 +380,7 @@ addLayer('m', {
                 if (!tmp[this.layer].upgrades[this.id].show) return '';
                 return `+${formatWhole(upgradeEffect(this.layer, this.id))}`;
             },
-            show() { return hasUpgrade(this.layer, this.id - 10); },
+            show() { return hasUpgrade(this.layer, this.id - 10) || hasAchievement('ach', 94); },
             item: 'copper_ore',
             cost: D(16),
             style() {
@@ -420,14 +420,14 @@ addLayer('m', {
             description() {
                 if (!tmp[this.layer].upgrades[this.id].show) return `Buy ${tmp[this.layer].upgrades[this.id - 10].title} to unlock`;
 
-                let text = 'Double ore gain, but halve stone gain';
+                let text = '+50% ore gain, but halve stone gain';
 
                 return text;
             },
             effect() {
                 return {
                     stone: D(0.5),
-                    ore: D.dTwo,
+                    ore: D(1.5),
                 };
             },
             effectDisplay() {
@@ -436,7 +436,7 @@ addLayer('m', {
                 const effect = upgradeEffect(this.layer, this.id);
                 return `*${format(effect.ore)}, /${format(effect.stone)}`;
             },
-            show() { return hasUpgrade(this.layer, this.id - 10); },
+            show() { return hasUpgrade(this.layer, this.id - 10) || hasAchievement('ach', 94); },
             item: 'tin_ore',
             cost: D(4),
             style() {
@@ -478,7 +478,7 @@ addLayer('m', {
 
                 let text = 'Breaking minerals boosts their drops';
 
-                if (shiftDown) text += '<br>Formula: log4(broken + 4)';
+                if (shiftDown) text += '<br>Formula: log8(broken + 8)';
 
                 return text;
             },
@@ -486,7 +486,7 @@ addLayer('m', {
                 /** @type {{[ore in ores]: Decimal}} */
                 const ores = Object.fromEntries(
                     Object.keys(layers.m.ores)
-                        .map(/**@param{ores}ore*/ore => [ore, D.add(player.m.ores[ore].broken, 4).log(4)]),
+                        .map(/**@param{ores}ore*/ore => [ore, D.add(player.m.ores[ore].broken, 8).log(8)]),
                 );
 
                 return Object.assign(ores, {
@@ -497,7 +497,7 @@ addLayer('m', {
                 if (!tmp[this.layer].upgrades[this.id].show) return '';
                 return `*${format(upgradeEffect(this.layer, this.id).current)}`;
             },
-            show() { return hasUpgrade(this.layer, this.id - 10); },
+            show() { return hasUpgrade(this.layer, this.id - 10) || hasAchievement('ach', 94); },
             item: 'bronze_blend',
             cost: D(2),
             style() {
@@ -548,7 +548,7 @@ addLayer('m', {
                 if (!tmp[this.layer].upgrades[this.id].show) return '';
                 return `/${format(upgradeEffect(this.layer, this.id))}`;
             },
-            show() { return hasUpgrade(this.layer, this.id - 10); },
+            show() { return hasUpgrade(this.layer, this.id - 10) || hasAchievement('ach', 94); },
             item: 'stone',
             cost: D(256),
             style() {
@@ -599,7 +599,7 @@ addLayer('m', {
                 if (!tmp[this.layer].upgrades[this.id].show) return '';
                 return `*${format(upgradeEffect(this.layer, this.id))}`;
             },
-            show() { return hasUpgrade(this.layer, this.id - 10); },
+            show() { return hasUpgrade(this.layer, this.id - 10) || hasAchievement('ach', 94); },
             item: 'copper_ore',
             cost: D(32),
             style() {
@@ -650,7 +650,7 @@ addLayer('m', {
                 if (!tmp[this.layer].upgrades[this.id].show) return '';
                 return `+${format(upgradeEffect(this.layer, this.id))}`;
             },
-            show() { return hasUpgrade(this.layer, this.id - 10); },
+            show() { return hasUpgrade(this.layer, this.id - 10) || hasAchievement('ach', 94); },
             item: 'tin_ore',
             cost: D(16),
             style() {
@@ -699,7 +699,7 @@ addLayer('m', {
                 if (!tmp[this.layer].upgrades[this.id].show) return '';
                 return `/${format(upgradeEffect(this.layer, this.id))}`;
             },
-            show() { return hasUpgrade(this.layer, this.id - 10); },
+            show() { return hasUpgrade(this.layer, this.id - 10) || hasAchievement('ach', 94); },
             item: 'bronze_blend',
             cost: D(8),
             style() {
@@ -736,7 +736,7 @@ addLayer('m', {
         },
         41: {
             title: 'Densium Pick',
-            description: 'Multiply mining damage by targetted ore amount',
+            description: 'Multiply mining damage by amount of ores being mined',
             effect() { return D(player.m.targets.length); },
             effectDisplay() { return `*${formatWhole(upgradeEffect(this.layer, this.id))}`; },
             item: 'densium',
@@ -763,8 +763,108 @@ addLayer('m', {
             },
             currencyLocation() { return player.items[this.item]; },
             currencyInternalName: 'amount',
-            unlocked() { return tmp.m.compactor.unlocked; },
+            unlocked() { return tmp.m.compactor.unlocked || hasAchievement('ach', 61); },
         },
+        42: {
+            title: 'Iron Pick',
+            description() {
+                let text = 'Increase mining damage by amount of ores broken';
+
+                if (shiftDown) text += '<br>Formula: log10(broken + 1)';
+
+                return text;
+            },
+            effect() { return D.add(tmp.m.broken.total, 1).log10(); },
+            effectDisplay() { return `+${format(upgradeEffect(this.layer, this.id))}`; },
+            item: 'iron_ore',
+            cost: D(9),
+            style() {
+                if (!hasUpgrade(this.layer, this.id) && canAffordUpgrade(this.layer, this.id)) {
+                    const selftmp = tmp[this.layer].upgrades[this.id];
+                    return {
+                        'backgroundColor': tmp.items[selftmp.item].color,
+                    };
+                }
+            },
+            costDisplay() {
+                const selftmp = tmp[this.layer].upgrades[this.id];
+                return `Cost: ${format(selftmp.cost)} ${tmp.items[selftmp.item].name}`;
+            },
+            canAfford() {
+                const selftmp = tmp[this.layer].upgrades[this.id];
+                return D.gte(player.items[selftmp.item].amount, selftmp.cost);
+            },
+            pay() {
+                const selftmp = tmp[this.layer].upgrades[this.id];
+                gain_items(selftmp.item, D.neg(selftmp.cost));
+            },
+            currencyLocation() { return player.items[this.item]; },
+            currencyInternalName: 'amount',
+            unlocked() { return hasUpgrade('m', 61) || hasAchievement('ach', 61); },
+        },
+        43: {
+            title: 'Silver Pick',
+            description: 'Multiply gold nugget chance by amount of picks',
+            effect() { return D(player.m.upgrades.filter(id => tmp.m.upgrades[id].title.toLowerCase().includes('pick')).length); },
+            effectDisplay() { return `*${formatWhole(upgradeEffect(this.layer, this.id))}`; },
+            item: 'silver_ore',
+            cost: D(6),
+            style() {
+                if (!hasUpgrade(this.layer, this.id) && canAffordUpgrade(this.layer, this.id)) {
+                    const selftmp = tmp[this.layer].upgrades[this.id];
+                    return {
+                        'backgroundColor': tmp.items[selftmp.item].color,
+                    };
+                }
+            },
+            costDisplay() {
+                const selftmp = tmp[this.layer].upgrades[this.id];
+                return `Cost: ${format(selftmp.cost)} ${tmp.items[selftmp.item].name}`;
+            },
+            canAfford() {
+                const selftmp = tmp[this.layer].upgrades[this.id];
+                return D.gte(player.items[selftmp.item].amount, selftmp.cost);
+            },
+            pay() {
+                const selftmp = tmp[this.layer].upgrades[this.id];
+                gain_items(selftmp.item, D.neg(selftmp.cost));
+            },
+            currencyLocation() { return player.items[this.item]; },
+            currencyInternalName: 'amount',
+            unlocked() { return hasUpgrade('m', 61) || hasAchievement('ach', 61); },
+        },
+        /*
+        TODO
+        44: {
+            title: 'Electrum Pick',
+            description: '',
+            item: 'electrum_blend',
+            cost: D(1),
+            style() {
+                if (!hasUpgrade(this.layer, this.id) && canAffordUpgrade(this.layer, this.id)) {
+                    const selftmp = tmp[this.layer].upgrades[this.id];
+                    return {
+                        'backgroundColor': tmp.items[selftmp.item].color,
+                    };
+                }
+            },
+            costDisplay() {
+                const selftmp = tmp[this.layer].upgrades[this.id];
+                return `Cost: ${format(selftmp.cost)} ${tmp.items[selftmp.item].name}`;
+            },
+            canAfford() {
+                const selftmp = tmp[this.layer].upgrades[this.id];
+                return D.gte(player.items[selftmp.item].amount, selftmp.cost);
+            },
+            pay() {
+                const selftmp = tmp[this.layer].upgrades[this.id];
+                gain_items(selftmp.item, D.neg(selftmp.cost));
+            },
+            currencyLocation() { return player.items[this.item]; },
+            currencyInternalName: 'amount',
+            unlocked() { return hasUpgrade('m', 61) || hasAchievement('ach', 61); },
+        },
+        */
         51: {
             title: 'Densium Attraction',
             description() {
@@ -776,11 +876,11 @@ addLayer('m', {
 
                 return text;
             },
-            show() { return hasUpgrade(this.layer, this.id - 10); },
+            show() { return hasUpgrade(this.layer, this.id - 10) || hasAchievement('ach', 94); },
             effect() { return D.add(player.items.densium.amount, 1).sqrt(); },
             effectDisplay() { return `*${format(upgradeEffect(this.layer, this.id))}`; },
             item: 'densium',
-            cost: D(4),
+            cost: D(3),
             style() {
                 if (!tmp[this.layer].upgrades[this.id].show) {
                     return {
@@ -817,16 +917,16 @@ addLayer('m', {
             description() {
                 if (!tmp[this.layer].upgrades[this.id].show) return `Buy ${tmp[this.layer].upgrades[this.id - 10].title} to unlock`;
 
-                return 'Automatically mine current ore once per second<br>Unlock new ores';
+                return 'Automatically mine current ore once per second<br>Mine an additionnal ore at once';
             },
-            show() { return hasUpgrade(this.layer, this.id - 10); },
+            show() { return hasUpgrade(this.layer, this.id - 10) || hasAchievement('ach', 94); },
             effect() { return D.dOne; },
             effectDisplay() {
                 if (!tmp[this.layer].upgrades[this.id].show) return '';
                 return `+${formatWhole(upgradeEffect(this.layer, this.id))}`;
             },
             item: 'densium',
-            cost: D(8),
+            cost: D(4),
             style() {
                 if (!tmp[this.layer].upgrades[this.id].show) {
                     return {
@@ -858,7 +958,8 @@ addLayer('m', {
             currencyInternalName: 'amount',
             unlocked() { return tmp.m.compactor.unlocked; },
         },
-        //todo iron upgrades (42-62), silver upgrades (43-63), electrum upgrades (44-64)
+        //todo iron upgrades (52-62), silver upgrades (53-63), electrum upgrades (44-64)
+        //todo unlock forge (in craft, with iron), mining experience (???)
     },
     clickables: {
         // Mining
@@ -1015,9 +1116,10 @@ addLayer('m', {
             name: 'copper ore',
             position: [0, 1],
             health() {
-                let base = D(25);
+                let base = D(25),
+                    health = D.times(base, tmp.m?.modifiers.health.mult);
 
-                return D.times(base, tmp.m?.modifiers.health.mult);
+                return health;
             },
             lore: `A chunk of rock containing copper.<br>
                 Somewhat tough to break.<br>
@@ -1032,9 +1134,10 @@ addLayer('m', {
             name: 'tin ore',
             position: [1, 1],
             health() {
-                let base = D(15);
+                let base = D(15),
+                    health = D.times(base, tmp.m?.modifiers.health.mult);
 
-                return D.times(base, tmp.m?.modifiers.health.mult);
+                return health;
             },
             lore: `A chunk of rock containing tin.<br>
                 Easy to break.<br>
@@ -1049,8 +1152,8 @@ addLayer('m', {
             name: 'coal',
             position: [2, 0],
             health() {
-                let base = D.dTen,
-                    health = D.times(base, tmp.m?.modifiers.health.mult)
+                let base = D(20),
+                    health = D.times(base, tmp.m?.modifiers.health.mult);
 
                 return health;
             },
@@ -1068,8 +1171,8 @@ addLayer('m', {
             name: 'iron',
             position: [2, 1],
             health() {
-                let base = D(15),
-                    health = D.times(base, tmp.m?.modifiers.health.mult)
+                let base = D(35),
+                    health = D.times(base, tmp.m?.modifiers.health.mult);
 
                 return health;
             },
@@ -1078,6 +1181,7 @@ addLayer('m', {
                 The red comes from oxidation. Refining this might be tough...`,
             weight() { return D.dOne; },
             breaks() { return D.dOne; },
+            unlocked() { return hasUpgrade('m', 61); },
         },
         silver: {
             _id: null,
@@ -1086,14 +1190,17 @@ addLayer('m', {
             name: 'silver',
             position: [2, 2],
             health() {
-                let base = D(35),
-                    health = D.times(base, tmp.m?.modifiers.health.mult)
+                let base = D(50),
+                    health = D.times(base, tmp.m?.modifiers.health.mult);
 
                 return health;
             },
             lore: `A chunk of rock mixed with silver.<br>
                 Tough to break and has strange black spots.<br>
                 Now this is a valuable ore!`,
+            weight() { return D(.5); },
+            breaks() { return D.dOne; },
+            unlocked() { return hasUpgrade('m', 61); },
         },
     },
     bars: {
@@ -1117,7 +1224,7 @@ addLayer('m', {
             height: 10,
             width: 320,
             fillStyle: {
-                backgroundColor() { return tmp.m.color; },
+                backgroundColor() { return tmp.m.nodeStyle.backgroundColor; },
             },
             unlocked() { return D.gt(tmp.m.modifiers.damage.speed, 0); },
         },
@@ -1159,6 +1266,7 @@ addLayer('m', {
 
                 if (hasUpgrade('m', 11)) base = base.add(upgradeEffect('m', 11));
                 if (hasUpgrade('m', 33)) base = base.add(upgradeEffect('m', 33));
+                if (hasUpgrade('m', 42)) base = base.add(upgradeEffect('m', 42));
 
                 if (hasUpgrade('l', 14)) base = base.add(upgradeEffect('l', 14));
 
@@ -1188,7 +1296,6 @@ addLayer('m', {
                 let speed = D.dZero;
 
                 if (hasUpgrade('m', 22)) speed = speed.add(upgradeEffect('m', 22));
-                if (hasUpgrade('m', 61)) speed = speed.add(upgradeEffect('m', 61));
 
                 return speed;
             },
@@ -1227,6 +1334,7 @@ addLayer('m', {
             let size = D.dOne;
 
             if (hasUpgrade('s', 22)) size = size.add(upgradeEffect('s', 22));
+            if (hasUpgrade('m', 61)) size = size.add(upgradeEffect('m', 61));
 
             return size.toNumber();
         },
@@ -1273,8 +1381,10 @@ addLayer('m', {
 
         // Damage
         let damage = D.dZero;
-        if (D.gte(player.m.mine_time, 1)) damage = damage.add(tmp.m.modifiers.damage.total);
-        if (D.gte(player.m.mine_time, 1)) player.m.mine_time = D.minus(player.m.mine_time, 1);
+        if (D.gte(player.m.mine_time, 1)) {
+            damage = damage.add(tmp.m.modifiers.damage.total);
+            player.m.mine_time = D.minus(player.m.mine_time, 1);
+        }
         if (damage.gt(0)) {
             player.m.health = D.minus(player.m.health, damage);
         }
@@ -1335,8 +1445,11 @@ addLayer('m', {
             upgs = [],
             /** @type {(keyof Player['m'])[]} */
             keep = ['lore', 'previous'];
+        if (hasAchievement('ach', 95) && hasUpgrade('m', 61)) {
+            upgs.push(61);
+        }
         if (D.gt(held, 0)) {
-            upgs.push(...player.m.upgrades.slice(0, held));
+            upgs.push(...player.m.upgrades.filter(id => !upgs.includes(id)).slice(0, held));
         }
 
         layerDataReset(this.layer, keep);

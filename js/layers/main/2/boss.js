@@ -17,7 +17,7 @@ addLayer('b', {
     symbol: 'B',
     color: '#CC5555',
     tooltip() {
-        if (!player.b.shown) return `Reach ${formatWhole(360)} kills to fight (you have ${formatWhole(tmp.xp.kill.total)} kills)`;
+        if (!player.b.shown) return `Reach ${formatWhole(360)} kills to challenge (you have ${formatWhole(tmp.xp.kill.total)} kills)`;
         return `${formatWhole(tmp.b.complete.total)} bosses beaten`;
     },
     startData() {
@@ -29,7 +29,7 @@ addLayer('b', {
             lore: 'slime_sovereign',
         };
     },
-    layerShown() { return player.b.shown || D.gte(tmp.xp.kill.total, 250); },
+    layerShown() { return player.b.shown || (player.l.unlocked && player.c.shown); },
     hotkeys: [
         {
             key: 'B',
@@ -236,6 +236,7 @@ addLayer('b', {
                 return { 'backgroundColor': tmp.b.groups[group].color, };
             },
         },
+        //todo 32: Tyche (TCG and deck gives mult to layers, reward is luck)
     },
     clickables: {
         // Bosstiary
@@ -366,7 +367,7 @@ addLayer('b', {
             unlocked() { return tmp.b.challenges[12].unlocked; },
             name: 'captain goodtooth',
             position: [1, 0],
-            lore: `In deep debts from the many fines and thefts committed.<br>
+            lore: `In deep debts from the many fines obtained and thefts committed.<br>
                 Banks refuse to let go of a debtor's debts, even in death...<br>
                 Continues stealing and getting fined while trying to clear her account.`,
             challenge: 12,

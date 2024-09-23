@@ -777,6 +777,7 @@ function inventory() {
                 tooltip_lines = [];
 
             if (Object.entries(chance).filter(([, c]) => D.gt(c, 0)).length) tooltip_lines.push(...Object.entries(chance)
+                .filter(([, c]) => D.gt(c, 0))
                 .map(/**@param{[string,Decimal]}*/([source, chance]) =>
                     `${capitalize(source_name(source))}: ${format_chance(chance)}`));
             if (Object.entries(range).filter(([, r]) => D.gt(r.max, 0)).length) tooltip_lines.push(...Object.entries(range)

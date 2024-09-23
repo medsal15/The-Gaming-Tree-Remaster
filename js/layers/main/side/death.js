@@ -21,7 +21,7 @@ addLayer('dea', {
         return {
             unlocked: true,
             points: D.dZero,
-            health: layers.dea.player.health(),
+            health: D(100),
             karma: D.dZero,
             souls: D.dZero,
         };
@@ -637,6 +637,11 @@ addLayer('dea', {
 
         const regen = D.times(tmp.dea.player.regen, diff);
         player.dea.health = D.add(player.dea.health, regen);
+    },
+    automate() {
+        if (D.gt(player.dea.health, tmp.dea.player.health)) {
+            player.dea.health = tmp.dea.player.health;
+        }
     },
     prestigeNotify() { return D.lte(player.dea.health, 0); },
 });

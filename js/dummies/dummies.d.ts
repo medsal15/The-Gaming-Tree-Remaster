@@ -1505,7 +1505,7 @@ type items = 'unknown' |
     'coin_copper' | 'coin_bronze' | 'coin_silver' | 'coin_gold' | 'coin_platinum' |
     'densium_slime' | 'densium_rock' | 'magic_densium_ball' |
     'cueball';
-//todo ??? (coal), ??? (clean iron ore), ??? (silver ore), ??? (electrum blend)
+//todo furnace (+coal, +heat (for forge)), ??? (clean iron ore), ??? (silver ore), ??? (electrum blend)
 
 type monsters = 'slime' | 'skeleton';
 
