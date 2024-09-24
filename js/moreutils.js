@@ -410,6 +410,14 @@ function bestiary_content(monster) {
                 ]);
             }
         }; break;
+        case 'skeleton': {
+            if (hasUpgrade('m', 53)) {
+                upgrade_lines.push([
+                    'display-text',
+                    `${resourceColor(tmp.items.silver_ore, tmp.m.upgrades[53].title)}: *${formatWhole(upgradeEffect('m', 53))} damage`,
+                ]);
+            }
+        }; break;
     }
 
     if (upgrade_lines.length > 0) lines.push(...upgrade_lines, 'blank');
@@ -461,6 +469,34 @@ function bestiary_content(monster) {
     }
 
     return lines;
+}
+/**
+ * Attack a monster
+ *
+ * @param {monsters} [monster] Target monster, defaults to selected
+ * @param {DecimalSource} [damage] Damage to deal, defaults to monster damage
+ */
+function attack_monster(monster, damage) {
+    monster ??= player.xp.selected;
+    if (!monster) return;
+
+    damage ??= tmp.xp.monsters[monster].damage;
+    if (D.lte(damage, 0)) return;
+
+    const data = player.xp.monsters[monster];
+    if (D.lte(data.health, 0)) return;
+
+    data.health = D.minus(data.health, damage);
+
+    if (inChallenge('b', 31)) {
+        const damage = tmp.dea.monsters[monster].damage;
+        player.dea.health = D.minus(player.dea.health, damage);
+
+        if (D.lte(player.dea.health, 0) && D.lt(player.dea.survives, tmp.dea.player.survives)) {
+            player.dea.health = D.dOne;
+            player.dea.survives = D.add(player.dea.survives, 1);
+        }
+    }
 }
 
 // mining
@@ -535,6 +571,7 @@ function handbook_content(ore) {
     ];
 
     if (D.neq(tore.breaks, 1)) lines.push(['display-text', `Each break counts as ${resourceColor(tmp.m.broken.color, format(tore.breaks))} breaks`]);
+    if (hasUpgrade('m', 63)) lines.push(['display-text', `Gives ${resourceColor(tmp.m.modifiers.xp.color, format(tore.experience))} experience on break`]);
 
     lines.push(
         'blank',
@@ -568,6 +605,11 @@ function handbook_content(ore) {
     }
 
     if (upgrade_lines.length > 0) lines.push(...upgrade_lines, 'blank');
+
+    lines.push(
+        ['display-text', tore.lore],
+        'blank',
+    );
 
     const own_drops = source_drops(`mining:${ore}`),
         any_drops = source_drops('mining:any'),
@@ -612,6 +654,16 @@ function handbook_content(ore) {
 
     return lines;
 }
+/**
+ * Hit the ore in mining
+ *
+ * @param {DecimalSource} [damage] Damage to deal, defaults to current damage
+ */
+function strike_ore(damage) {
+    damage ??= tmp.m.modifiers.damage.total;
+
+    player.m.health = D.minus(player.m.health, damage).max(0);
+}
 
 // crafting
 /**
@@ -621,7 +673,7 @@ function handbook_content(ore) {
  */
 function crafting_toggles() {
     /** @type {categories[]} */
-    const list = ['materials', 'equipment', 'slime', 'skeleton', 'mining'],
+    const list = ['materials', 'equipment', 'slime', 'skeleton', 'mining', 'forge'],
         /** @type {(cat: categories) => boolean} */
         unlocked = cat => {
             switch (cat) {
@@ -634,6 +686,8 @@ function crafting_toggles() {
                     return tmp.xp.monsters.skeleton.unlocked ?? true;
                 case 'mining':
                     return tmp.m.layerShown;
+                case 'forge':
+                    return tmp.c.forge.unlocked;
             }
         },
         /** @type {{[cat in categories]: string}} */
@@ -643,6 +697,7 @@ function crafting_toggles() {
             'slime': 'Slime',
             'skeleton': 'Skeleton',
             'mining': 'Mining',
+            'forge': 'Forge',
         },
         /** @type {{[cat in categories]: () => string}} */
         colors = {
@@ -651,6 +706,7 @@ function crafting_toggles() {
             'slime': () => tmp.xp.monsters.slime.color,
             'skeleton': () => tmp.xp.monsters.skeleton.color,
             'mining': () => tmp.m.color,
+            'forge': () => tmp.c.modifiers.heat.color,
         };
 
     return Object.fromEntries(list.map(/**@returns{[string, Clickable<'c'>][]}*/cat => {
@@ -724,6 +780,46 @@ function crafting_toggles() {
                             color = colors[cat]();
 
                         switch (vis.crafting[cat]) {
+                            case 'show':
+                                return color;
+                            case 'hide':
+                                return rgb_negative(color);
+                            case 'ignore':
+                                return rgb_grayscale(color);
+                        }
+                    },
+                },
+                unlocked: () => unlocked(cat),
+            }],
+            [`forge_${cat}`, {
+                canClick() { return true; },
+                onClick() {
+                    const vis = player.c.visiblity;
+
+                    vis.forge[cat] = {
+                        'show': 'hide',
+                        'hide': 'ignore',
+                        'ignore': 'show',
+                    }[vis.forge[cat] ??= 'ignore'];
+                },
+                display() {
+                    const vis = player.c.visiblity,
+                        name = names[cat];
+
+                    let visibility = {
+                        'show': 'Shown',
+                        'hide': 'Hidden',
+                        'ignore': 'Ignored',
+                    }[vis.forge[cat] ??= 'ignore'];
+
+                    return `<span style="font-size:1.5em;">${name}</span><br>${visibility}`;
+                },
+                style: {
+                    'backgroundColor'() {
+                        const vis = player.c.visiblity,
+                            color = colors[cat]();
+
+                        switch (vis.forge[cat]) {
                             case 'show':
                                 return color;
                             case 'hide':
@@ -811,7 +907,8 @@ function inventory() {
 function crafting_show_recipe(recipe) {
     const precipe = player.c.recipes[recipe],
         trecipe = tmp.c.recipes[recipe],
-        vis = player.c.visiblity.crafting;
+        type = D.gt(trecipe.heat, 0) ? 'forge' : 'crafting',
+        vis = player.c.visiblity[type];
 
     if (vis.craftable == 'show' && !crafting_can(recipe, D.dOne) && D.lte(precipe.making, 0)) return []
 
@@ -826,79 +923,97 @@ function crafting_show_recipe(recipe) {
         line = list => {
             if (options.colCraft) return ['row', list.map(row => ['column', row])];
             else return ['column', list.map(row => ['row', row])];
-        };
+        },
+        rec = [
+            line(square(trecipe.consumes.map(([item, cost]) => {
+                const tile = item_tile(item),
+                    text = shiftDown ? `[${trecipe.formulas.consumes[item]}]` : `${format(player.items[item].amount)} / ${format(cost)}`;
+                tile.text = `${capitalize(tmp.items[item].name)}<br>${text}`;
 
-    return ['row', [
-        line(square(trecipe.consumes.map(([item, cost]) => {
-            const tile = item_tile(item),
-                text = shiftDown ? `[${trecipe.formulas.consumes[item]}]` : `${format(player.items[item].amount)} / ${format(cost)}`;
-            tile.text = `${capitalize(tmp.items[item].name)}<br>${text}`;
+                return ['tile', tile];
+            }))),
+            'blank',
+            ['dynabar', {
+                direction: RIGHT,
+                height: 60,
+                width: 300,
+                progress() {
+                    if ('duration' in trecipe) return D.div(player.c.recipes[trecipe.id].time, trecipe.duration);
+                    return D.dZero;
+                },
+                display() {
+                    if ('duration' in trecipe) {
+                        if (shiftDown) return `${trecipe.formulas.duration}`;
+                        return `${formatTime(player.c.recipes[trecipe.id].time)} / ${formatTime(trecipe.duration)}`;
+                    }
+                },
+                fillStyle: {
+                    'backgroundColor': colors[options.theme][3],
+                },
+            }],
+            'blank',
+            line(square(trecipe.produces.map(([item, prod]) => {
+                const tile = item_tile(item),
+                    text = shiftDown ? `[${trecipe.formulas.produces[item]}]` : format(prod);
+                tile.text = `${capitalize(tmp.items[item].name)}<br>${text}`;
 
-            return ['tile', tile];
-        }))),
-        'blank',
-        ['dynabar', {
-            direction: RIGHT,
-            height: 60,
-            width: 300,
-            progress() {
-                if ('duration' in trecipe) return D.div(player.c.recipes[trecipe.id].time, trecipe.duration);
-                return D.dZero;
+                return ['tile', tile];
+            }))),
+            'blank',
+        ];
+
+    if (D.gt(trecipe.heat, 0)) {
+        rec.push(
+            ['dynabar', {
+                direction: UP,
+                height: 80,
+                width: 80,
+                progress() { return D.div(player.c.heat, trecipe.heat); },
+                display() { return shiftDown ? `[${trecipe.formulas.heat}]` : `${formatWhole(player.c.heat)} / ${formatWhole(trecipe.heat)}`; },
+                fillStyle: {
+                    'backgroundColor': tmp.c.modifiers.heat.color,
+                },
+            }],
+            'blank',
+        );
+    }
+
+    rec.push(['column', [
+        ['tile', {
+            text: '+',
+            style: {
+                height: '30px',
+                width: '40px',
             },
-            display() {
-                if ('duration' in trecipe) {
-                    if (shiftDown) return `${trecipe.formulas.duration}`;
-                    return `${formatTime(player.c.recipes[trecipe.id].time)} / ${formatTime(trecipe.duration)}`;
-                }
+            canClick() { return D.lt(precipe.target, tmp.c.crafting.max); },
+            onClick() { precipe.target = D.add(precipe.target, 1).min(tmp.c.crafting.max); },
+            onHold() { precipe.target = D.add(precipe.target, 1).min(tmp.c.crafting.max); },
+        }],
+        ['tile', {
+            text: `Craft ${formatWhole(precipe.target)}${craft}${total}`,
+            canClick() { return D.lte(precipe.making, 0) && crafting_can(recipe); },
+            onClick() {
+                gain_items(trecipe.consumes.map(([item, amount]) => [item, amount.neg()]));
+                precipe.making = precipe.target;
+                precipe.time = D.dZero;
             },
-            fillStyle: {
-                'backgroundColor': colors[options.theme][3],
+            style: {
+                height: '60px',
             },
         }],
-        'blank',
-        line(square(trecipe.produces.map(([item, prod]) => {
-            const tile = item_tile(item),
-                text = shiftDown ? `[${trecipe.formulas.produces[item]}]` : format(prod);
-            tile.text = `${capitalize(tmp.items[item].name)}<br>${text}`;
+        ['tile', {
+            text: '-',
+            style: {
+                height: '30px',
+                width: '40px',
+            },
+            canClick() { return D.gt(precipe.target, 1); },
+            onClick() { precipe.target = D.minus(precipe.target, 1).max(1); },
+            onHold() { precipe.target = D.minus(precipe.target, 1).max(1); },
+        }],
+    ]]);
 
-            return ['tile', tile];
-        }))),
-        'blank',
-        ['column', [
-            ['tile', {
-                text: '+',
-                style: {
-                    height: '30px',
-                    width: '40px',
-                },
-                canClick() { return D.lt(precipe.target, tmp.c.crafting.max); },
-                onClick() { precipe.target = D.add(precipe.target, 1).min(tmp.c.crafting.max); },
-                onHold() { precipe.target = D.add(precipe.target, 1).min(tmp.c.crafting.max); },
-            }],
-            ['tile', {
-                text: `Craft ${formatWhole(precipe.target)}${craft}${total}`,
-                canClick() { return D.lte(precipe.making, 0) && crafting_can(recipe); },
-                onClick() {
-                    gain_items(trecipe.consumes.map(([item, amount]) => [item, amount.neg()]));
-                    precipe.making = precipe.target;
-                    precipe.time = D.dZero;
-                },
-                style: {
-                    height: '60px',
-                },
-            }],
-            ['tile', {
-                text: '-',
-                style: {
-                    height: '30px',
-                    width: '40px',
-                },
-                canClick() { return D.gt(precipe.target, 1); },
-                onClick() { precipe.target = D.minus(precipe.target, 1).max(1); },
-                onHold() { precipe.target = D.minus(precipe.target, 1).max(1); },
-            }],
-        ]],
-    ]];
+    return ['row', rec];
 }
 /**
  * Returns the default amount for a recipe

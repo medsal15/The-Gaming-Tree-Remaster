@@ -747,40 +747,13 @@ addLayer('xp', {
                 'image-rendering': 'crisp-edges',
                 'background-size': `${UI_SIZES.width * 100}% ${UI_SIZES.height * 100}%`,
             },
-            onClick() {
-                const selected = player.xp.selected,
-                    damage = tmp.xp.monsters[selected].damage,
-                    monster = player.xp.monsters[selected];
-
-                monster.health = D.minus(monster.health, damage);
-
-                if (inChallenge('b', 31)) {
-                    const damage = tmp.dea.monsters[selected].damage;
-                    player.dea.health = D.minus(player.dea.health, damage);
-
-                    if (D.lte(player.dea.health, 0) && D.lt(player.dea.survives, tmp.dea.player.survives)) {
-                        player.dea.health = D.dOne;
-                        player.dea.survives = D.add(player.dea.survives, 1);
-                    }
-                }
-            },
+            onClick: attack_monster,
             onHold() {
                 const selected = player.xp.selected,
                     // About 5 clicks per second
-                    damage = D.div(tmp.xp.monsters[selected].damage, 20 / 5),
-                    monster = player.xp.monsters[selected];
+                    damage = D.div(tmp.xp.monsters[selected].damage, 20 / 5);
 
-                monster.health = D.minus(monster.health, damage);
-
-                if (inChallenge('b', 31)) {
-                    const damage = D.div(tmp.dea.monsters[selected].damage, 20 / 5);
-                    player.dea.health = D.minus(player.dea.health, damage);
-
-                    if (D.lte(player.dea.health, 0) && D.lt(player.dea.survives, tmp.dea.player.survives)) {
-                        player.dea.health = D.dOne;
-                        player.dea.survives = D.add(player.dea.survives, 1);
-                    }
-                }
+                attack_monster(player.xp.selected, damage);
             },
             canClick() {
                 if (inChallenge('b', 31) && D.lte(player.dea.health, 0)) return false;
@@ -866,7 +839,8 @@ addLayer('xp', {
         },
     },
     automate() {
-        let limit = tmp.xp.modifiers.xp.gain_cap;
+        let limit = tmp.xp.modifiers.xp.gain_cap,
+            killed = D.dZero;
         Object.entries(player.xp.monsters)
             .forEach(/**@param {[monsters, Player['xp']['monsters'][monsters]]}*/([id, data]) => {
                 if (D.gt(data.health, tmp.xp.monsters[id].health)) {
@@ -879,19 +853,7 @@ addLayer('xp', {
                 if (D.gte(player.xp.attack_time_all, 1)) {
                     damage = damage.add(tmp.xp.monsters[id].damage);
                 }
-                if (damage.gt(0)) {
-                    data.health = D.minus(data.health, damage);
-
-                    if (inChallenge('b', 31)) {
-                        const damage = tmp.dea.monsters[id].damage;
-                        player.dea.health = D.minus(player.dea.health, damage);
-
-                        if (D.lte(player.dea.health, 0) && D.lt(player.dea.survives, tmp.dea.player.survives)) {
-                            player.dea.health = D.dOne;
-                            player.dea.survives = D.add(player.dea.survives, 1);
-                        }
-                    }
-                }
+                attack_monster(id, damage);
                 if (D.lte(data.health, 0)) {
                     const monster = layers.xp.monsters[id],
                         kills = tmp.xp.monsters[id].kills;
@@ -920,8 +882,15 @@ addLayer('xp', {
                         data.last_drops = drops;
                     }
                     gain_items(drops);
+
+                    killed = killed.add(1);
                 }
             });
+
+        if (hasUpgrade('m', 64) && D.gt(killed, 0)) {
+            let damage = D.times(tmp.m.modifiers.damage.total, killed).div(upgradeEffect('m', 64));
+            strike_ore(damage);
+        }
 
         if (D.gte(player.xp.attack_time_selected, 1)) player.xp.attack_time_selected = D.minus(player.xp.attack_time_selected, 1);
         if (D.gte(player.xp.attack_time_all, 1)) player.xp.attack_time_all = D.minus(player.xp.attack_time_all, 1);
@@ -1065,7 +1034,11 @@ addLayer('xp', {
 
                 if (hasUpgrade('l', 31)) base = base.add(upgradeEffect('l', 31)[this.id]);
 
-                return D.times(base, tmp.xp.modifiers.damage.mult);
+                let damage = D.times(base, tmp.xp.modifiers.damage.mult);
+
+                if (hasUpgrade('m', 53)) damage = damage.times(upgradeEffect('m', 53));
+
+                return damage;
             },
             damage_per_second() {
                 let mult = D.dZero;
@@ -1162,25 +1135,31 @@ addLayer('xp', {
 
                 return mult;
             },
-            cap() {
-                let cap = D(1_000);
+            cap_base() {
+                let base = D(1_000);
 
-                if (hasAchievement('ach', 15)) cap = cap.add(achievementEffect('ach', 15));
+                if (hasAchievement('ach', 15)) base = base.add(achievementEffect('ach', 15));
 
-                if (hasUpgrade('m', 32)) cap = cap.times(upgradeEffect('m', 32));
-
-                if (hasUpgrade('l', 13)) cap = cap.times(upgradeEffect('l', 13));
-                if (hasUpgrade('l', 23)) cap = cap.times(upgradeEffect('l', 23));
-
-                if (hasUpgrade('s', 12)) cap = cap.times(upgradeEffect('s', 12));
-
-                cap = cap.times(tmp.l.effect);
-
-                cap = cap.times(item_effect('slime_crystal').xp_cap);
-                cap = cap.times(item_effect('crystal_skull').xp_cap);
-
-                return cap;
+                return base;
             },
+            cap_mult() {
+                let mult = D.dOne;
+
+                if (hasUpgrade('m', 32)) mult = mult.times(upgradeEffect('m', 32));
+
+                if (hasUpgrade('l', 13)) mult = mult.times(upgradeEffect('l', 13));
+                if (hasUpgrade('l', 23)) mult = mult.times(upgradeEffect('l', 23));
+
+                if (hasUpgrade('s', 12)) mult = mult.times(upgradeEffect('s', 12));
+
+                mult = mult.times(tmp.l.effect);
+
+                mult = mult.times(item_effect('slime_crystal').xp_cap);
+                mult = mult.times(item_effect('crystal_skull').xp_cap);
+
+                return mult;
+            },
+            cap() { return D.times(tmp.xp.modifiers.xp.cap_base, tmp.xp.modifiers.xp.cap_mult); },
             gain_cap() { return D.minus(tmp.xp.modifiers.xp.cap, player.xp.points); },
         },
         health: {

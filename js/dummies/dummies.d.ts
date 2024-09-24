@@ -1501,11 +1501,14 @@ type items = 'unknown' |
     'bone_pick' | 'crystal_skull' | 'bone_slate' | 'magic_slime_ball' |
     'stone' | 'copper_ore' | 'tin_ore' | 'bronze_blend' | 'gold_nugget' | 'densium' |
     'coal' | 'iron_ore' | 'clear_iron_ore' | 'silver_ore' | 'electrum_blend' |
+    'stone_brick' | 'copper_ingot' | 'tin_ingot' | 'bronze_ingot' | 'gold_ingot' |
+    'iron_ingot' | 'silver_ingot' | 'lead_ingot' | 'electrum_ingot' |
     'stone_mace' | 'copper_pick' | 'tin_cache' | 'bronze_cart' | 'doubloon' |
     'coin_copper' | 'coin_bronze' | 'coin_silver' | 'coin_gold' | 'coin_platinum' |
     'densium_slime' | 'densium_rock' | 'magic_densium_ball' |
     'cueball';
-//todo furnace (+coal, +heat (for forge)), ??? (clean iron ore), ??? (silver ore), ??? (electrum blend)
+//todo ??? (coal), ??? (clean iron ore), ??? (silver ore), ??? (electrum blend)
+//todo ??? (forge)
 
 type monsters = 'slime' | 'skeleton';
 
@@ -1514,7 +1517,7 @@ type ores = 'stone' | 'copper' | 'tin' |
 
 type drop_sources = `kill:${monsters}` | 'kill:any' | 'crafting' | `mining:${ores}` | 'mining:any' | 'mining:compactor' | 'shop';
 type drop_types = 'kill' | 'crafting' | 'mining' | 'shop';
-type categories = 'materials' | 'equipment' | 'mining' | 'shop' | 'craftable' |
+type categories = 'materials' | 'equipment' | 'mining' | 'shop' | 'forge' | 'craftable' |
     monsters;
 
 type death_resources = 'karma' | 'souls';
@@ -1628,6 +1631,8 @@ type Layers = {
             xp: {
                 base(): Decimal
                 mult(): Decimal
+                cap_base(): Decimal
+                cap_mult(): Decimal
                 /** XP limit */
                 cap(): Decimal
                 /** XP left until limit */
@@ -1666,6 +1671,8 @@ type Layers = {
             weight(): Decimal
             /** How many breaks on destruction (affects item gain) */
             breaks(): Decimal
+            /** Experience gain on break */
+            experience(): Decimal
         } }
         modifiers: {
             damage: {
@@ -1685,6 +1692,19 @@ type Layers = {
                 /** Total health of target ores */
                 total(): Decimal
             }
+            xp: {
+                /** Base on breaking ore */
+                base(): Decimal
+                mult(): Decimal
+                /** Gain on breaking current ores */
+                gain(): Decimal
+                cap_base(): Decimal
+                /** XP limit */
+                cap(): Decimal
+                /** XP left until limit */
+                gain_cap(): Decimal
+                color: string
+            },
             /** Amount of mined ores */
             size(): number
         }
@@ -1722,6 +1742,9 @@ type Layers = {
             /** Divides crafting time */
             speed(): Decimal
         }
+        forge: {
+            unlocked(): boolean
+        }
         recipes: {
             [id: string]: {
                 private _id: string | null
@@ -1734,8 +1757,11 @@ type Layers = {
                 produces(amount?: DecimalSource, all_time?: DecimalSource): [items, Decimal][]
                 /** Duration to craft an amount of items, if 0 or absent, crafting is instant */
                 duration?(amount?: DecimalSource, all_time?: DecimalSource): Decimal
+                /** If present and above 0, the recipe will be visible in the forge instead of the normal tab */
+                heat?(amount?: DecimalSource, all_time?: DecimalSource): Decimal
                 formulas: {
                     duration?: string
+                    heat?: string
                     consumes: { [item in items]?: string }
                     produces: { [item in items]?: string }
                 }
@@ -1756,7 +1782,25 @@ type Layers = {
             equipment: {
                 cost_mult(): Decimal
             }
+            heat: {
+                /** Gain per second */
+                gain: {
+                    base(): Decimal
+                    mult(): Decimal
+                    total(): Decimal
+                }
+                /** Loss per second */
+                loss: {
+                    base(): Decimal
+                    mult(): Decimal
+                    total(): Decimal
+                }
+                /** Total per second */
+                per_second(): Decimal
+                color: Computable<string>
+            }
         }
+        //todo forge fuels
     }
     // Row 2
     b: Layer<'b'> & {
@@ -1918,6 +1962,7 @@ type Player = {
             /** If true, the compactor is compacting */
             running: boolean
         }
+        experience: Decimal
     }
     // Row 1
     l: LayerData & {}
@@ -1928,6 +1973,9 @@ type Player = {
                 [cat in categories]: 'show' | 'hide' | 'ignore'
             }
             crafting: {
+                [cat in categories]: 'show' | 'hide' | 'ignore'
+            }
+            forge: {
                 [cat in categories]: 'show' | 'hide' | 'ignore'
             }
         }
@@ -1941,6 +1989,9 @@ type Player = {
             }
         }
         compendium: items | false
+        visited_forge: boolean
+        heat: Decimal
+        //todo forge fuels
     }
     // Row 2
     b: LayerData & {

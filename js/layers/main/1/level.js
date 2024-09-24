@@ -389,7 +389,13 @@ addLayer('l', {
     },
     type: 'static',
     baseResource: 'experience',
-    baseAmount() { return player.xp.points; },
+    baseAmount() {
+        let amount = player.xp.points;
+
+        if (hasUpgrade('m', 63)) amount = D.add(amount, player.m.experience);
+
+        return amount;
+    },
     requires: D(750),
     exponent: D.dTwo,
     base: D(1.75),

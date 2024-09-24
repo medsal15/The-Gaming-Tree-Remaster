@@ -417,10 +417,10 @@ addLayer('ach', {
         75: {
             name() {
                 if (!hasAchievement(this.layer, this.id)) return 'A Great Deal';
-                return 'Scammed';
+                return 'Scammed!';
             },
             tooltip: 'Buy a map<br>Reward: Keep the compactor unlocked',
-            done() { return D.gte(player.items.coin_gold, 1); },
+            done() { return hasUpgrade('s', 33); },
             onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.s.color); },
             style() {
                 let style = {};
@@ -507,7 +507,7 @@ addLayer('ach', {
             },
             unlocked() { return tmp.m.compactor.unlocked; },
         },
-        //todo deep mining achievements
+        //todo forge achievements
         //#endregion Normal
         //#region Bonus
         81: {

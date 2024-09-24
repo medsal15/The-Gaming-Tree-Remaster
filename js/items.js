@@ -1,4 +1,3 @@
-//todo lower mining numbers
 /**
  * @type {{[id in items]: Item<id>}}
  */
@@ -939,7 +938,7 @@ const item_list = {
         id: null,
         color: '#FFFF44',
         name: 'gold nugget',
-        grid: [2, 4],
+        grid: [3, 0],
         icon: [4, 4],
         row: 0,
         sources: {
@@ -955,7 +954,8 @@ const item_list = {
                 if (hasUpgrade('m', 43)) chance = chance.times(upgradeEffect('m', 43));
                 if (hasAchievement('ach', 65)) chance = chance.times(achievementEffect('ach', 65));
 
-                chance = chance.div(player.items[this.id].amount.add(1).max(1));
+                chance = chance.div(item_effect('gold_nugget'));
+                chance = chance.times(item_effect('gold_ingot'));
 
                 if (hasChallenge('b', 12)) skeleton_chance = D.div(chance, 10);
 
@@ -969,13 +969,31 @@ const item_list = {
             Somehow, the more you have, the harder it is to find.<br>
             Some people would kill for one of these.`,
         categories: ['materials', 'mining'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].total);
+
+            return D.div(x, 2).add(1);
+        },
+        effectDescription(amount) {
+            let div;
+            if (shiftDown) {
+                div = '[amount / 2 + 1]';
+            } else {
+                const x = D(amount ?? player.items[this.id].total),
+                    effect = item_list[this.id].effect(x);
+
+                div = format(effect);
+            }
+
+            return `Divides gold nugget chance by ${div}`;
+        },
         unlocked() { return D.gte(player.items.gold_nugget.amount, 1) || player.b.visible_challenges.includes('12'); },
     },
     'densium': {
         id: null,
         color: '#445566',
         name: 'densium',
-        grid: [2, 5],
+        grid: [4, 0],
         icon: [4, 5],
         row: 0,
         sources: {
@@ -991,7 +1009,7 @@ const item_list = {
         id: null,
         color: '#333344',
         name: 'coal',
-        grid: [2, 6],
+        grid: [3, 1],
         icon: [4, 6],
         row: 0,
         sources: {
@@ -1020,7 +1038,7 @@ const item_list = {
         id: null,
         color: '#BB2222',
         name: 'iron ore',
-        grid: [2, 7],
+        grid: [3, 2],
         icon: [4, 7],
         row: 0,
         sources: {
@@ -1049,7 +1067,7 @@ const item_list = {
         id: null,
         color: '#8899AA',
         name: 'rustless iron ore',
-        grid: [2, 8],
+        grid: [3, 3],
         icon: [4, 8],
         row: 0,
         sources: {
@@ -1065,7 +1083,7 @@ const item_list = {
         id: null,
         color: '#DDEEEE',
         name: 'silver ore',
-        grid: [2, 9],
+        grid: [3, 4],
         icon: [4, 9],
         row: 0,
         sources: {
@@ -1094,7 +1112,7 @@ const item_list = {
         id: null,
         color: '#EEDDAA',
         name: 'electrum blend',
-        grid: [2, 10],
+        grid: [3, 5],
         icon: [4, 10],
         row: 0,
         sources: {
@@ -1106,11 +1124,174 @@ const item_list = {
         categories: ['materials', 'mining'],
         unlocked() { return hasUpgrade('m', 61); },
     },
+    // Forge
+    'stone_brick': {
+        id: null,
+        color: '#BBBBDD',
+        name: 'stone brick',
+        grid: [5, 0],
+        icon: [8, 0],
+        row: 1,
+        sources: {
+            other: ['crafting',],
+        },
+        lore: `A brick of solid rock.<br>
+            Now this is some useful stone.<br>
+            Commonly used as a material for other things.`,
+        categories: ['materials', 'forge'],
+        unlocked() { return tmp.c.forge.unlocked; },
+    },
+    'copper_ingot': {
+        id: null,
+        color: '#FFAA11',
+        name: 'copper ingot',
+        grid: [5, 1],
+        icon: [8, 1],
+        row: 1,
+        sources: {
+            other: ['crafting',],
+        },
+        lore: `A solid block of copper.<br>
+            Just as useful as copper, but easier to store.<br>
+            Proper storage allows slower color change.`,
+        categories: ['materials', 'forge'],
+        unlocked() { return tmp.c.forge.unlocked; },
+    },
+    'tin_ingot': {
+        id: null,
+        color: '#FFFFCC',
+        name: 'tin ingot',
+        grid: [5, 2],
+        icon: [8, 2],
+        row: 1,
+        sources: {
+            other: ['crafting',],
+        },
+        lore: `A light yellow ingot.<br>
+            The way you store these makes them look even prettier...`,
+        categories: ['materials', 'forge'],
+        unlocked() { return tmp.c.forge.unlocked; },
+    },
+    'bronze_ingot': {
+        id: null,
+        color: '#BB7744',
+        name: 'bronze ingot',
+        grid: [5, 3],
+        icon: [8, 3],
+        row: 1,
+        sources: {
+            other: ['crafting',],
+        },
+        lore: `A big brown ingot.<br>
+            This is much easier to handle.<br>
+            Congratulations on actually reaching the bronze age!`,
+        categories: ['materials', 'forge'],
+        unlocked() { return tmp.c.forge.unlocked; },
+    },
+    'gold_ingot': {
+        id: null,
+        color: '#FFFF44',
+        name: 'gold ingot',
+        grid: [5, 4],
+        icon: [8, 4],
+        row: 1,
+        sources: {
+            other: ['crafting',],
+        },
+        lore: `A small, but very rare ingot.<br>
+            Somehow, the more you own, the harder it is to find.<br>
+            Many people would kill for one of these.`,
+        categories: ['materials', 'forge'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].total);
+
+            return D.div(x, 8).add(1);
+        },
+        effectDescription(amount) {
+            let mult;
+            if (shiftDown) {
+                mult = '[amount / 8 + 1]';
+            } else {
+                const x = D(amount ?? player.items[this.id].total),
+                    effect = item_list[this.id].effect(x);
+
+                mult = format(effect);
+            }
+
+            return `Multiplies gold nugget chance by ${mult}`;
+        },
+        unlocked() { return tmp.c.forge.unlocked; },
+    },
+    'iron_ingot': {
+        id: null,
+        color: '#8899AA',
+        name: 'iron ingot',
+        grid: [5, 5],
+        icon: [8, 5],
+        row: 1,
+        sources: {
+            other: ['crafting',],
+        },
+        lore: `A gray block of metal.<br>
+            Keeps all the positives of iron, but is easier to store.<br>
+            Congratulations on reaching the iron age!`,
+        categories: ['materials', 'forge'],
+        unlocked() { return tmp.c.forge.unlocked; },
+    },
+    'silver_ingot': {
+        id: null,
+        color: '#DDEEEE',
+        name: 'silver ingot',
+        grid: [5, 6],
+        icon: [8, 6],
+        row: 1,
+        sources: {
+            other: ['crafting',],
+        },
+        lore: `An almost white metal block.<br>
+            Looks like you managed to separate the impurities.<br>
+            The way they are stored makes them shine almost too brightly`,
+        categories: ['materials', 'forge'],
+        unlocked() { return tmp.c.forge.unlocked; },
+    },
+    'lead_ingot': {
+        id: null,
+        color: '#113366',
+        name: 'lead ingot',
+        grid: [5, 7],
+        icon: [8, 7],
+        row: 1,
+        sources: {
+            other: ['crafting',],
+        },
+        lore: `A black metal cube.<br>
+            It feels very heavy.<br>
+            So that's what was mixed with the silver...`,
+        categories: ['materials', 'forge'],
+        unlocked() { return tmp.c.forge.unlocked; },
+    },
+    'electrum_ingot': {
+        id: null,
+        color: '#EEDDAA',
+        name: 'electrum ingot',
+        grid: [5, 8],
+        icon: [8, 8],
+        row: 1,
+        sources: {
+            other: ['crafting',],
+        },
+        lore: `A pretty light yellow alloy.<br>
+            The method of storage used makes them even prettier.<br>
+            Very valuable.`,
+        categories: ['materials', 'forge'],
+        unlocked() { return tmp.c.forge.unlocked; },
+    },
+    // Mining Tools
     'stone_mace': {
         id: null,
         color: '#BBBBDD',
         name: 'stone mace',
-        grid: [3, 0],
+        grid: [2, 4],
         icon: [5, 0],
         row: 1,
         sources: {
@@ -1155,7 +1336,7 @@ const item_list = {
             return `#${color_between(low, high, progress).map(n => n.toString(16).padStart(2, '0')).join('')}`;
         },
         name: 'copper pick',
-        grid: [3, 1],
+        grid: [2, 5],
         icon: [5, 1],
         row: 1,
         sources: {
@@ -1203,7 +1384,7 @@ const item_list = {
         id: null,
         color: '#FFFFCC',
         name: 'tin cache',
-        grid: [3, 2],
+        grid: [2, 6],
         icon: [5, 2],
         row: 1,
         sources: {
@@ -1242,7 +1423,7 @@ const item_list = {
         id: null,
         color: '#BB7744',
         name: 'bronze cart',
-        grid: [3, 3],
+        grid: [2, 7],
         icon: [5, 3],
         row: 1,
         sources: {
@@ -1281,7 +1462,7 @@ const item_list = {
         id: null,
         color: '#FFFF44',
         name: 'doubloon',
-        grid: [3, 4],
+        grid: [3, 6],
         icon: [5, 4],
         row: 1,
         sources: {
@@ -1317,7 +1498,7 @@ const item_list = {
         id: null,
         color: '#445566',
         name: 'densium slime',
-        grid: [4, 0],
+        grid: [4, 1],
         icon: [7, 0],
         row: 1,
         sources: {
@@ -1353,7 +1534,7 @@ const item_list = {
         id: null,
         color: '#445566',
         name: 'densium rock',
-        grid: [4, 1],
+        grid: [4, 2],
         icon: [7, 1],
         row: 1,
         sources: {
@@ -1389,7 +1570,7 @@ const item_list = {
         id: null,
         color: '#445566',
         name: 'magic densium ball',
-        grid: [4, 2],
+        grid: [4, 3],
         icon: [7, 2],
         row: 1,
         sources: {
@@ -1527,7 +1708,7 @@ const item_list = {
 
 const ITEM_SIZES = {
     width: 12,
-    height: 8,
+    height: 9,
 };
 /**
  * @type {{[row in Layer['row']]: items[]}}
