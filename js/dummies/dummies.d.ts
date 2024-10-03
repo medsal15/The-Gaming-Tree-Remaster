@@ -1504,11 +1504,10 @@ type items = 'unknown' |
     'stone_brick' | 'copper_ingot' | 'tin_ingot' | 'bronze_ingot' | 'gold_ingot' |
     'iron_ingot' | 'silver_ingot' | 'lead_ingot' | 'electrum_ingot' |
     'stone_mace' | 'copper_pick' | 'tin_cache' | 'bronze_cart' | 'doubloon' |
+    'furnace' | 'iron_rails' | 'silver_coating' | 'electrum_coin_mold' | 'bellow' | 'lead_coating' |
     'coin_copper' | 'coin_bronze' | 'coin_silver' | 'coin_gold' | 'coin_platinum' |
     'densium_slime' | 'densium_rock' | 'magic_densium_ball' |
     'cueball';
-//todo ??? (coal), ??? (clean iron ore), ??? (silver ore), ??? (electrum blend)
-//todo ??? (forge)
 
 type monsters = 'slime' | 'skeleton';
 
@@ -1733,6 +1732,13 @@ type Layers = {
         }
     }
     c: Layer<'c'> & {
+        upgrades: {
+            [id: string]: Upgrade<'c'> & {
+                item: items
+                currencyInternalName: 'amount'
+                currencyLocation(): Player['items'][items]
+            }
+        }
         chance_multiplier(): Decimal
         crafting: {
             /** Max multiplier for crafting amount */

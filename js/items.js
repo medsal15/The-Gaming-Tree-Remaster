@@ -993,7 +993,7 @@ const item_list = {
         id: null,
         color: '#445566',
         name: 'densium',
-        grid: [4, 0],
+        grid: [5, 0],
         icon: [4, 5],
         row: 0,
         sources: {
@@ -1021,6 +1021,8 @@ const item_list = {
                 if (hasUpgrade('xp', 51)) mult = mult.times(upgradeEffect('xp', 51));
                 if (hasUpgrade('m', 23)) mult = mult.times(upgradeEffect('m', 23).stone);
                 if (hasUpgrade('m', 51)) mult = mult.times(upgradeEffect('m', 51));
+
+                mult = mult.times(item_effect('furnace').coal_mult);
 
                 min = D.times(min, mult);
                 max = D.times(max, mult);
@@ -1439,6 +1441,13 @@ const item_list = {
             let xp_drop = D.add(x, 5).log(5),
                 m_drop = D.add(x, 4).log(4);
 
+            let mult = D.dOne;
+
+            mult = mult.times(item_effect('iron_rails').cart_mult);
+
+            xp_drop = xp_drop.times(mult);
+            m_drop = m_drop.times(mult);
+
             return { xp_drop, m_drop, };
         },
         effectDescription(amount) {
@@ -1462,7 +1471,7 @@ const item_list = {
         id: null,
         color: '#FFFF44',
         name: 'doubloon',
-        grid: [3, 6],
+        grid: [4, 0],
         icon: [5, 4],
         row: 1,
         sources: {
@@ -1494,11 +1503,246 @@ const item_list = {
         },
         unlocked() { return inChallenge('b', 12) || hasChallenge('b', 12); },
     },
+    'furnace': {
+        id: null,
+        color: '#9999AA',
+        name: 'furnace',
+        grid: [4, 1],
+        icon: [9, 0],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        lore: `A furnace made of stone and coal.<br>
+            Even after usage, it still feels warm.<br>
+            You can even stack them up!`,
+        categories: ['equipment', 'mining', 'forge'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let coal_mult = D.div(x, 10).add(1),
+                heat_mult = D.pow(1.01, x);
+
+            return { coal_mult, heat_mult, };
+        },
+        effectDescription(amount) {
+            let coal_mult, heat_mult;
+            if (shiftDown) {
+                coal_mult = '[amount / 10 + 1]';
+                heat_mult = '[1.01 ^ amount]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                coal_mult = format(effect.coal_mult);
+                heat_mult = format(effect.heat_mult);
+            }
+
+            return `Multiplies coal gain by ${coal_mult}, and heat gain by ${heat_mult}`;
+        },
+        unlocked() { return hasUpgrade('m', 61); },
+    },
+    'iron_rails': {
+        id: null,
+        color: '#8899AA',
+        name: 'iron rails',
+        grid: [4, 2],
+        icon: [9, 1],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        lore: `Solid bars of iron connected together with bones.<br>
+            These are good for your carts.<br>
+            The rails are also reinforcing ores.`,
+        categories: ['equipment', 'mining', 'forge'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let cart_mult = D.div(x, 10).add(1),
+                health_mult = D.pow(1.1, x);
+
+            return { cart_mult, health_mult, };
+        },
+        effectDescription(amount) {
+            let cart_mult, health_mult;
+            if (shiftDown) {
+                cart_mult = '[amount / 10 + 1]';
+                health_mult = '[1.1 ^ amount]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                cart_mult = format(effect.cart_mult);
+                health_mult = format(effect.health_mult);
+            }
+
+            return `Multiplies bronze cart effect by ${cart_mult}, and ore health by ${health_mult}`;
+        },
+        unlocked() { return hasUpgrade('m', 61); },
+    },
+    'silver_coating': {
+        id: null,
+        color: '#DDEEEE',
+        name: 'silver coating',
+        grid: [4, 3],
+        icon: [9, 2],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        lore: `Silver coating for a weapon.<br>
+            It's great for fighting undeads.<br>
+            Hopefully you'll find more than one type.`,
+        categories: ['equipment', 'mining', 'forge'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let skeleton_damage_mult = D.pow(1.25, x);
+
+            return { skeleton_damage_mult, };
+        },
+        effectDescription(amount) {
+            let skeleton_damage_mult;
+            if (shiftDown) {
+                skeleton_damage_mult = '[1.25 ^ amount]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                skeleton_damage_mult = format(effect.skeleton_damage_mult);
+            }
+
+            return `Multiplies skeleton damage by ${skeleton_damage_mult}`;
+        },
+        unlocked() { return hasUpgrade('m', 61); },
+    },
+    'electrum_coin_mold': {
+        id: null,
+        color: '#EEDDAA',
+        name: 'electrum coin mold',
+        grid: [4, 4],
+        icon: [9, 3],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        lore: `A mold to allow making coins.<br>
+            I'm not allowing you to use it for forging fake coins.<br>
+            You're not a licensed coin maker.`,
+        categories: ['equipment', 'mining', 'forge'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let coin_mult = D.div(x, 15).add(1);
+
+            return { coin_mult, };
+        },
+        effectDescription(amount) {
+            let coin_mult;
+            if (shiftDown) {
+                coin_mult = '[amount / 15 + 1]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                coin_mult = format(effect.coin_mult);
+            }
+
+            return `Multiplies coin gain by ${coin_mult}`;
+        },
+        unlocked() { return hasUpgrade('m', 61); },
+    },
+    'bellow': {
+        id: null,
+        color() { return tmp.c.modifiers.heat.color; },
+        name: 'bellow',
+        grid: [4, 5],
+        icon() {
+            let icon = [9, 4];
+
+            if (inChallenge('b', 11)) icon[1] = 10;
+            else if (inChallenge('b', 21)) icon[1] = 11;
+
+            return icon;
+        },
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        lore: `A crude bellow for heating up your forge.<br>
+            Manually working it is tiring.<br>
+            Good luck with it.`,
+        categories: ['equipment', 'forge'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let heat_mult = D.div(x, 20).add(1),
+                speed_mult = D.pow(1.1, x);
+
+            return { heat_mult, speed_mult, };
+        },
+        effectDescription(amount) {
+            let heat_mult, speed_mult;
+            if (shiftDown) {
+                heat_mult = '[amount / 20 + 1]';
+                speed_mult = '[1.1 ^ amount]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                heat_mult = format(effect.heat_mult);
+                speed_mult = format(effect.speed_mult);
+            }
+
+            return `Multiplies heat gain by ${heat_mult}, and forge speed by ${speed_mult}`;
+        },
+        unlocked() { return tmp.c.forge.unlocked; },
+    },
+    'lead_coating': {
+        id: null,
+        color: '#113366',
+        name: 'lead coating',
+        grid: [4, 6],
+        icon: [9, 5],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        lore: `Lead coating for a weapon.<br>
+            It's great for fighting living beings.<br>
+            It's also bad for fighting undeads.`,
+        categories: ['equipment', 'mining', 'forge'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let damage_mult = D.pow(1.15, x),
+                skeleton_damage_div = D.pow(1.2, x);
+
+            return { damage_mult, skeleton_damage_div, };
+        },
+        effectDescription(amount) {
+            let damage_mult, skeleton_damage_div;
+            if (shiftDown) {
+                damage_mult = '[1.15 ^ amount]';
+                skeleton_damage_div = '[1.2 ^ amount]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                damage_mult = format(effect.damage_mult);
+                skeleton_damage_div = format(effect.skeleton_damage_div);
+            }
+
+            return `Multiplies damage by ${damage_mult}, but divides skeleton damage by ${skeleton_damage_div}`;
+        },
+        unlocked() { return tmp.c.forge.unlocked; },
+    },
     'densium_slime': {
         id: null,
         color: '#445566',
         name: 'densium slime',
-        grid: [4, 1],
+        grid: [5, 1],
         icon: [7, 0],
         row: 1,
         sources: {
@@ -1534,7 +1778,7 @@ const item_list = {
         id: null,
         color: '#445566',
         name: 'densium rock',
-        grid: [4, 2],
+        grid: [5, 2],
         icon: [7, 1],
         row: 1,
         sources: {
@@ -1570,7 +1814,7 @@ const item_list = {
         id: null,
         color: '#445566',
         name: 'magic densium ball',
-        grid: [4, 3],
+        grid: [5, 3],
         icon: [7, 2],
         row: 1,
         sources: {
@@ -1708,7 +1952,7 @@ const item_list = {
 
 const ITEM_SIZES = {
     width: 12,
-    height: 9,
+    height: 10,
 };
 /**
  * @type {{[row in Layer['row']]: items[]}}

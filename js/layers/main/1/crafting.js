@@ -129,6 +129,7 @@ addLayer('c', {
                 ['display-text', `<span class="warning">You lose 1% of your heat every second</span>`],
                 'blank',
                 ['buyable', 21],
+                ['upgrades', [1, 2]],
                 'blank',
                 ['row', () => Object.keys(tmp.c.clickables)
                     .filter(id => id.startsWith('forge_') && tmp.c.clickables[id].unlocked)
@@ -275,7 +276,9 @@ addLayer('c', {
             },
         },
     },
-    //todo forge upgrades
+    upgrades: {
+        //todo forge upgrades
+    },
     clickables: {
         ...crafting_toggles(),
         'crafting_craftable': {
@@ -375,7 +378,7 @@ addLayer('c', {
         },
     },
     forge: {
-        unlocked() { return D.gt(tmp.c.modifiers.heat.gain.base, 0); },
+        unlocked() { return hasUpgrade('m', 62) || player.c.visited_forge; },
     },
     recipes: {
         // Materials
@@ -1725,6 +1728,8 @@ addLayer('c', {
             static: true,
             unlocked() { return inChallenge('b', 12) || hasChallenge('b', 12); },
         },
+        //todo furnace (stone & coal), iron rails (clear iron & bone), silver coating (silver & slime goo), electrum coin mold (electrum & ??? coin)
+        //todo bellow (stone & rib & slime core), lead coating (lead & slime goo)
         densium_slime: {
             _id: null,
             get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
@@ -1860,7 +1865,6 @@ addLayer('c', {
             static: true,
             unlocked() { return tmp.m.compactor.unlocked; },
         },
-        //todo extended mining equipement
     },
     modifiers: {
         craft: { cost_mult() { return D.dOne; }, },
@@ -1897,7 +1901,14 @@ addLayer('c', {
 
                     return base;
                 },
-                mult() { return D.dOne; },
+                mult() {
+                    let mult = D.dOne;
+
+                    mult = mult.times(item_effect('furnace').heat_mult);
+                    mult = mult.times(item_effect('bellow').heat_mult);
+
+                    return mult;
+                },
                 total() { return D.times(tmp.c.modifiers.heat.gain.base, tmp.c.modifiers.heat.gain.mult); },
             },
             loss: {

@@ -289,6 +289,7 @@ addLayer('s', {
                 if (hasUpgrade('s', 31)) mult = mult.times(upgradeEffect('s', 31));
 
                 mult = mult.times(item_effect('doubloon').coin_mult);
+                mult = mult.times(item_effect('electrum_coin_mold').coin_mult);
 
                 if (inChallenge('b', 12)) mult = mult.times(tmp.c.chance_multiplier);
 
@@ -648,7 +649,7 @@ addLayer('s', {
                 return D.div(base, loss);
             },
         },
-        //todo extended ores
+        //todo extended mining equipement
         densium: {
             _id: null,
             get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },

@@ -1038,6 +1038,9 @@ addLayer('xp', {
 
                 if (hasUpgrade('m', 53)) damage = damage.times(upgradeEffect('m', 53));
 
+                damage = damage.times(item_effect('silver_coating').skeleton_damage_mult);
+                damage = damage.div(item_effect('lead_coating').skeleton_damage_div);
+
                 return damage;
             },
             damage_per_second() {
@@ -1092,6 +1095,7 @@ addLayer('xp', {
                 if (hasUpgrade('l', 21)) mult = mult.times(upgradeEffect('l', 21));
 
                 mult = mult.times(item_effect('slime_knife').damage);
+                mult = mult.times(item_effect('lead_coating').damage_mult);
 
                 if (hasChallenge('b', 21)) mult = mult.times(2);
 

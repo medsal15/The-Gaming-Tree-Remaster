@@ -1164,7 +1164,11 @@ addLayer('m', {
             description() {
                 if (!tmp[this.layer].upgrades[this.id].show) return `Buy ${tmp[this.layer].upgrades[this.id - 10].title} to unlock`;
 
-                let text = 'Unlock forging<br>Gain +1 heat per second';
+                let text = '';
+
+                if (!player.c.visited_forge) text += 'Unlock forging<br>';
+
+                text += 'Gain +1 heat per second';
 
                 return text;
             },

@@ -236,7 +236,7 @@ addLayer('b', {
                 return { 'backgroundColor': tmp.b.groups[group].color, };
             },
         },
-        //todo 32: Tyche (TCG and deck gives mult to layers, reward is luck)
+        //todo 32: Tyche (???, reward is lootboxes)
     },
     clickables: {
         // Bosstiary
