@@ -1618,24 +1618,27 @@ type Layers = {
             damage: {
                 base(): Decimal
                 mult(): Decimal
+            }
+            speed: {
                 /**
                  * Auto attacks to target enemy per second
                  */
-                active_speed(): Decimal
+                active(): Decimal
                 /**
                  * Auto attacks to all enemies per second
                  */
-                passive_speed(): Decimal
+                passive(): Decimal
             }
             xp: {
+                mult(): Decimal
+            }
+            cap: {
                 base(): Decimal
                 mult(): Decimal
-                cap_base(): Decimal
-                cap_mult(): Decimal
                 /** XP limit */
-                cap(): Decimal
+                total(): Decimal
                 /** XP left until limit */
-                gain_cap(): Decimal
+                gain(): Decimal
             }
             health: {
                 mult(): Decimal

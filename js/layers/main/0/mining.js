@@ -1745,7 +1745,7 @@ addLayer('m', {
 
                 return base;
             },
-            cap() { return D.times(tmp.m.modifiers.xp.cap_base, tmp.xp.modifiers.xp.cap_mult); },
+            cap() { return D.times(tmp.m.modifiers.xp.cap_base, tmp.xp.modifiers.cap.mult); },
             gain_cap() { return D.minus(tmp.m.modifiers.xp.cap, player.m.experience); },
             color: '#BB8822',
         },
