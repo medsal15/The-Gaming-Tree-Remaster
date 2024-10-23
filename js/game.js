@@ -206,9 +206,11 @@ function layerDataReset(layer, keep = []) {
  * @param {DecimalSource} gain
  */
 function addPoints(layer, gain) {
-	player[layer].points = player[layer].points.add(gain).max(0)
-	if (player[layer].best) player[layer].best = player[layer].best.max(player[layer].points)
-	if (player[layer].total) player[layer].total = player[layer].total.add(gain)
+	player[layer].points = player[layer].points.add(gain).max(0);
+	if (D.gt(gain, 0)) {
+		if (player[layer].best) player[layer].best = player[layer].best.max(player[layer].points);
+		if (player[layer].total) player[layer].total = player[layer].total.add(gain);
+	}
 }
 
 /**

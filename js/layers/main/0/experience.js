@@ -1078,6 +1078,7 @@ addLayer('xp', {
                 if (hasUpgrade('l', 11)) base = base.add(upgradeEffect('l', 11));
 
                 base = base.add(item_effect('bone_pick').xp_damage);
+                base = base.add(item_effect('tin_ring').xp_damage);
 
                 base = base.add(buyableEffect('dea', 13));
 
@@ -1173,6 +1174,8 @@ addLayer('xp', {
 
                 if (hasUpgrade('xp', 13)) mult = mult.times(upgradeEffect('xp', 13));
                 if (hasUpgrade('xp', 31)) mult = mult.div(upgradeEffect('xp', 31));
+
+                mult = mult.div(item_effect('stone_wall').health_div);
 
                 mult = mult.div(item_effect('slime_injector').health);
 

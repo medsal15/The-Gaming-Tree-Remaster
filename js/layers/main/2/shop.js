@@ -649,7 +649,7 @@ addLayer('s', {
                 return D.div(base, loss);
             },
         },
-        //todo extended mining equipement
+        //todo forge equipement
         densium: {
             _id: null,
             get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },

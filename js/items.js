@@ -1029,6 +1029,15 @@ const item_list = {
 
                 return { 'mining:coal': { min, max } };
             },
+            per_second() {
+                const per_second = {};
+
+                if (D.gt(buyableEffect('c', 21).coal, 0)) {
+                    per_second['forge'] = D.neg(buyableEffect('c', 21).coal);
+                }
+
+                return per_second;
+            },
         },
         lore: `A piece of flammable rock.<br>
             Of low value, but required for any fire.<br>
@@ -1135,7 +1144,7 @@ const item_list = {
         icon: [8, 0],
         row: 1,
         sources: {
-            other: ['crafting',],
+            other: ['forge',],
         },
         lore: `A brick of solid rock.<br>
             Now this is some useful stone.<br>
@@ -1151,7 +1160,7 @@ const item_list = {
         icon: [8, 1],
         row: 1,
         sources: {
-            other: ['crafting',],
+            other: ['forge',],
         },
         lore: `A solid block of copper.<br>
             Just as useful as copper, but easier to store.<br>
@@ -1167,7 +1176,7 @@ const item_list = {
         icon: [8, 2],
         row: 1,
         sources: {
-            other: ['crafting',],
+            other: ['forge',],
         },
         lore: `A light yellow ingot.<br>
             The way you store these makes them look even prettier...`,
@@ -1182,7 +1191,7 @@ const item_list = {
         icon: [8, 3],
         row: 1,
         sources: {
-            other: ['crafting',],
+            other: ['forge',],
         },
         lore: `A big brown ingot.<br>
             This is much easier to handle.<br>
@@ -1198,7 +1207,7 @@ const item_list = {
         icon: [8, 4],
         row: 1,
         sources: {
-            other: ['crafting',],
+            other: ['forge',],
         },
         lore: `A small, but very rare ingot.<br>
             Somehow, the more you own, the harder it is to find.<br>
@@ -1232,7 +1241,7 @@ const item_list = {
         icon: [8, 5],
         row: 1,
         sources: {
-            other: ['crafting',],
+            other: ['forge',],
         },
         lore: `A gray block of metal.<br>
             Keeps all the positives of iron, but is easier to store.<br>
@@ -1248,7 +1257,7 @@ const item_list = {
         icon: [8, 6],
         row: 1,
         sources: {
-            other: ['crafting',],
+            other: ['forge',],
         },
         lore: `An almost white metal block.<br>
             Looks like you managed to separate the impurities.<br>
@@ -1264,7 +1273,7 @@ const item_list = {
         icon: [8, 7],
         row: 1,
         sources: {
-            other: ['crafting',],
+            other: ['forge',],
         },
         lore: `A black metal cube.<br>
             It feels very heavy.<br>
@@ -1280,12 +1289,165 @@ const item_list = {
         icon: [8, 8],
         row: 1,
         sources: {
-            other: ['crafting',],
+            other: ['forge',],
         },
         lore: `A pretty light yellow alloy.<br>
             The method of storage used makes them even prettier.<br>
             Very valuable.`,
         categories: ['materials', 'forge'],
+        unlocked() { return tmp.c.forge.unlocked; },
+    },
+    // Forge Equipment
+    'stone_wall': {
+        id: null,
+        color: '#BBBBDD',
+        name: 'stone wall',
+        icon: [9, 0],
+        row: 1,
+        sources: {
+            other: ['forge',],
+        },
+        lore: `A wall made of stone bricks.<br>
+            Makes it easier to fight enemies.<br>
+            With some tiles, you could even make a house!`,
+        categories: ['equipment', 'forge'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let health_div = D.div(x, 20).add(1),
+                cost_div = D.root(x, 3).pow10();
+
+            return { health_div, cost_div, };
+        },
+        effectDescription(amount) {
+            let health_div, cost_div;
+            if (shiftDown) {
+                health_div = '[amount / 20 + 1]';
+                cost_div = '[10 ^ 3√(amount)]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                health_div = format(effect.health_div);
+                cost_div = format(effect.cost_div);
+            }
+
+            return `Divides enemy health by ${health_div}, and stone brick use costs by ${cost_div}`;
+        },
+        unlocked() { return tmp.c.forge.unlocked; },
+    },
+    'copper_golem': {
+        id: null,
+        color: '#FFAA11',
+        name: 'copper golem',
+        icon: [9, 1],
+        row: 1,
+        sources: {
+            other: ['forge',],
+        },
+        lore: `A mechanical being made of copper.<br>
+            Helpful with crafting and forging.<br>
+            This one won't attack you. Shouldn't, at least.`,
+        categories: ['equipment', 'forge'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let speed_mult = D.pow(1.05, x),
+                cost_div = D.root(x, 3).pow_base(15);
+
+            return { speed_mult, cost_div, };
+        },
+        effectDescription(amount) {
+            let speed_mult, cost_div;
+            if (shiftDown) {
+                speed_mult = '[1.05 ^ amount]';
+                cost_div = '[15 ^ 3√(amount)]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                speed_mult = format(effect.speed_mult);
+                cost_div = format(effect.cost_div);
+            }
+
+            return `Multiplies crafting and forging speed by ${speed_mult}, and divides copper ingot use costs by ${cost_div}`;
+        },
+        unlocked() { return tmp.c.forge.unlocked; },
+    },
+    'tin_ring': {
+        id: null,
+        color: '#FFFFCC',
+        name: 'tin ring',
+        icon: [9, 2],
+        row: 1,
+        sources: {
+            other: ['forge',],
+        },
+        lore: `A small ring made of tin.<br>
+            Somehow makes you stronger.<br>
+            Please don't hit anyone or anything with it, it will break.`,
+        categories: ['equipment', 'forge'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let xp_damage = D.div(x, 20),
+                cost_div = D.root(x, 3).pow_base(20);
+
+            return { xp_damage, cost_div, };
+        },
+        effectDescription(amount) {
+            let xp_damage, cost_div;
+            if (shiftDown) {
+                xp_damage = '[amount / 20]';
+                cost_div = '[20 ^ 3√(amount)]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                xp_damage = format(effect.xp_damage);
+                cost_div = format(effect.cost_div);
+            }
+
+            return `Increases enemy damage by ${xp_damage}, and divides tin ingot use costs by ${cost_div}`;
+        },
+        unlocked() { return tmp.c.forge.unlocked; },
+    },
+    'bronze_mold': {
+        id: null,
+        color: '#BB7744',
+        name: 'bronze mold',
+        icon: [9, 3],
+        row: 1,
+        sources: {
+            other: ['forge',],
+        },
+        lore: `A flat plate with an ingot-shaped hole in it.<br>
+            Commonly used to make ingots easier to obtain.<br>
+            Should not be used for eating.`,
+        categories: ['equipment', 'forge'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let forge_cost = D.div(x, 10).add(1),
+                cost_div = D.root(x, 4).pow_base(10);
+
+            return { forge_cost, cost_div, };
+        },
+        effectDescription(amount) {
+            let forge_cost, cost_div;
+            if (shiftDown) {
+                forge_cost = '[amount / 10 + 1]';
+                cost_div = '[10 ^ 4√(amount)]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                forge_cost = format(effect.forge_cost);
+                cost_div = format(effect.cost_div);
+            }
+
+            return `Divides forging costs by ${forge_cost}, and bronze ingot use costs by ${cost_div}`;
+        },
         unlocked() { return tmp.c.forge.unlocked; },
     },
     // Mining Tools
@@ -1538,7 +1700,9 @@ const item_list = {
                 heat_mult = format(effect.heat_mult);
             }
 
-            return `Multiplies coal gain by ${coal_mult}, and heat gain by ${heat_mult}`;
+            let text = `Multiplies coal gain by ${coal_mult}`;
+            if (tmp.c.forge.unlocked) text += `, and heat gain by ${heat_mult}`;
+            return text;
         },
         unlocked() { return hasUpgrade('m', 61); },
     },
@@ -1939,7 +2103,7 @@ const item_list = {
     'cueball': {
         id: null,
         color: '#FFFFFF',
-        name: 'platinum coin',
+        name: 'cueball',
         //todo icon & grid
         row: 'side',
         lore: `A spherical white ball.<br>
@@ -1952,7 +2116,7 @@ const item_list = {
 
 const ITEM_SIZES = {
     width: 12,
-    height: 10,
+    height: 11,
 };
 /**
  * @type {{[row in Layer['row']]: items[]}}
@@ -2105,6 +2269,8 @@ function source_name(source) {
         };
         case 'crafting':
             return 'crafting';
+        case 'forge':
+            return 'forge';
         case 'mining': {
             /** @type {ores|'any'|'compactor'} */
             const ore = sub[0];

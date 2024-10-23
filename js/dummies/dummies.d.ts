@@ -1485,7 +1485,11 @@ declare class Item<I> {
         per_second?: Computable<{ [key in drop_sources]: Decimal }>
         /** Drops between min and max */
         range?: Computable<{ [key in drop_sources]: { min: Decimal, max: Decimal } }>
-        /** Total produced every second */
+        /**
+         * Automatically set
+         *
+         * Total produced every second
+         */
         per_second_total?(): Decimal
         other?: Computable<drop_sources[]>
     }
@@ -1505,6 +1509,7 @@ type items = 'unknown' |
     'iron_ingot' | 'silver_ingot' | 'lead_ingot' | 'electrum_ingot' |
     'stone_mace' | 'copper_pick' | 'tin_cache' | 'bronze_cart' | 'doubloon' |
     'furnace' | 'iron_rails' | 'silver_coating' | 'electrum_coin_mold' | 'bellow' | 'lead_coating' |
+    'stone_wall' | 'copper_golem' | 'tin_ring' | 'bronze_mold' |
     'coin_copper' | 'coin_bronze' | 'coin_silver' | 'coin_gold' | 'coin_platinum' |
     'densium_slime' | 'densium_rock' | 'magic_densium_ball' |
     'cueball';
@@ -1514,8 +1519,8 @@ type monsters = 'slime' | 'skeleton';
 type ores = 'stone' | 'copper' | 'tin' |
     'coal' | 'iron' | 'silver';
 
-type drop_sources = `kill:${monsters}` | 'kill:any' | 'crafting' | `mining:${ores}` | 'mining:any' | 'mining:compactor' | 'shop';
-type drop_types = 'kill' | 'crafting' | 'mining' | 'shop';
+type drop_sources = `kill:${monsters}` | 'kill:any' | 'crafting' | 'forge' | `mining:${ores}` | 'mining:any' | 'mining:compactor' | 'shop';
+type drop_types = 'kill' | 'crafting' | 'forge' | 'mining' | 'shop';
 type categories = 'materials' | 'equipment' | 'mining' | 'shop' | 'forge' | 'craftable' |
     monsters;
 
@@ -1753,6 +1758,10 @@ type Layers = {
         }
         forge: {
             unlocked(): boolean
+            /** Divides forging time */
+            speed(): Decimal
+            /** Multiplies forging costs */
+            cost_mult(): Decimal
         }
         recipes: {
             [id: string]: {
@@ -1809,7 +1818,6 @@ type Layers = {
                 color: Computable<string>
             }
         }
-        //todo forge fuels
     }
     // Row 2
     b: Layer<'b'> & {

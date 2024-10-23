@@ -658,6 +658,20 @@ addLayer('ach', {
             },
             unlocked() { return hasAchievement(this.layer, this.id); },
         },
+        101: {
+            name: 'Try Clicking Harder',
+            tooltip: 'Switch to double-decker bus distance again',
+            done() { return options.distMode == 'DOUBLEDECKERBUSH'; },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Secret Completed!', 3, tmp.ach.categories.secret.color); },
+            style() {
+                let style = {};
+
+                style['background-color'] = tmp.ach.categories.secret.color;
+
+                return style;
+            },
+            unlocked() { return hasAchievement(this.layer, this.id); },
+        },
         //#endregion Secret
     },
     achievementPopups: false, // This is done manually
@@ -681,7 +695,7 @@ addLayer('ach', {
             owned() { return player.ach.achievements.filter(id => this.rows.includes(Math.floor(id / 10))); },
         },
         secret: {
-            rows: [6, 2],
+            rows: [10, 6, 2],
             color: '#FF0077',
             visible() {
                 return Object.values(tmp.ach.achievements)

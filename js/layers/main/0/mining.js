@@ -4,6 +4,7 @@ const ORE_SIZES = {
     width: 3,
     height: 3,
 };
+//todo ore depths (like monster levels)
 addLayer('m', {
     row: 0,
     position: 1,

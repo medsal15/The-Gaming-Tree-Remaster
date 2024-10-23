@@ -129,7 +129,7 @@ addLayer('c', {
                 ['display-text', `<span class="warning">You lose 1% of your heat every second</span>`],
                 'blank',
                 ['buyable', 21],
-                ['upgrades', [1, 2]],
+                ['buyables', [3, 4]],
                 'blank',
                 ['row', () => Object.keys(tmp.c.clickables)
                     .filter(id => id.startsWith('forge_') && tmp.c.clickables[id].unlocked)
@@ -197,6 +197,7 @@ addLayer('c', {
         return mult;
     },
     buyables: {
+        // Main
         11: {
             title() { return `Looting lv.${formatWhole(getBuyableAmount(this.layer, this.id))}`; },
             display() {
@@ -233,16 +234,21 @@ addLayer('c', {
                 player.c.shown = true;
             },
         },
+        // Forge
         21: {
             title() { return `Heating lv.${formatWhole(getBuyableAmount(this.layer, this.id))}`; },
             display() {
-                const cost = tmp[this.layer].buyables[this.id].cost;
-                let effect = shiftDown ? '[amount / 10]' : format(buyableEffect(this.layer, this.id)),
+                const cost = tmp[this.layer].buyables[this.id].cost,
+                    effect = buyableEffect(this.layer, this.id);
+                let effect_heat = shiftDown ? '[amount / 10]' : format(effect.heat),
+                    effect_coal = shiftDown ? '[amount / 15]' : format(effect.coal),
                     coal_cost = shiftDown ? '[1.1 ^ amount * 100]' : format(cost.coal),
                     stone_cost = shiftDown ? '[1.5 ^ amount * 333]' : format(cost.stone);
 
-                return `Increases heat gain by ${effect}<br><br>
-                Costs: ${coal_cost} coal, ${stone_cost} stone`;
+                return `Increases heat gain by ${effect_heat},\
+                    consumes ${effect_coal} coal per second<br>
+                    Only works when you have at least 10% of coal needed per second<br><br>
+                    Costs: ${coal_cost} coal, ${stone_cost} stone`;
             },
             cost(x) {
                 if (tmp[this.layer].deactivated) x = D.dZero;
@@ -259,7 +265,15 @@ addLayer('c', {
             effect(x) {
                 if (tmp[this.layer].deactivated) x = D.dZero;
 
-                return D.div(x, 10);
+                let heat = D.div(x, 10),
+                    coal = D.div(x, 15);
+
+                if (D.lt(player.items.coal.amount, coal.div(10))) {
+                    heat = D.dZero;
+                    coal = D.dZero;
+                }
+
+                return { heat, coal, };
             },
             buy() {
                 if (!this.canAfford()) return;
@@ -275,9 +289,181 @@ addLayer('c', {
                 }
             },
         },
-    },
-    upgrades: {
-        //todo forge upgrades
+        31: {
+            title() { return `${formatWhole(player.items.stone_wall.amount)} ${capitalize_words(tmp.items.stone_wall.name)}`; },
+            display() {
+                const cost = tmp[this.layer].buyables[this.id].cost;
+                let stone_cost = shiftDown ? '[amount * 100 + 200]' : format(cost);
+
+                return item_list.stone_wall.effectDescription() + `<br>
+                    First purchase replaces stone costs with stone bricks<br><br>
+                    Costs: ${stone_cost} stone bricks`
+            },
+            cost(x) {
+                if (tmp[this.layer].deactivated) x = D.dZero;
+
+                let cost = D.times(x, 100).add(200);
+
+                return cost;
+            },
+            canAfford() {
+                const cost = tmp[this.layer].buyables[this.id].cost;
+                return D.gte(player.items.stone_brick.amount, cost);
+            },
+            buy() {
+                if (!this.canAfford()) return;
+
+                const cost = tmp[this.layer].buyables[this.id].cost;
+                player.items.stone_brick.amount = D.minus(player.items.stone_brick.amount, cost);
+                gain_items('stone_wall', 1);
+                addBuyables(this.layer, this.id, 1);
+            },
+            style() {
+                const style = {
+                    'height': '150px',
+                    'width': '150px',
+                };
+
+                if (canBuyBuyable(this.layer, this.id)) {
+                    Object.assign(style, { 'backgroundColor': tmp.items.stone_wall.color });
+                }
+
+                return style;
+            },
+        },
+        32: {
+            title() { return `${formatWhole(player.items.copper_golem.amount)} ${capitalize_words(tmp.items.copper_golem.name)}`; },
+            display() {
+                const cost = tmp[this.layer].buyables[this.id].cost;
+                let copper_cost = shiftDown ? '[amount * 150 + 250]' : format(cost);
+
+                return item_list.copper_golem.effectDescription() + `<br>
+                    First purchase replaces copper ore costs with copper ingots<br><br>
+                    Costs: ${copper_cost} copper ingots`
+            },
+            cost(x) {
+                if (tmp[this.layer].deactivated) x = D.dZero;
+
+                let cost = D.times(x, 150).add(250);
+
+                return cost;
+            },
+            canAfford() {
+                const cost = tmp[this.layer].buyables[this.id].cost;
+                return D.gte(player.items.copper_ingot.amount, cost);
+            },
+            buy() {
+                if (!this.canAfford()) return;
+
+                const cost = tmp[this.layer].buyables[this.id].cost;
+                player.items.copper_ingot.amount = D.minus(player.items.copper_ingot.amount, cost);
+                gain_items('copper_golem', 1);
+                addBuyables(this.layer, this.id, 1);
+            },
+            style() {
+                const style = {
+                    'height': '150px',
+                    'width': '150px',
+                };
+
+                if (canBuyBuyable(this.layer, this.id)) {
+                    Object.assign(style, { 'backgroundColor': tmp.items.copper_golem.color });
+                }
+
+                return style;
+            },
+        },
+        33: {
+            title() { return `${formatWhole(player.items.tin_ring.amount)} ${capitalize_words(tmp.items.tin_ring.name)}`; },
+            display() {
+                const cost = tmp[this.layer].buyables[this.id].cost;
+                let tin_cost = shiftDown ? '[amount * 150 + 250]' : format(cost);
+
+                return item_list.tin_ring.effectDescription() + `<br>
+                    First purchase replaces tin ore costs with tin ingots<br><br>
+                    Costs: ${tin_cost} tin ingots`
+            },
+            cost(x) {
+                if (tmp[this.layer].deactivated) x = D.dZero;
+
+                let cost = D.times(x, 150).add(250);
+
+                return cost;
+            },
+            canAfford() {
+                const cost = tmp[this.layer].buyables[this.id].cost;
+                return D.gte(player.items.tin_ingot.amount, cost);
+            },
+            buy() {
+                if (!this.canAfford()) return;
+
+                const cost = tmp[this.layer].buyables[this.id].cost;
+                player.items.tin_ingot.amount = D.minus(player.items.tin_ingot.amount, cost);
+                gain_items('tin_ring', 1);
+                addBuyables(this.layer, this.id, 1);
+            },
+            style() {
+                const style = {
+                    'height': '150px',
+                    'width': '150px',
+                };
+
+                if (canBuyBuyable(this.layer, this.id)) {
+                    Object.assign(style, { 'backgroundColor': tmp.items.tin_ring.color });
+                }
+
+                return style;
+            },
+        },
+        34: {
+            title() { return `${formatWhole(player.items.bronze_mold.amount)} ${capitalize_words(tmp.items.bronze_mold.name)}`; },
+            display() {
+                const cost = tmp[this.layer].buyables[this.id].cost;
+                let bronze_cost = shiftDown ? '[amount * 150 + 250]' : format(cost);
+
+                return item_list.bronze_mold.effectDescription() + `<br>
+                    First purchase replaces bronze blend costs with bronze ingots<br><br>
+                    Costs: ${bronze_cost} bronze ingots`
+            },
+            cost(x) {
+                if (tmp[this.layer].deactivated) x = D.dZero;
+
+                let cost = D.times(x, 150).add(250);
+
+                return cost;
+            },
+            canAfford() {
+                const cost = tmp[this.layer].buyables[this.id].cost;
+                return D.gte(player.items.bronze_blend.amount, cost);
+            },
+            buy() {
+                if (!this.canAfford()) return;
+
+                const cost = tmp[this.layer].buyables[this.id].cost;
+                player.items.bronze_blend.amount = D.minus(player.items.bronze_blend.amount, cost);
+                gain_items('bronze_mold', 1);
+                addBuyables(this.layer, this.id, 1);
+            },
+            style() {
+                const style = {
+                    'height': '150px',
+                    'width': '150px',
+                };
+
+                if (canBuyBuyable(this.layer, this.id)) {
+                    Object.assign(style, { 'backgroundColor': tmp.items.bronze_mold.color });
+                }
+
+                return style;
+            },
+        },
+        /**
+         * TODO
+         * 41: ??? (Iron)
+         * 42: ??? (Silver)
+         * 43: ??? (Lead)
+         * 44: Electrum Necklace (???)
+         */
     },
     clickables: {
         ...crafting_toggles(),
@@ -374,11 +560,27 @@ addLayer('c', {
 
             if (hasAchievement('ach', 45)) speed = speed.times(achievementEffect('ach', 45));
 
+            speed = speed.times(item_effect('copper_golem').speed_mult);
+
             return speed;
         },
     },
     forge: {
         unlocked() { return hasUpgrade('m', 62) || player.c.visited_forge; },
+        speed() {
+            let speed = D.dOne;
+
+            speed = speed.times(item_effect('copper_golem').speed_mult);
+
+            return speed;
+        },
+        cost_mult() {
+            let mult = D.dOne;
+
+            mult = mult.div(item_effect('bronze_mold').forge_cost);
+
+            return mult;
+        },
     },
     recipes: {
         // Materials
@@ -662,6 +864,7 @@ addLayer('c', {
                 ];
 
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.forge.cost_mult));
 
                 return costs;
             },
@@ -677,7 +880,7 @@ addLayer('c', {
 
                 let duration = D.times(count, 10).add(10);
 
-                return D.div(duration, tmp.c.crafting.speed);
+                return D.div(duration, tmp.c.forge.speed);
             },
             heat: D.dTen,
             formulas: {
@@ -706,6 +909,7 @@ addLayer('c', {
                 ];
 
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.forge.cost_mult));
 
                 return costs;
             },
@@ -721,7 +925,7 @@ addLayer('c', {
 
                 let duration = D.times(count, 15).add(10);
 
-                return D.div(duration, tmp.c.crafting.speed);
+                return D.div(duration, tmp.c.forge.speed);
             },
             heat: D(25),
             formulas: {
@@ -750,6 +954,7 @@ addLayer('c', {
                 ];
 
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.forge.cost_mult));
 
                 return costs;
             },
@@ -765,7 +970,7 @@ addLayer('c', {
 
                 let duration = D.times(count, 5).add(10);
 
-                return D.div(duration, tmp.c.crafting.speed);
+                return D.div(duration, tmp.c.forge.speed);
             },
             heat: D(25),
             formulas: {
@@ -794,6 +999,7 @@ addLayer('c', {
                 ];
 
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.forge.cost_mult));
 
                 return costs;
             },
@@ -809,7 +1015,7 @@ addLayer('c', {
 
                 let duration = D.times(count, 20).add(10);
 
-                return D.div(duration, tmp.c.crafting.speed);
+                return D.div(duration, tmp.c.forge.speed);
             },
             heat: D(75),
             formulas: {
@@ -839,6 +1045,7 @@ addLayer('c', {
                 ];
 
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.forge.cost_mult));
 
                 return costs;
             },
@@ -854,7 +1061,7 @@ addLayer('c', {
 
                 let duration = D.times(count, 30).add(20);
 
-                return D.div(duration, tmp.c.crafting.speed);
+                return D.div(duration, tmp.c.forge.speed);
             },
             heat: D(75),
             formulas: {
@@ -884,6 +1091,7 @@ addLayer('c', {
                 ];
 
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.forge.cost_mult));
 
                 return costs;
             },
@@ -899,7 +1107,7 @@ addLayer('c', {
 
                 let duration = D.times(count, 5).add(5);
 
-                return D.div(duration, tmp.c.crafting.speed);
+                return D.div(duration, tmp.c.forge.speed);
             },
             heat: D(50),
             formulas: {
@@ -929,6 +1137,7 @@ addLayer('c', {
                 ];
 
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.forge.cost_mult));
 
                 return costs;
             },
@@ -944,7 +1153,7 @@ addLayer('c', {
 
                 let duration = D.times(count, 30).add(30);
 
-                return D.div(duration, tmp.c.crafting.speed);
+                return D.div(duration, tmp.c.forge.speed);
             },
             heat: D(110),
             formulas: {
@@ -974,6 +1183,7 @@ addLayer('c', {
                 ];
 
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.forge.cost_mult));
 
                 return costs;
             },
@@ -989,7 +1199,7 @@ addLayer('c', {
 
                 let duration = D.times(count, 15).add(15);
 
-                return D.div(duration, tmp.c.crafting.speed);
+                return D.div(duration, tmp.c.forge.speed);
             },
             heat: D(100),
             formulas: {
@@ -1019,6 +1229,7 @@ addLayer('c', {
                 ];
 
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.forge.cost_mult));
 
                 return costs;
             },
@@ -1035,7 +1246,7 @@ addLayer('c', {
 
                 let duration = D.times(count, 15).add(45);
 
-                return D.div(duration, tmp.c.crafting.speed);
+                return D.div(duration, tmp.c.forge.speed);
             },
             heat: D(150),
             formulas: {
@@ -1066,6 +1277,7 @@ addLayer('c', {
                 ];
 
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.forge.cost_mult));
 
                 return costs;
             },
@@ -1081,7 +1293,7 @@ addLayer('c', {
 
                 let duration = D.times(count, 20).add(20);
 
-                return D.div(duration, tmp.c.crafting.speed);
+                return D.div(duration, tmp.c.forge.speed);
             },
             heat: D(225),
             formulas: {
@@ -1111,6 +1323,7 @@ addLayer('c', {
                 ];
 
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.forge.cost_mult));
 
                 return costs;
             },
@@ -1126,7 +1339,7 @@ addLayer('c', {
 
                 let duration = D.times(count, 10).add(10);
 
-                return D.div(duration, tmp.c.crafting.speed);
+                return D.div(duration, tmp.c.forge.speed);
             },
             heat: D(225),
             formulas: {
@@ -1515,6 +1728,12 @@ addLayer('c', {
                     ['stone', D.sumGeometricSeries(count, 12, 2, all)],
                 ];
 
+                if (D.gt(getBuyableAmount('c', 31), 0)) {
+                    const stone_row = costs.find(([item]) => item == 'stone');
+                    stone_row[0] = 'stone_brick';
+                    stone_row[1] = D.div(stone_row[1], item_effect('stone_wall').cost_div);
+                }
+
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
 
                 return costs;
@@ -1538,6 +1757,7 @@ addLayer('c', {
                 consumes: {
                     'bone': '5 * 1.8 ^ amount',
                     'stone': '12 * 2 ^ amount',
+                    'stone_brick'() { return `${this.stone} / ${format(item_effect('stone_wall').cost_div)}`; },
                 },
                 produces: {
                     'stone_mace': 'amount',
@@ -1560,6 +1780,12 @@ addLayer('c', {
                     ['slime_goo', D.sumGeometricSeries(count, 15, 1.8, all)],
                     ['copper_ore', D.sumGeometricSeries(count, 12, 1.5, all)],
                 ];
+
+                if (D.gt(getBuyableAmount('c', 32), 0)) {
+                    const copper_row = costs.find(([item]) => item == 'copper_ore');
+                    copper_row[0] = 'copper_ingot';
+                    copper_row[1] = D.div(copper_row[1], item_effect('copper_golem').cost_div);
+                }
 
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
 
@@ -1585,6 +1811,7 @@ addLayer('c', {
                     'bone': '6 * 1.8 ^ amount',
                     'slime_goo': '15 * 1.8 ^ amount',
                     'copper_ore': '12 * 1.5 ^ amount',
+                    'copper_ingot'() { return `${this.copper_ore} / ${format(item_effect('copper_golem').cost_div)}`; },
                 },
                 produces: {
                     'copper_pick': 'amount',
@@ -1606,6 +1833,17 @@ addLayer('c', {
                     ['copper_ore', D.sumGeometricSeries(count, 8, 1.5, all)],
                     ['tin_ore', D.sumGeometricSeries(count, 12, 1.25, all)],
                 ];
+
+                if (D.gt(getBuyableAmount('c', 32), 0)) {
+                    const copper_row = costs.find(([item]) => item == 'copper_ore');
+                    copper_row[0] = 'copper_ingot';
+                    copper_row[1] = D.div(copper_row[1], item_effect('copper_golem').cost_div);
+                }
+                if (D.gt(getBuyableAmount('c', 33), 0)) {
+                    const tin_row = costs.find(([item]) => item == 'tin_ore');
+                    tin_row[0] = 'tin_ingot';
+                    tin_row[1] = D.div(tin_row[1], item_effect('tin_ring').cost_div);
+                }
 
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
 
@@ -1630,6 +1868,8 @@ addLayer('c', {
                 consumes: {
                     'copper_ore': '8 * 1.5 ^ amount',
                     'tin_ore': '12 * 1.25 ^ amount',
+                    'copper_ingot'() { return `${this.copper_ore} / ${format(item_effect('copper_golem').cost_div)}`; },
+                    'tin_ingot'() { return `${this.tin_ore} / ${format(item_effect('tin_ring').cost_div)}`; },
                 },
                 produces: {
                     'tin_cache': 'amount',
@@ -1651,6 +1891,17 @@ addLayer('c', {
                     ['copper_ore', D.sumGeometricSeries(count, 24, 1.5, all)],
                     ['bronze_blend', D.sumGeometricSeries(count, 8, 1.1, all)],
                 ];
+
+                if (D.gt(getBuyableAmount('c', 32), 0)) {
+                    const copper_row = costs.find(([item]) => item == 'copper_ore');
+                    copper_row[0] = 'copper_ingot';
+                    copper_row[1] = D.div(copper_row[1], item_effect('copper_golem').cost_div);
+                }
+                if (D.gt(getBuyableAmount('c', 34), 0)) {
+                    const bronze_row = costs.find(([item]) => item == 'bronze_blend');
+                    bronze_row[0] = 'bronze_ingot';
+                    bronze_row[1] = D.div(bronze_row[1], item_effect('bronze_mold').cost_div);
+                }
 
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
 
@@ -1675,6 +1926,7 @@ addLayer('c', {
                 consumes: {
                     'copper_ore': '24 * 1.5 ^ amount',
                     'bronze_blend': '8 * 1.1 ^ amount',
+                    'copper_ingot'() { return `${this.copper_ore} / ${format(item_effect('copper_golem').cost_div)}`; },
                 },
                 produces: {
                     'bronze_cart': 'amount',
@@ -1728,8 +1980,299 @@ addLayer('c', {
             static: true,
             unlocked() { return inChallenge('b', 12) || hasChallenge('b', 12); },
         },
-        //todo furnace (stone & coal), iron rails (clear iron & bone), silver coating (silver & slime goo), electrum coin mold (electrum & ??? coin)
-        //todo bellow (stone & rib & slime core), lead coating (lead & slime goo)
+        furnace: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let costs = [
+                    ['coal', D.sumGeometricSeries(count, 5, 2, all)],
+                    ['stone', D.sumGeometricSeries(count, 25, 2, all)],
+                ];
+
+                if (D.gt(getBuyableAmount('c', 31), 0)) {
+                    const stone_row = costs.find(([item]) => item == 'stone');
+                    stone_row[0] = 'stone_brick';
+                    stone_row[1] = D.div(stone_row[1], item_effect('stone_wall').cost_div);
+                }
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['furnace', count],
+                ];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let duration = D.times(count, 4).add(all).times(5).add(10);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'coal': '5 * 2 ^ amount',
+                    'stone': '25 * 2 ^ amount',
+                    'stone_brick'() { return `${this.stone} / ${format(item_effect('stone_wall').cost_div)}`; },
+                },
+                produces: {
+                    'furnace': 'amount',
+                },
+                duration: '(crafting * 4 + crafted) * 5 + 10 seconds',
+            },
+            categories: ['equipment', 'mining',],
+            static: true,
+            unlocked() { return hasUpgrade('m', 61) || hasAchievement('ach', 94); },
+        },
+        iron_rails: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let costs = [
+                    ['clear_iron_ore', D.sumGeometricSeries(count, 10, 1.4, all)],
+                    ['bone', D.sumGeometricSeries(count, 15, 1.8, all)],
+                ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['iron_rails', count],
+                ];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let duration = D.times(count, 2.5).add(all).times(5).add(25);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'clear_iron_ore': '10 * 2 ^ amount',
+                    'bone': '15 * 1.8 ^ amount',
+                },
+                produces: {
+                    'iron_rails': 'amount',
+                },
+                duration: '(crafting * 2.5 + crafted) * 5 + 25 seconds',
+            },
+            categories: ['equipment', 'mining',],
+            static: true,
+            unlocked() { return hasUpgrade('m', 61) || hasAchievement('ach', 94); },
+        },
+        silver_coating: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let costs = [
+                    ['silver_ore', D.sumGeometricSeries(count, 7, 1.2, all)],
+                    ['slime_goo', D.sumGeometricSeries(count, 25, 1.8, all)],
+                ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['silver_coating', count],
+                ];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let duration = D.times(count, 3.5).add(D.times(all, .7)).times(2).add(21);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'silver_ore': '7 * 1.25 ^ amount',
+                    'slime_goo': '25 * 1.8 ^ amount',
+                },
+                produces: {
+                    'silver_coating': 'amount',
+                },
+                duration: '(crafting * 3.5 + crafted * 0.7) * 2 + 21 seconds',
+            },
+            categories: ['equipment', 'mining',],
+            static: true,
+            unlocked() { return hasUpgrade('m', 61) || hasAchievement('ach', 94); },
+        },
+        electrum_coin_mold: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let costs = [
+                    ['electrum_blend', D.sumGeometricSeries(count, 7, 1.1, all)],
+                ];
+                // Get the current value
+                if (!value_coin.values.length) value_coin(1);
+                const value = D.sumGeometricSeries(count, 15, 2, all).times(value_coin.values.find(([i]) => i == 'coin_bronze'));
+                costs.push(...value_coin(value));
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['electrum_coin_mold', count],
+                ];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let duration = D.times(count, 4).add(D.times(all, 2)).times(4).add(8);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'electrum_blend': '7 * 1.25 ^ amount',
+                    'coin_copper': '',
+                    'coin_bronze': '25 * 1.8 ^ amount',
+                    'coin_silver': '',
+                    'coin_gold': '',
+                    'coin_platinum': '',
+                },
+                produces: {
+                    'electrum_coin_mold': 'amount',
+                },
+                duration: '(crafting * 4 + crafted * 2) * 4 + 8 seconds',
+            },
+            categories: ['equipment', 'mining',],
+            static: true,
+            unlocked() { return hasUpgrade('m', 61) || hasAchievement('ach', 94); },
+        },
+        bellow: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let costs = [
+                    ['slime_core', D.sumGeometricSeries(count, 5, 1.2, all)],
+                    ['rib', D.sumGeometricSeries(count, 3, 1.2, all)],
+                    ['stone', D.sumGeometricSeries(count, 50, 2, all)],
+                ];
+
+                if (D.gt(getBuyableAmount('c', 31), 0)) {
+                    const stone_row = costs.find(([item]) => item == 'stone');
+                    stone_row[0] = 'stone_brick';
+                    stone_row[1] = D.div(stone_row[1], item_effect('stone_wall').cost_div);
+                }
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['bellow', count],
+                ];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let duration = D.times(count, 2).add(all).times(5).add(30);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'slime_core': '5 * 1.2 ^ amount',
+                    'rib': '3 * 1.2 ^ amount',
+                    'stone': '50 * 2 ^ amount',
+                    'stone_brick'() { return `${this.stone} / ${format(item_effect('stone_wall').cost_div)}`; },
+                },
+                produces: {
+                    'bellow': 'amount',
+                },
+                duration: '(crafting * 2 + crafted) * 5 + 30 seconds',
+            },
+            categories: ['equipment', 'mining',],
+            static: true,
+            unlocked() { return tmp.c.forge.unlocked; },
+        },
+        lead_coating: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let costs = [
+                    ['slime_goo', D.sumGeometricSeries(count, 50, 1.8, all)],
+                    ['lead_ingot', D.sumGeometricSeries(count, .25, 1.15, all)],
+                ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['lead_coating', count],
+                ];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let duration = D.times(count, 3).add(D.div(all, 3)).times(3).add(13);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'slime_goo': '50 * 1.8 ^ amount',
+                    'lead_ingot': '1.15 ^ amount / 4',
+                },
+                produces: {
+                    'lead_coating': 'amount',
+                },
+                duration: '(crafting * 3 + crafted / 3) * 3 + 13 seconds',
+            },
+            categories: ['equipment', 'mining',],
+            static: true,
+            unlocked() { return tmp.c.forge.unlocked; },
+        },
         densium_slime: {
             _id: null,
             get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
@@ -1789,6 +2332,12 @@ addLayer('c', {
                     ['slime_core_shard', D.sumGeometricSeries(count, 10, 2.1, all)],
                 ];
 
+                if (D.gt(getBuyableAmount('c', 31), 0)) {
+                    const stone_row = costs.find(([item]) => item == 'stone');
+                    stone_row[0] = 'stone_brick';
+                    stone_row[1] = D.div(stone_row[1], item_effect('stone_wall').cost_div);
+                }
+
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
 
                 return costs;
@@ -1809,6 +2358,7 @@ addLayer('c', {
                 consumes: {
                     'densium': '1.05 ^ amount',
                     'stone': '50 * 3 ^ amount',
+                    'stone_brick'() { return `${this.stone} / ${format(item_effect('stone_wall').cost_div)}`; },
                     'slime_core_shard': '5 * 2.1 ^ amount',
                 },
                 produces: {
@@ -1897,7 +2447,7 @@ addLayer('c', {
 
                     if (hasUpgrade('m', 62)) base = base.add(upgradeEffect('m', 62));
 
-                    base = base.add(buyableEffect('c', 21));
+                    base = base.add(buyableEffect('c', 21).heat);
 
                     return base;
                 },
@@ -1951,6 +2501,11 @@ addLayer('c', {
         });
 
         player.c.heat = D.times(tmp.c.modifiers.heat.per_second, diff).add(player.c.heat);
+
+        if (D.gt(buyableEffect('c', 21).coal, 0)) {
+            const loss = D.times(buyableEffect('c', 21).coal, diff);
+            gain_items('coal', loss.neg());
+        }
     },
     automate() {
         Object.entries(player.c.recipes).forEach(([id, rec]) => {
