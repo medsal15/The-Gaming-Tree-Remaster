@@ -10,7 +10,7 @@ function makeParticles(data, amount=1, type = "normal") {
 
             switch(thing) {
                 case 'onClick': // Functions that should be copied over
-                case 'onMouseOver':
+                case 'onMouseEnter':
                 case 'onMouseLeave':
                 case 'update':
                     particle[thing] = data[thing]
