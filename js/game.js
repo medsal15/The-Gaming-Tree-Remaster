@@ -246,14 +246,19 @@ function resetRow(row) {
 
 function startChallenge(layer, x) {
 	let enter = false
-	if (!player[layer].unlocked || !tmp[layer].challenges[x].unlocked) return
+	if (!player[layer].unlocked || !tmp[layer].challenges[x].unlocked || !canEnterChallenge(layer, x)) return
+
 	if (player[layer].activeChallenge == x) {
-		completeChallenge(layer, x)
-		Vue.set(player[layer], "activeChallenge", null)
-		} else {
+		// This needs to be embedded due to how 'enter' works
+		if(canExitChallenge(layer, x)){
+			completeChallenge(layer, x)
+			Vue.set(player[layer], "activeChallenge", null)
+		}
+	}
+	else {
 		enter = true
-	}	
-	doReset(layer, true)
+	}
+	if(enter || canExitChallenge(layer, x)) doReset(layer, true)
 	if(enter) {
 		Vue.set(player[layer], "activeChallenge", x)
 		run(layers[layer].challenges[x].onEnter, layers[layer].challenges[x])
