@@ -1,9 +1,11 @@
 // ************ Save stuff ************
+let getModID = () => modInfo.id ?? `${modInfo.name.replace(/\s+/g, '-')}-${modInfo.author.replace(/\s+/g, '-')}`;
+
 function save(force) {
 	NaNcheck(player)
 	if (NaNalert && !force) return
-	localStorage.setItem(modInfo.id, btoa(unescape(encodeURIComponent(JSON.stringify(player)))));
-	localStorage.setItem(modInfo.id+"_options", btoa(unescape(encodeURIComponent(JSON.stringify(options)))));
+	localStorage.setItem(getModID(), btoa(unescape(encodeURIComponent(JSON.stringify(player)))));
+	localStorage.setItem(getModID()+"_options", btoa(unescape(encodeURIComponent(JSON.stringify(options)))));
 
 }
 function startPlayerBase() {
@@ -12,7 +14,7 @@ function startPlayerBase() {
 		navTab: (layoutInfo.showTree ? layoutInfo.startNavTab : "none"),
 		time: Date.now(),
 		notify: {},
-		versionType: modInfo.id,
+		versionType: getModID(),
 		version: VERSION.num,
 		beta: VERSION.beta,
 		timePlayed: 0,
@@ -185,7 +187,7 @@ function fixData(defaultData, newData) {
 	}
 }
 function load() {
-	let get = localStorage.getItem(modInfo.id);
+	let get = localStorage.getItem(getModID());
 
 	if (get === null || get === undefined) {
 		player = getStartPlayer();
@@ -217,7 +219,7 @@ function load() {
 }
 
 function loadOptions() {
-	let get2 = localStorage.getItem(modInfo.id+"_options");
+	let get2 = localStorage.getItem(getModID()+"_options");
 	if (get2) 
 		options = Object.assign(getStartOptions(), JSON.parse(decodeURIComponent(escape(atob(get2)))));
 	else 
@@ -274,10 +276,10 @@ function importSave(imported = undefined, forced = false) {
 		imported = prompt("Paste your save here");
 	try {
 		tempPlr = Object.assign(getStartPlayer(), JSON.parse(atob(imported)));
-		if (tempPlr.versionType != modInfo.id && !forced && !confirm("This save appears to be for a different mod! Are you sure you want to import?")) // Wrong save (use "Forced" to force it to accept.)
+		if (tempPlr.versionType != getModID() && !forced && !confirm("This save appears to be for a different mod! Are you sure you want to import?")) // Wrong save (use "Forced" to force it to accept.)
 			return;
 		player = tempPlr;
-		player.versionType = modInfo.id;
+		player.versionType = getModID();
 		fixSave();
 		versionCheck();
 		NaNcheck(save)
@@ -291,12 +293,12 @@ function versionCheck() {
 	let setVersion = true;
 
 	if (player.versionType === undefined || player.version === undefined) {
-		player.versionType = modInfo.id;
+		player.versionType = getModID();
 		player.version = 0;
 	}
 
 	if (setVersion) {
-		if (player.versionType == modInfo.id && VERSION.num > player.version) {
+		if (player.versionType == getModID() && VERSION.num > player.version) {
 			player.keepGoing = false;
 			if (fixOldSave)
 				fixOldSave(player.version);
