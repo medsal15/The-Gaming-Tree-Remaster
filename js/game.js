@@ -184,11 +184,12 @@ function doReset(layer, force=false) {
 		if (tmp[layer].type=="static") {
 			if (tmp[layer].baseAmount.lt(tmp[layer].nextAt)) return;
 			gain =(tmp[layer].canBuyMax ? gain : 1)
-		} 
+		}
 
-
-		if (layers[layer].onPrestige)
+		if (layers[layer].onPrestige){
+			updateMilestones(layer)
 			run(layers[layer].onPrestige, layers[layer], gain)
+		}
 		
 		addPoints(layer, gain)
 		updateMilestones(layer)
