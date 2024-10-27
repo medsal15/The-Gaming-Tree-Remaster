@@ -14,6 +14,7 @@ function getStartOptions() {
 		forceOneTab: false,
 		oldStyle: false,
 		tooltipForcing: true,
+		hideMilestonePopups: false,
 	}
 }
 
@@ -76,3 +77,5 @@ function milestoneShown(layer, id) {
 	}
 	return false;
 }
+
+let formatOption = (opt) => opt ? 'ON' : 'OFF'
