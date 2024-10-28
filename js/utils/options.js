@@ -92,3 +92,5 @@ function changeLootChance() {
 	const modes = Object.keys(CHANCE_MODE);
 	options.chanceMode = modes[(modes.indexOf(options.chanceMode) + 1) % modes.length];
 }
+
+let formatOption = (opt) => opt ? 'ON' : 'OFF';
