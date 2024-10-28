@@ -1,5 +1,7 @@
 # TODO #
 
+Add an indication that the challenge cannot be entered/exited
+
 Add an export save to file
 
 Add modal to select theme

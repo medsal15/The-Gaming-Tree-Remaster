@@ -47,6 +47,11 @@ const item_list = {
                 return other;
             },
         },
+        value: {
+            cost() {
+                if (inChallenge('b', 12)) return D(5);
+            },
+        },
         lore() {
             if (inChallenge('b', 11)) return `A chunk of orange goo.<br>
                 Feels warm to the touch.<br>
@@ -94,6 +99,11 @@ const item_list = {
                 if (inChallenge('b', 12)) other.push('shop');
 
                 return other;
+            },
+        },
+        value: {
+            cost() {
+                if (inChallenge('b', 12)) return D(15);
             },
         },
         lore() {
@@ -147,6 +157,11 @@ const item_list = {
                 return other;
             },
         },
+        value: {
+            cost() {
+                if (inChallenge('b', 12)) return D(50);
+            },
+        },
         lore() {
             if (inChallenge('b', 11)) return `The very core of a slime.<br>
                 Hot to the touch and valuable.<br>
@@ -187,6 +202,11 @@ const item_list = {
                 return other;
             },
         },
+        value: {
+            cost() {
+                return D(100);
+            },
+        },
         lore() {
             if (inChallenge('b', 11)) return `Are you sure this is a good idea?<br>
                 It glows in an angry red light.<br>
@@ -218,6 +238,11 @@ const item_list = {
         row: 1,
         sources: {
             other: ['crafting'],
+        },
+        value: {
+            value() {
+                return D(100);
+            },
         },
         lore() {
             if (inChallenge('b', 11)) return `A bright red crystal made of pure slime.<br>
@@ -292,6 +317,11 @@ const item_list = {
         sources: {
             other: ['crafting'],
         },
+        value: {
+            value() {
+                return D(200);
+            },
+        },
         lore() {
             if (inChallenge('b', 11)) return `A sharp red weapon.<br>
                 Requires a license to use in some kingdoms.<br>
@@ -357,6 +387,11 @@ const item_list = {
         row: 1,
         sources: {
             other: ['crafting'],
+        },
+        value: {
+            value() {
+                return D(300);
+            },
         },
         lore() {
             if (inChallenge('b', 11)) return `This experimental drug destabilizes slimes.<br>
@@ -446,6 +481,11 @@ const item_list = {
         sources: {
             other: ['crafting'],
         },
+        value: {
+            value() {
+                return D(800);
+            },
+        },
         lore() {
             if (inChallenge('b', 11)) return `A dice that glows in a worrying light.<br>
                 It feels lucky, somehow.<br>
@@ -528,6 +568,11 @@ const item_list = {
                 return other;
             },
         },
+        value: {
+            cost() {
+                if (inChallenge('b', 12)) return D(7);
+            },
+        },
         lore: `A big rod mostly made of calcium.<br>
             Stolen from a dead body, but (hopefully) not a grave.<br>
             Wait long enough, and it becomes archeology.`,
@@ -559,6 +604,11 @@ const item_list = {
                 if (inChallenge('b', 12)) other.push('shop');
 
                 return other;
+            },
+        },
+        value: {
+            cost() {
+                if (inChallenge('b', 12)) return D(20);
             },
         },
         lore: `A curved bone.<br>
@@ -596,6 +646,11 @@ const item_list = {
                 return other;
             },
         },
+        value: {
+            cost() {
+                if (inChallenge('b', 12)) return D(60);
+            },
+        },
         lore: `The head of a skeleton.<br>
             Used to store one of the most important organs in the body.<br>
             Its hollow sockets make you feel unseasy.`,
@@ -626,6 +681,11 @@ const item_list = {
                 return other;
             },
         },
+        value: {
+            cost() {
+                return D(150);
+            },
+        },
         lore: `A slimy skull.<br>
             The goo is slowly flowing from its sockets...<br>
             Why would you do that?`,
@@ -641,6 +701,11 @@ const item_list = {
         row: 1,
         sources: {
             other: ['crafting'],
+        },
+        value: {
+            value() {
+                return D(150);
+            },
         },
         lore: `A pick made of bones.<br>
             Not a good weapon, unless you're fighting rocks.<br>
@@ -689,6 +754,11 @@ const item_list = {
         row: 1,
         sources: {
             other: ['crafting'],
+        },
+        value: {
+            value() {
+                return D(300);
+            },
         },
         lore() {
             if (inChallenge('b', 11)) return `A skull containing some crystallized slime.<br>
@@ -739,6 +809,11 @@ const item_list = {
         sources: {
             other: ['crafting'],
         },
+        value: {
+            value() {
+                return D(300);
+            },
+        },
         lore: `A slab made of bones.<br>
             Useful for recording things.<br>
             It's a bit crooked, but there's a limit to what ribs can do.`,
@@ -785,6 +860,11 @@ const item_list = {
         row: 1,
         sources: {
             other: ['crafting'],
+        },
+        value: {
+            value() {
+                return D(500);
+            },
         },
         lore() {
             if (inChallenge('b', 11)) return `A magic 11 ball that can predict the future!<br>
@@ -891,6 +971,11 @@ const item_list = {
                 return { 'mining:copper': { min, max } };
             },
         },
+        value: {
+            value() {
+                if (inChallenge('b', 12)) return D(1);
+            },
+        },
         lore: `An orange mineral.<br>
             Useful for tools and electricity.<br>
             Slowly turns teal over time, lowering its usefulness.`,
@@ -920,6 +1005,11 @@ const item_list = {
                 return { 'mining:tin': { min, max } };
             },
         },
+        value: {
+            value() {
+                if (inChallenge('b', 12)) return D(9);
+            },
+        },
         lore: `A light yellow mineral.<br>
             Useful for jewelry.<br>
             Surprisingly valuable for some reason.`,
@@ -935,6 +1025,11 @@ const item_list = {
         row: 0,
         sources: {
             other: ['crafting'],
+        },
+        value: {
+            value() {
+                if (inChallenge('b', 12)) return D(20);
+            },
         },
         lore: `A solid brown alloy.<br>
             Useful for all kinds of things.<br>
@@ -973,6 +1068,11 @@ const item_list = {
                 };
             },
         },
+        value: {
+            value() {
+                if (inChallenge('b', 12)) return D(1_000);
+            },
+        },
         lore: `An extremely rare mineral.<br>
             Somehow, the more you have, the harder it is to find.<br>
             Some people would kill for one of these.`,
@@ -1006,6 +1106,11 @@ const item_list = {
         row: 0,
         sources: {
             other: ['mining:compactor'],
+        },
+        value: {
+            value() {
+                if (inChallenge('b', 12)) return D(500);
+            },
         },
         lore: `An extremely dense piece of stone.<br>
             Perfectly circular and smooth.<br>
@@ -1076,6 +1181,11 @@ const item_list = {
                 return { 'mining:iron': { min, max } };
             },
         },
+        value: {
+            value() {
+                if (inChallenge('b', 12)) return D(2);
+            },
+        },
         lore: `A piece of red metal.<br>
             Worthless without removing all this rust.<br>
             Careful when handling, as cuts may lead to infections.`,
@@ -1091,6 +1201,11 @@ const item_list = {
         row: 0,
         sources: {
             other: ['crafting'],
+        },
+        value: {
+            value() {
+                if (inChallenge('b', 12)) return D(4);
+            },
         },
         lore: `A piece of gray metal.<br>
             Durable, tough, common. The perfect material?<br>
@@ -1121,6 +1236,11 @@ const item_list = {
                 return { 'mining:silver': { min, max } };
             },
         },
+        value: {
+            value() {
+                if (inChallenge('b', 12)) return D(150);
+            },
+        },
         lore: `A (mostly) white chunk of metal.<br>
             Useful for jewelry.<br>
             After a bit of treatment, it can reflect light like no other mineral.`,
@@ -1137,6 +1257,11 @@ const item_list = {
         sources: {
             other: ['crafting'],
         },
+        value: {
+            value() {
+                if (inChallenge('b', 12)) return D(1_750);
+            },
+        },
         lore: `A pretty light yellow alloy.<br>
             Useful for jewelry.<br>
             Also very valuable.`,
@@ -1144,6 +1269,7 @@ const item_list = {
         unlocked() { return hasUpgrade('m', 61); },
     },
     // Forge
+    //todo values
     'stone_brick': {
         id: null,
         color: '#BBBBDD',
@@ -1305,6 +1431,635 @@ const item_list = {
         categories: ['materials', 'forge'],
         unlocked() { return tmp.c.forge.unlocked; },
     },
+    // Mining Tools
+    'stone_mace': {
+        id: null,
+        color: '#BBBBDD',
+        name: 'stone mace',
+        grid: [2, 4],
+        icon: [5, 0],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        value: {
+            value() {
+                return D(300);
+            },
+        },
+        lore: `A large rock on a stick.<br>
+            Good for whacking your enemies (which include rocks for some reason).<br>
+            As expected, it's quite heavy.`,
+        categories: ['equipment', 'mining'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let m_damage = D.pow(1.1, x),
+                xp_damage = D.div(x, 5);
+
+            return { xp_damage, m_damage, };
+        },
+        effectDescription(amount) {
+            let xp_damage, m_damage;
+            if (shiftDown) {
+                xp_damage = '[amount / 5]';
+                m_damage = '[1.1 ^ amount]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                xp_damage = format(effect.xp_damage);
+                m_damage = format(effect.m_damage);
+            }
+
+            return `Increase damage dealt to enemies by ${xp_damage}, and multiplies mining damage by ${m_damage}`;
+        },
+        unlocked() { return tmp.m.layerShown; },
+    },
+    'copper_pick': {
+        id: null,
+        color() {
+            const high = [0xFF, 0xAA, 0x11],
+                low = [0x11, 0xFF, 0xAA],
+                progress = D.minus(2, D.log10(item_effect(this.id).decay)).toNumber();
+
+            return `#${color_between(low, high, progress).map(n => n.toString(16).padStart(2, '0')).join('')}`;
+        },
+        name: 'copper pick',
+        grid: [2, 5],
+        icon: [5, 1],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        value: {
+            value() {
+                return D(150);
+            },
+        },
+        lore: `A solid orange pickaxe.<br>
+            Because it's made of copper, its effect decays over time.<br>
+            Do you find the orange tint or the teal tint prettier?`,
+        categories: ['equipment', 'mining'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let decay = D.add(player.m.resetTime, 1).log10().max(1),
+                damage = D.pow(1.1, x),
+                ores = D.div(x, 10).add(1);
+
+            // Apply decay
+            damage = damage.root(decay);
+            ores = ores.root(decay);
+
+            return { decay, damage, ores, };
+        },
+        effectDescription(amount) {
+            let damage,
+                ores,
+                decay;
+            if (shiftDown) {
+                decay = 'max(log10(reset time + 1), 1)'
+                ores = '[decay√(amount / 10 + 1)]';
+                damage = '[decay√(1.1 ^ amount)]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                decay = format(effect.decay);
+                damage = format(effect.damage);
+                ores = format(effect.ores);
+            }
+
+            return `Multiplies mining damage by ${damage}, and ores gained by ${ores}<br>Decay: ${decay}`;
+        },
+        unlocked() { return tmp.m.layerShown; },
+    },
+    'tin_cache': {
+        id: null,
+        color: '#FFFFCC',
+        name: 'tin cache',
+        grid: [2, 6],
+        icon: [5, 2],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        value: {
+            value() {
+                return D(150);
+            },
+        },
+        lore: `A big box made of copper and tin.<br>
+            Each one improves your leveling up.<br>
+            It can even hold things!`,
+        categories: ['equipment', 'mining'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let hold = D.floor(x),
+                level = D.div(x, 8).add(1);
+
+            return { hold, level, };
+        },
+        effectDescription(amount) {
+            let hold, level;
+            if (shiftDown) {
+                hold = '[amount]';
+                level = '[amount / 8 + 1]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                hold = formatWhole(effect.hold);
+                level = format(effect.level);
+            }
+
+            return `Holds ${hold} lower layer upgrades, and multiplies level gain by ${level}`;
+        },
+        unlocked() { return tmp.m.layerShown; },
+    },
+    'bronze_cart': {
+        id: null,
+        color: '#BB7744',
+        name: 'bronze cart',
+        grid: [2, 7],
+        icon: [5, 3],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        value: {
+            value() {
+                return D(200);
+            },
+        },
+        lore: `A hollow box with an opening on top and 4 wheels to the sides.<br>
+            Good for transporting items of all kinds.<br>
+            Don't forget to get rails!`,
+        categories: ['equipment', 'mining'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let xp_drop = D.add(x, 5).log(5),
+                m_drop = D.add(x, 4).log(4);
+
+            let mult = D.dOne;
+
+            mult = mult.times(item_effect('iron_rails').cart_mult);
+
+            xp_drop = xp_drop.times(mult);
+            m_drop = m_drop.times(mult);
+
+            return { xp_drop, m_drop, };
+        },
+        effectDescription(amount) {
+            let xp_drop, m_drop;
+            if (shiftDown) {
+                xp_drop = '[log5(amount + 5)]';
+                m_drop = '[log4(amount + 4)]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                xp_drop = format(effect.xp_drop);
+                m_drop = format(effect.m_drop);
+            }
+
+            return `Multiplies enemy drops by ${xp_drop}, and mining drops by ${m_drop}`;
+        },
+        unlocked() { return tmp.m.layerShown; },
+    },
+    'doubloon': {
+        id: null,
+        color: '#FFFF44',
+        name: 'doubloon',
+        grid: [4, 0],
+        icon: [5, 4],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        value: {
+            value() {
+                return D(5_000);
+            },
+        },
+        lore: `A large gold coin, found deep underwater.<br>
+            Its rarity makes it more valuable.<br>
+            Nobody knows whose face is on its side.`,
+        categories: ['equipment', 'mining'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let coin_mult = D.div(x, 10).add(1);
+
+            return { coin_mult, };
+        },
+        effectDescription(amount) {
+            let coin_mult;
+            if (shiftDown) {
+                coin_mult = '[amount / 10 + 1]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                coin_mult = format(effect.coin_mult);
+            }
+
+            return `Multiplies coin gain by ${coin_mult}`;
+        },
+        unlocked() { return inChallenge('b', 12) || hasChallenge('b', 12); },
+    },
+    'furnace': {
+        id: null,
+        color: '#9999AA',
+        name: 'furnace',
+        grid: [4, 1],
+        icon: [9, 0],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        value: {
+            value() {
+                return D(50);
+            },
+        },
+        lore: `A furnace made of stone and coal.<br>
+            Even after usage, it still feels warm.<br>
+            You can even stack them up!`,
+        categories: ['equipment', 'mining', 'forge'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let coal_mult = D.div(x, 10).add(1),
+                heat_mult = D.pow(1.01, x);
+
+            return { coal_mult, heat_mult, };
+        },
+        effectDescription(amount) {
+            let coal_mult, heat_mult;
+            if (shiftDown) {
+                coal_mult = '[amount / 10 + 1]';
+                heat_mult = '[1.01 ^ amount]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                coal_mult = format(effect.coal_mult);
+                heat_mult = format(effect.heat_mult);
+            }
+
+            let text = `Multiplies coal gain by ${coal_mult}`;
+            if (tmp.c.forge.unlocked) text += `, and heat gain by ${heat_mult}`;
+            return text;
+        },
+        unlocked() { return hasUpgrade('m', 61); },
+    },
+    'iron_rails': {
+        id: null,
+        color: '#8899AA',
+        name: 'iron rails',
+        grid: [4, 2],
+        icon: [9, 1],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        value: {
+            value() {
+                return D(160);
+            },
+        },
+        lore: `Solid bars of iron connected together with bones.<br>
+            These are good for your carts.<br>
+            The rails are also reinforcing ores.`,
+        categories: ['equipment', 'mining', 'forge'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let cart_mult = D.div(x, 10).add(1),
+                health_mult = D.pow(1.1, x);
+
+            return { cart_mult, health_mult, };
+        },
+        effectDescription(amount) {
+            let cart_mult, health_mult;
+            if (shiftDown) {
+                cart_mult = '[amount / 10 + 1]';
+                health_mult = '[1.1 ^ amount]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                cart_mult = format(effect.cart_mult);
+                health_mult = format(effect.health_mult);
+            }
+
+            return `Multiplies bronze cart effect by ${cart_mult}, and ore health by ${health_mult}`;
+        },
+        unlocked() { return hasUpgrade('m', 61); },
+    },
+    'silver_coating': {
+        id: null,
+        color: '#DDEEEE',
+        name: 'silver coating',
+        grid: [4, 3],
+        icon: [9, 2],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        value: {
+            value() {
+                return D(1_200);
+            },
+        },
+        lore: `Silver coating for a weapon.<br>
+            It's great for fighting undeads.<br>
+            Hopefully you'll find more than one type.`,
+        categories: ['equipment', 'mining', 'forge'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let skeleton_damage_mult = D.pow(1.25, x);
+
+            return { skeleton_damage_mult, };
+        },
+        effectDescription(amount) {
+            let skeleton_damage_mult;
+            if (shiftDown) {
+                skeleton_damage_mult = '[1.25 ^ amount]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                skeleton_damage_mult = format(effect.skeleton_damage_mult);
+            }
+
+            return `Multiplies skeleton damage by ${skeleton_damage_mult}`;
+        },
+        unlocked() { return hasUpgrade('m', 61); },
+    },
+    'electrum_coin_mold': {
+        id: null,
+        color: '#EEDDAA',
+        name: 'electrum coin mold',
+        grid: [4, 4],
+        icon: [9, 3],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        value: {
+            value() {
+                return D(12_500);
+            },
+        },
+        lore: `A mold to allow making coins.<br>
+            I'm not allowing you to use it for forging fake coins.<br>
+            You're not a licensed coin maker.`,
+        categories: ['equipment', 'mining', 'forge'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let coin_mult = D.div(x, 15).add(1);
+
+            return { coin_mult, };
+        },
+        effectDescription(amount) {
+            let coin_mult;
+            if (shiftDown) {
+                coin_mult = '[amount / 15 + 1]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                coin_mult = format(effect.coin_mult);
+            }
+
+            return `Multiplies coin gain by ${coin_mult}`;
+        },
+        unlocked() { return hasUpgrade('m', 61); },
+    },
+    'bellow': {
+        id: null,
+        color() { return tmp.c.modifiers.heat.color; },
+        name: 'bellow',
+        grid: [4, 5],
+        icon() {
+            let icon = [9, 4];
+
+            if (inChallenge('b', 11)) icon[1] = 10;
+            else if (inChallenge('b', 21)) icon[1] = 11;
+
+            return icon;
+        },
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        value: {
+            value() {
+                return D(450);
+            },
+        },
+        lore: `A crude bellow for heating up your forge.<br>
+            Manually working it is tiring.<br>
+            Good luck with it.`,
+        categories: ['equipment', 'forge'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let heat_mult = D.div(x, 20).add(1),
+                speed_mult = D.pow(1.1, x);
+
+            return { heat_mult, speed_mult, };
+        },
+        effectDescription(amount) {
+            let heat_mult, speed_mult;
+            if (shiftDown) {
+                heat_mult = '[amount / 20 + 1]';
+                speed_mult = '[1.1 ^ amount]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                heat_mult = format(effect.heat_mult);
+                speed_mult = format(effect.speed_mult);
+            }
+
+            return `Multiplies heat gain by ${heat_mult}, and forge speed by ${speed_mult}`;
+        },
+        unlocked() { return tmp.c.forge.unlocked; },
+    },
+    //todo value
+    'lead_coating': {
+        id: null,
+        color: '#113366',
+        name: 'lead coating',
+        grid: [4, 6],
+        icon: [9, 5],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        lore: `Lead coating for a weapon.<br>
+            It's great for fighting living beings.<br>
+            It's also bad for fighting undeads.`,
+        categories: ['equipment', 'mining', 'forge'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let damage_mult = D.pow(1.15, x),
+                skeleton_damage_div = D.pow(1.2, x);
+
+            return { damage_mult, skeleton_damage_div, };
+        },
+        effectDescription(amount) {
+            let damage_mult, skeleton_damage_div;
+            if (shiftDown) {
+                damage_mult = '[1.15 ^ amount]';
+                skeleton_damage_div = '[1.2 ^ amount]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                damage_mult = format(effect.damage_mult);
+                skeleton_damage_div = format(effect.skeleton_damage_div);
+            }
+
+            return `Multiplies damage by ${damage_mult}, but divides skeleton damage by ${skeleton_damage_div}`;
+        },
+        unlocked() { return tmp.c.forge.unlocked; },
+    },
+    'densium_slime': {
+        id: null,
+        color: '#445566',
+        name: 'densium slime',
+        grid: [5, 1],
+        icon: [7, 0],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        value: {
+            value() {
+                return D(1_000);
+            },
+        },
+        lore: `An extremely dense slime.<br>
+            Its smaller size hides an extreme weight.<br>
+            Did you know it cannot move on its own?`,
+        categories: ['equipment', 'mining', 'slime',],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let slime_mult = D.add(x, 1);
+
+            return { slime_mult, };
+        },
+        effectDescription(amount) {
+            let slime_mult;
+            if (shiftDown) {
+                slime_mult = '[amount + 1]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                slime_mult = format(effect.slime_mult);
+            }
+
+            return `Multiplies slime health, experience, kills, and drops by ${slime_mult}`;
+        },
+        unlocked() { return tmp.m.compactor.unlocked || D.gt(player.items[this.id].amount, 0); },
+    },
+    'densium_rock': {
+        id: null,
+        color: '#445566',
+        name: 'densium rock',
+        grid: [5, 2],
+        icon: [7, 1],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        value: {
+            value() {
+                return D(750);
+            },
+        },
+        lore: `An extremely dense piece of rock.<br>
+            It's also very hard!<br>
+            Just... Break... Already!`,
+        categories: ['equipment', 'mining'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let rock_mult = D.add(x, 1);
+
+            return { rock_mult, };
+        },
+        effectDescription(amount) {
+            let rock_mult;
+            if (shiftDown) {
+                rock_mult = '[amount + 1]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                rock_mult = format(effect.rock_mult);
+            }
+
+            return `Multiplies stone health, breaks, and drops by ${rock_mult}`;
+        },
+        unlocked() { return tmp.m.compactor.unlocked || D.gt(player.items[this.id].amount, 0); },
+    },
+    'magic_densium_ball': {
+        id: null,
+        color: '#445566',
+        name: 'magic densium ball',
+        grid: [5, 3],
+        icon: [7, 2],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        value: {
+            value() {
+                return D(888);
+            },
+        },
+        lore: `A very heavy magic 8 ball that can predict the past!<br>
+            Just ask a simple yes or no question to get an answer.<br>
+            Despite its weight, you still have to hold <b>and</b> shake it. Good luck.`,
+        categories: ['equipment', 'mining'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let comp_mult = D.div(x, 8).add(1),
+                coin_mult = D.div(x, 10).add(1);
+
+            return { comp_mult, coin_mult, };
+        },
+        effectDescription(amount) {
+            let comp_mult, coin_mult;
+            if (shiftDown) {
+                comp_mult = '[amount / 8 + 1]';
+                coin_mult = '[amount / 10 + 1]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                comp_mult = format(effect.comp_mult);
+                coin_mult = format(effect.coin_mult);
+            }
+
+            return `Divides compactor time by ${comp_mult}, and multiplies coin gain by ${coin_mult}`;
+        },
+        unlocked() { return tmp.m.compactor.unlocked || D.gt(player.items[this.id].amount, 0); },
+    },
     // Forge Equipment
     'stone_wall': {
         id: null,
@@ -1457,569 +2212,6 @@ const item_list = {
             return `Divides forging costs by ${forge_cost}, and bronze ingot use costs by ${cost_div}`;
         },
         unlocked() { return tmp.c.forge.unlocked; },
-    },
-    // Mining Tools
-    'stone_mace': {
-        id: null,
-        color: '#BBBBDD',
-        name: 'stone mace',
-        grid: [2, 4],
-        icon: [5, 0],
-        row: 1,
-        sources: {
-            other: ['crafting'],
-        },
-        lore: `A large rock on a stick.<br>
-            Good for whacking your enemies (which include rocks for some reason).<br>
-            As expected, it's quite heavy.`,
-        categories: ['equipment', 'mining'],
-        effect(amount) {
-            const x = D(amount ?? player.items[this.id].amount);
-
-            let m_damage = D.pow(1.1, x),
-                xp_damage = D.div(x, 5);
-
-            return { xp_damage, m_damage, };
-        },
-        effectDescription(amount) {
-            let xp_damage, m_damage;
-            if (shiftDown) {
-                xp_damage = '[amount / 5]';
-                m_damage = '[1.1 ^ amount]';
-            } else {
-                const x = D(amount ?? player.items[this.id].amount),
-                    effect = item_list[this.id].effect(x);
-
-                xp_damage = format(effect.xp_damage);
-                m_damage = format(effect.m_damage);
-            }
-
-            return `Increase damage dealt to enemies by ${xp_damage}, and multiplies mining damage by ${m_damage}`;
-        },
-        unlocked() { return tmp.m.layerShown; },
-    },
-    'copper_pick': {
-        id: null,
-        color() {
-            const high = [0xFF, 0xAA, 0x11],
-                low = [0x11, 0xFF, 0xAA],
-                progress = D.minus(2, D.log10(item_effect(this.id).decay)).toNumber();
-
-            return `#${color_between(low, high, progress).map(n => n.toString(16).padStart(2, '0')).join('')}`;
-        },
-        name: 'copper pick',
-        grid: [2, 5],
-        icon: [5, 1],
-        row: 1,
-        sources: {
-            other: ['crafting'],
-        },
-        lore: `A solid orange pickaxe.<br>
-            Because it's made of copper, its effect decays over time.<br>
-            Do you find the orange tint or the teal tint prettier?`,
-        categories: ['equipment', 'mining'],
-        effect(amount) {
-            const x = D(amount ?? player.items[this.id].amount);
-
-            let decay = D.add(player.m.resetTime, 1).log10().max(1),
-                damage = D.pow(1.1, x),
-                ores = D.div(x, 10).add(1);
-
-            // Apply decay
-            damage = damage.root(decay);
-            ores = ores.root(decay);
-
-            return { decay, damage, ores, };
-        },
-        effectDescription(amount) {
-            let damage,
-                ores,
-                decay;
-            if (shiftDown) {
-                decay = 'max(log10(reset time + 1), 1)'
-                ores = '[decay√(amount / 10 + 1)]';
-                damage = '[decay√(1.1 ^ amount)]';
-            } else {
-                const x = D(amount ?? player.items[this.id].amount),
-                    effect = item_list[this.id].effect(x);
-
-                decay = format(effect.decay);
-                damage = format(effect.damage);
-                ores = format(effect.ores);
-            }
-
-            return `Multiplies mining damage by ${damage}, and ores gained by ${ores}<br>Decay: ${decay}`;
-        },
-        unlocked() { return tmp.m.layerShown; },
-    },
-    'tin_cache': {
-        id: null,
-        color: '#FFFFCC',
-        name: 'tin cache',
-        grid: [2, 6],
-        icon: [5, 2],
-        row: 1,
-        sources: {
-            other: ['crafting'],
-        },
-        lore: `A big box made of copper and tin.<br>
-            Each one improves your leveling up.<br>
-            It can even hold things!`,
-        categories: ['equipment', 'mining'],
-        effect(amount) {
-            const x = D(amount ?? player.items[this.id].amount);
-
-            let hold = D.floor(x),
-                level = D.div(x, 8).add(1);
-
-            return { hold, level, };
-        },
-        effectDescription(amount) {
-            let hold, level;
-            if (shiftDown) {
-                hold = '[amount]';
-                level = '[amount / 8 + 1]';
-            } else {
-                const x = D(amount ?? player.items[this.id].amount),
-                    effect = item_list[this.id].effect(x);
-
-                hold = formatWhole(effect.hold);
-                level = format(effect.level);
-            }
-
-            return `Holds ${hold} lower layer upgrades, and multiplies level gain by ${level}`;
-        },
-        unlocked() { return tmp.m.layerShown; },
-    },
-    'bronze_cart': {
-        id: null,
-        color: '#BB7744',
-        name: 'bronze cart',
-        grid: [2, 7],
-        icon: [5, 3],
-        row: 1,
-        sources: {
-            other: ['crafting'],
-        },
-        lore: `A hollow box with an opening on top and 4 wheels to the sides.<br>
-            Good for transporting items of all kinds.<br>
-            Don't forget to get rails!`,
-        categories: ['equipment', 'mining'],
-        effect(amount) {
-            const x = D(amount ?? player.items[this.id].amount);
-
-            let xp_drop = D.add(x, 5).log(5),
-                m_drop = D.add(x, 4).log(4);
-
-            let mult = D.dOne;
-
-            mult = mult.times(item_effect('iron_rails').cart_mult);
-
-            xp_drop = xp_drop.times(mult);
-            m_drop = m_drop.times(mult);
-
-            return { xp_drop, m_drop, };
-        },
-        effectDescription(amount) {
-            let xp_drop, m_drop;
-            if (shiftDown) {
-                xp_drop = '[log5(amount + 5)]';
-                m_drop = '[log4(amount + 4)]';
-            } else {
-                const x = D(amount ?? player.items[this.id].amount),
-                    effect = item_list[this.id].effect(x);
-
-                xp_drop = format(effect.xp_drop);
-                m_drop = format(effect.m_drop);
-            }
-
-            return `Multiplies enemy drops by ${xp_drop}, and mining drops by ${m_drop}`;
-        },
-        unlocked() { return tmp.m.layerShown; },
-    },
-    'doubloon': {
-        id: null,
-        color: '#FFFF44',
-        name: 'doubloon',
-        grid: [4, 0],
-        icon: [5, 4],
-        row: 1,
-        sources: {
-            other: ['crafting'],
-        },
-        lore: `A large gold coin, found deep underwater.<br>
-            Its rarity makes it more valuable.<br>
-            Nobody knows whose face is on its side.`,
-        categories: ['equipment', 'mining'],
-        effect(amount) {
-            const x = D(amount ?? player.items[this.id].amount);
-
-            let coin_mult = D.div(x, 10).add(1);
-
-            return { coin_mult, };
-        },
-        effectDescription(amount) {
-            let coin_mult;
-            if (shiftDown) {
-                coin_mult = '[amount / 10 + 1]';
-            } else {
-                const x = D(amount ?? player.items[this.id].amount),
-                    effect = item_list[this.id].effect(x);
-
-                coin_mult = format(effect.coin_mult);
-            }
-
-            return `Multiplies coin gain by ${coin_mult}`;
-        },
-        unlocked() { return inChallenge('b', 12) || hasChallenge('b', 12); },
-    },
-    'furnace': {
-        id: null,
-        color: '#9999AA',
-        name: 'furnace',
-        grid: [4, 1],
-        icon: [9, 0],
-        row: 1,
-        sources: {
-            other: ['crafting'],
-        },
-        lore: `A furnace made of stone and coal.<br>
-            Even after usage, it still feels warm.<br>
-            You can even stack them up!`,
-        categories: ['equipment', 'mining', 'forge'],
-        effect(amount) {
-            const x = D(amount ?? player.items[this.id].amount);
-
-            let coal_mult = D.div(x, 10).add(1),
-                heat_mult = D.pow(1.01, x);
-
-            return { coal_mult, heat_mult, };
-        },
-        effectDescription(amount) {
-            let coal_mult, heat_mult;
-            if (shiftDown) {
-                coal_mult = '[amount / 10 + 1]';
-                heat_mult = '[1.01 ^ amount]';
-            } else {
-                const x = D(amount ?? player.items[this.id].amount),
-                    effect = item_list[this.id].effect(x);
-
-                coal_mult = format(effect.coal_mult);
-                heat_mult = format(effect.heat_mult);
-            }
-
-            let text = `Multiplies coal gain by ${coal_mult}`;
-            if (tmp.c.forge.unlocked) text += `, and heat gain by ${heat_mult}`;
-            return text;
-        },
-        unlocked() { return hasUpgrade('m', 61); },
-    },
-    'iron_rails': {
-        id: null,
-        color: '#8899AA',
-        name: 'iron rails',
-        grid: [4, 2],
-        icon: [9, 1],
-        row: 1,
-        sources: {
-            other: ['crafting'],
-        },
-        lore: `Solid bars of iron connected together with bones.<br>
-            These are good for your carts.<br>
-            The rails are also reinforcing ores.`,
-        categories: ['equipment', 'mining', 'forge'],
-        effect(amount) {
-            const x = D(amount ?? player.items[this.id].amount);
-
-            let cart_mult = D.div(x, 10).add(1),
-                health_mult = D.pow(1.1, x);
-
-            return { cart_mult, health_mult, };
-        },
-        effectDescription(amount) {
-            let cart_mult, health_mult;
-            if (shiftDown) {
-                cart_mult = '[amount / 10 + 1]';
-                health_mult = '[1.1 ^ amount]';
-            } else {
-                const x = D(amount ?? player.items[this.id].amount),
-                    effect = item_list[this.id].effect(x);
-
-                cart_mult = format(effect.cart_mult);
-                health_mult = format(effect.health_mult);
-            }
-
-            return `Multiplies bronze cart effect by ${cart_mult}, and ore health by ${health_mult}`;
-        },
-        unlocked() { return hasUpgrade('m', 61); },
-    },
-    'silver_coating': {
-        id: null,
-        color: '#DDEEEE',
-        name: 'silver coating',
-        grid: [4, 3],
-        icon: [9, 2],
-        row: 1,
-        sources: {
-            other: ['crafting'],
-        },
-        lore: `Silver coating for a weapon.<br>
-            It's great for fighting undeads.<br>
-            Hopefully you'll find more than one type.`,
-        categories: ['equipment', 'mining', 'forge'],
-        effect(amount) {
-            const x = D(amount ?? player.items[this.id].amount);
-
-            let skeleton_damage_mult = D.pow(1.25, x);
-
-            return { skeleton_damage_mult, };
-        },
-        effectDescription(amount) {
-            let skeleton_damage_mult;
-            if (shiftDown) {
-                skeleton_damage_mult = '[1.25 ^ amount]';
-            } else {
-                const x = D(amount ?? player.items[this.id].amount),
-                    effect = item_list[this.id].effect(x);
-
-                skeleton_damage_mult = format(effect.skeleton_damage_mult);
-            }
-
-            return `Multiplies skeleton damage by ${skeleton_damage_mult}`;
-        },
-        unlocked() { return hasUpgrade('m', 61); },
-    },
-    'electrum_coin_mold': {
-        id: null,
-        color: '#EEDDAA',
-        name: 'electrum coin mold',
-        grid: [4, 4],
-        icon: [9, 3],
-        row: 1,
-        sources: {
-            other: ['crafting'],
-        },
-        lore: `A mold to allow making coins.<br>
-            I'm not allowing you to use it for forging fake coins.<br>
-            You're not a licensed coin maker.`,
-        categories: ['equipment', 'mining', 'forge'],
-        effect(amount) {
-            const x = D(amount ?? player.items[this.id].amount);
-
-            let coin_mult = D.div(x, 15).add(1);
-
-            return { coin_mult, };
-        },
-        effectDescription(amount) {
-            let coin_mult;
-            if (shiftDown) {
-                coin_mult = '[amount / 15 + 1]';
-            } else {
-                const x = D(amount ?? player.items[this.id].amount),
-                    effect = item_list[this.id].effect(x);
-
-                coin_mult = format(effect.coin_mult);
-            }
-
-            return `Multiplies coin gain by ${coin_mult}`;
-        },
-        unlocked() { return hasUpgrade('m', 61); },
-    },
-    'bellow': {
-        id: null,
-        color() { return tmp.c.modifiers.heat.color; },
-        name: 'bellow',
-        grid: [4, 5],
-        icon() {
-            let icon = [9, 4];
-
-            if (inChallenge('b', 11)) icon[1] = 10;
-            else if (inChallenge('b', 21)) icon[1] = 11;
-
-            return icon;
-        },
-        row: 1,
-        sources: {
-            other: ['crafting'],
-        },
-        lore: `A crude bellow for heating up your forge.<br>
-            Manually working it is tiring.<br>
-            Good luck with it.`,
-        categories: ['equipment', 'forge'],
-        effect(amount) {
-            const x = D(amount ?? player.items[this.id].amount);
-
-            let heat_mult = D.div(x, 20).add(1),
-                speed_mult = D.pow(1.1, x);
-
-            return { heat_mult, speed_mult, };
-        },
-        effectDescription(amount) {
-            let heat_mult, speed_mult;
-            if (shiftDown) {
-                heat_mult = '[amount / 20 + 1]';
-                speed_mult = '[1.1 ^ amount]';
-            } else {
-                const x = D(amount ?? player.items[this.id].amount),
-                    effect = item_list[this.id].effect(x);
-
-                heat_mult = format(effect.heat_mult);
-                speed_mult = format(effect.speed_mult);
-            }
-
-            return `Multiplies heat gain by ${heat_mult}, and forge speed by ${speed_mult}`;
-        },
-        unlocked() { return tmp.c.forge.unlocked; },
-    },
-    'lead_coating': {
-        id: null,
-        color: '#113366',
-        name: 'lead coating',
-        grid: [4, 6],
-        icon: [9, 5],
-        row: 1,
-        sources: {
-            other: ['crafting'],
-        },
-        lore: `Lead coating for a weapon.<br>
-            It's great for fighting living beings.<br>
-            It's also bad for fighting undeads.`,
-        categories: ['equipment', 'mining', 'forge'],
-        effect(amount) {
-            const x = D(amount ?? player.items[this.id].amount);
-
-            let damage_mult = D.pow(1.15, x),
-                skeleton_damage_div = D.pow(1.2, x);
-
-            return { damage_mult, skeleton_damage_div, };
-        },
-        effectDescription(amount) {
-            let damage_mult, skeleton_damage_div;
-            if (shiftDown) {
-                damage_mult = '[1.15 ^ amount]';
-                skeleton_damage_div = '[1.2 ^ amount]';
-            } else {
-                const x = D(amount ?? player.items[this.id].amount),
-                    effect = item_list[this.id].effect(x);
-
-                damage_mult = format(effect.damage_mult);
-                skeleton_damage_div = format(effect.skeleton_damage_div);
-            }
-
-            return `Multiplies damage by ${damage_mult}, but divides skeleton damage by ${skeleton_damage_div}`;
-        },
-        unlocked() { return tmp.c.forge.unlocked; },
-    },
-    'densium_slime': {
-        id: null,
-        color: '#445566',
-        name: 'densium slime',
-        grid: [5, 1],
-        icon: [7, 0],
-        row: 1,
-        sources: {
-            other: ['crafting'],
-        },
-        lore: `An extremely dense slime.<br>
-            Its smaller size hides an extreme weight.<br>
-            Did you know it cannot move on its own?`,
-        categories: ['equipment', 'mining', 'slime',],
-        effect(amount) {
-            const x = D(amount ?? player.items[this.id].amount);
-
-            let slime_mult = D.add(x, 1);
-
-            return { slime_mult, };
-        },
-        effectDescription(amount) {
-            let slime_mult;
-            if (shiftDown) {
-                slime_mult = '[amount + 1]';
-            } else {
-                const x = D(amount ?? player.items[this.id].amount),
-                    effect = item_list[this.id].effect(x);
-
-                slime_mult = format(effect.slime_mult);
-            }
-
-            return `Multiplies slime health, experience, kills, and drops by ${slime_mult}`;
-        },
-        unlocked() { return tmp.m.compactor.unlocked || D.gt(player.items[this.id].amount, 0); },
-    },
-    'densium_rock': {
-        id: null,
-        color: '#445566',
-        name: 'densium rock',
-        grid: [5, 2],
-        icon: [7, 1],
-        row: 1,
-        sources: {
-            other: ['crafting'],
-        },
-        lore: `An extremely dense piece of rock.<br>
-            It's also very hard!<br>
-            Just... Break... Already!`,
-        categories: ['equipment', 'mining'],
-        effect(amount) {
-            const x = D(amount ?? player.items[this.id].amount);
-
-            let rock_mult = D.add(x, 1);
-
-            return { rock_mult, };
-        },
-        effectDescription(amount) {
-            let rock_mult;
-            if (shiftDown) {
-                rock_mult = '[amount + 1]';
-            } else {
-                const x = D(amount ?? player.items[this.id].amount),
-                    effect = item_list[this.id].effect(x);
-
-                rock_mult = format(effect.rock_mult);
-            }
-
-            return `Multiplies stone health, breaks, and drops by ${rock_mult}`;
-        },
-        unlocked() { return tmp.m.compactor.unlocked || D.gt(player.items[this.id].amount, 0); },
-    },
-    'magic_densium_ball': {
-        id: null,
-        color: '#445566',
-        name: 'magic densium ball',
-        grid: [5, 3],
-        icon: [7, 2],
-        row: 1,
-        sources: {
-            other: ['crafting'],
-        },
-        lore: `A very heavy magic 8 ball that can predict the past!<br>
-            Just ask a simple yes or no question to get an answer.<br>
-            Despite its weight, you still have to hold <b>and</b> shake it. Good luck.`,
-        categories: ['equipment', 'mining'],
-        effect(amount) {
-            const x = D(amount ?? player.items[this.id].amount);
-
-            let comp_mult = D.div(x, 8).add(1),
-                coin_mult = D.div(x, 10).add(1);
-
-            return { comp_mult, coin_mult, };
-        },
-        effectDescription(amount) {
-            let comp_mult, coin_mult;
-            if (shiftDown) {
-                comp_mult = '[amount / 8 + 1]';
-                coin_mult = '[amount / 10 + 1]';
-            } else {
-                const x = D(amount ?? player.items[this.id].amount),
-                    effect = item_list[this.id].effect(x);
-
-                comp_mult = format(effect.comp_mult);
-                coin_mult = format(effect.coin_mult);
-            }
-
-            return `Divides compactor time by ${comp_mult}, and multiplies coin gain by ${coin_mult}`;
-        },
-        unlocked() { return tmp.m.compactor.unlocked || D.gt(player.items[this.id].amount, 0); },
     },
     // Shop
     'coin_copper': {
@@ -2180,6 +2372,9 @@ function setupItem([id, item]) {
                 return ps.reduce((sum, ps) => D.add(sum, ps), D.dZero);
             }
         }
+    }
+    if (typeof item.value == 'object') {
+        item.value.id = id;
     }
 }
 

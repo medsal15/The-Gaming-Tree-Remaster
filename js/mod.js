@@ -4,7 +4,6 @@ let modInfo = {
 	pointsName: "points",
 	modFiles: [
 		'tree.js',
-		'items.js',
 		'layers/hotkeys.js',
 
 		// main
@@ -35,6 +34,7 @@ let VERSION = {
 
 let changelog = `<h1>Changelog:</h1><br>
 	<h3>v0.2: Bones and Stones</h3><br>
+		- Update vue to 2.7.16 and TMT to 2.7<br>
 		- ???<br>
 		- Improve import modal.<br>
 		- Update endgame: Enter the second boss fight.<br>
@@ -93,7 +93,7 @@ var displayThings = [
 
 // Determines when the game "ends"
 function isEndgame() {
-	return false;
+	return inChallenge('b', 12);
 }
 
 

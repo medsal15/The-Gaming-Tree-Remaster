@@ -965,6 +965,14 @@ declare class Challenge<L extends string> {
      * By default, if the challenge has multiple completions, it will be starred at max completions.
      */
     marked?: Computable<boolean | string>
+    /**
+     * If defined and false, the challenge will not be able to start
+     */
+    canEnter?(): boolean
+    /**
+     * If defined and false, the challenge will not be able to end
+     */
+    canExit?(): boolean
 }
 
 declare class Clickable<L extends string> {
@@ -1495,6 +1503,25 @@ declare class Item<I> {
         other?: Computable<drop_sources[]>
     }
 
+    /**
+     * Item values
+     *
+     * Note that multipliers are applied separately
+     *
+     * 0 values are ignored
+     */
+    value?: {
+        readonly id: I
+        /**
+         * Cost for buying 1
+         */
+        cost?: Computable<Decimal>
+        /**
+         * Value for selling 1
+         */
+        value?: Computable<Decimal>
+    }
+
     effect(amount?: DecimalSource): any
     effectDescription(amount?: DecimalSource): string
 }
@@ -1889,26 +1916,12 @@ type Layers = {
             /** Coins and amount needed to upgrade (if it can improve) */
             list: [items, DecimalSource?][]
         }
-        trades: { [item in items]?: {
-            private _id: item | null
+        items: { [item in items]?: {
             readonly id: item
-            unlocked?: Computable<boolean>
-            /** Cost for buying */
-            cost?: Computable<Decimal>
-            /**
-             * Time multiplier for buying one
-             *
-             * @default D.dOne
-             */
-            cost_time?: Computable<Decimal>
-            /** Value for selling one */
-            value?: Computable<Decimal>
-            /**
-             * Time multiplier for buying one
-             *
-             * @default D.dOne
-             */
-            value_time?: Computable<Decimal>
+            /** Cost for buying 1 */
+            cost?(): Decimal
+            /** Value for selling 1 */
+            value?(): Decimal
         } }
         upgrades: {
             [id: string]: Upgrade<'s'> & {

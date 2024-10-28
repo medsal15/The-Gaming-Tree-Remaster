@@ -236,7 +236,7 @@ addLayer('b', {
                 return { 'backgroundColor': tmp.b.groups[group].color, };
             },
         },
-        //todo 32: Tyche (lootboxes, reward is luck switches)
+        //todo 32: Ek Chuah (stock market, reward: ???)
     },
     clickables: {
         // Bosstiary

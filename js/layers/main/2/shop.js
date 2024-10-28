@@ -21,10 +21,10 @@ addLayer('s', {
             sell: D.dOne,
             sell_amount: D.dOne,
             spent: D.dZero,
-            trades: Object.fromEntries(Object.keys(layers.s.trades).map(item => {
+            trades: Object.fromEntries(Object.keys(layers.s.items).map(item => {
                 const obj = {};
-                if ('cost' in layers.s.trades[item]) obj.bought = D.dZero;
-                if ('value' in layers.s.trades[item]) obj.sold = D.dZero;
+                if ('cost' in layers.s.items[item]) obj.bought = D.dZero;
+                if ('value' in layers.s.items[item]) obj.sold = D.dZero;
                 return [item, obj];
             })),
         };
@@ -326,342 +326,46 @@ addLayer('s', {
             ['coin_platinum'],
         ],
     },
-    trades: {
-        // Enemy drops
-        slime_goo: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            unlocked() { return inChallenge('b', 12); },
-            cost() {
-                let base = D(5);
+    items: {
+        ...Object.fromEntries(
+            Object.keys(item_list)
+                .filter(/**@param{items}item*/item => typeof item_list[item].value == 'object')
+                .map(/**@param{items}item*/item => {
+                    /** @type {Layers['s']['items'][items]} */
+                    const entry = {
+                        id: item,
+                    };
 
-                const loss = D.add(player.s.trades[this.id].bought, 10).log10();
+                    if (item_list[item].value.cost) {
+                        entry.cost = function () {
+                            let base = D(tmp.items[this.id].value.cost);
 
-                return D.times(base, loss);
-            },
-        },
-        slime_core_shard: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            unlocked() { return inChallenge('b', 12); },
-            cost() {
-                let base = D(15);
+                            const loss = D.add(player.s.trades[this.id]?.bought, 10).log10();
 
-                const loss = D.add(player.s.trades[this.id].bought, 10).log10();
+                            let cost = D.times(base, loss);
 
-                return D.times(base, loss);
-            },
-        },
-        slime_core: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            unlocked() { return inChallenge('b', 12); },
-            cost() {
-                let base = D(50);
+                            cost = cost.times(tmp.s.modifiers.trade.buy_mult);
 
-                const loss = D.add(player.s.trades[this.id].bought, 10).log10();
+                            return cost;
+                        }
+                    }
+                    if (item_list[item].value.value) {
+                        entry.value = function () {
+                            let base = D(tmp.items[this.id].value.value);
 
-                return D.times(base, loss);
-            },
-        },
-        bone: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            unlocked() { return inChallenge('b', 12); },
-            cost() {
-                let base = D(7);
+                            const loss = D.add(player.s.trades[this.id]?.sold, 10).log10();
 
-                const loss = D.add(player.s.trades[this.id].bought, 10).log10();
+                            let value = D.div(base, loss);
 
-                return D.times(base, loss);
-            },
-        },
-        rib: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            unlocked() { return inChallenge('b', 12); },
-            cost() {
-                let base = D(20);
+                            value = value.times(tmp.s.modifiers.trade.buy_mult);
 
-                const loss = D.add(player.s.trades[this.id].bought, 10).log10();
+                            return value;
+                        }
+                    }
 
-                return D.times(base, loss);
-            },
-        },
-        skull: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            unlocked() { return inChallenge('b', 12); },
-            cost() {
-                let base = D(60);
-
-                const loss = D.add(player.s.trades[this.id].bought, 10).log10();
-
-                return D.times(base, loss);
-            },
-        },
-        // Crafted items
-        dense_slime_core: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            cost() {
-                let base = D(100);
-
-                const loss = D.add(player.s.trades[this.id].bought, 10).log10();
-
-                return D.times(base, loss);
-            },
-        },
-        slimy_skull: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            cost() {
-                let base = D(150);
-
-                const loss = D.add(player.s.trades[this.id].bought, 10).log10();
-
-                return D.times(base, loss);
-            },
-        },
-        slime_crystal: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            value() {
-                let base = D(100);
-
-                const loss = D.add(player.s.trades[this.id].sold, 10).log10();
-
-                return D.div(base, loss);
-            },
-        },
-        slime_knife: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            value() {
-                let base = D(200);
-
-                const loss = D.add(player.s.trades[this.id].sold, 10).log10();
-
-                return D.div(base, loss);
-            },
-        },
-        slime_injector: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            value() {
-                let base = D(300);
-
-                const loss = D.add(player.s.trades[this.id].sold, 10).log10();
-
-                return D.div(base, loss);
-            },
-        },
-        slime_die: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            value() {
-                let base = D(800);
-
-                const loss = D.add(player.s.trades[this.id].sold, 10).log10();
-
-                return D.div(base, loss);
-            },
-        },
-        bone_pick: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            value() {
-                let base = D(150);
-
-                const loss = D.add(player.s.trades[this.id].sold, 10).log10();
-
-                return D.div(base, loss);
-            },
-        },
-        crystal_skull: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            value() {
-                let base = D(300);
-
-                const loss = D.add(player.s.trades[this.id].sold, 10).log10();
-
-                return D.div(base, loss);
-            },
-        },
-        bone_slate: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            value() {
-                let base = D(300);
-
-                const loss = D.add(player.s.trades[this.id].sold, 10).log10();
-
-                return D.div(base, loss);
-            },
-        },
-        magic_slime_ball: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            value() {
-                let base = D(500);
-
-                const loss = D.add(player.s.trades[this.id].sold, 10).log10();
-
-                return D.div(base, loss);
-            },
-        },
-        stone_mace: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            value() {
-                let base = D(300);
-
-                const loss = D.add(player.s.trades[this.id].sold, 10).log10();
-
-                return D.div(base, loss);
-            },
-        },
-        copper_pick: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            value() {
-                let base = D(150);
-
-                const loss = D.add(player.s.trades[this.id].sold, 10).log10();
-
-                return D.div(base, loss);
-            },
-        },
-        tin_cache: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            value() {
-                let base = D(150);
-
-                const loss = D.add(player.s.trades[this.id].sold, 10).log10();
-
-                return D.div(base, loss);
-            },
-        },
-        bronze_cart: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            value() {
-                let base = D(200);
-
-                const loss = D.add(player.s.trades[this.id].sold, 10).log10();
-
-                return D.div(base, loss);
-            },
-        },
-        doubloon: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            value() {
-                let base = D(5_000);
-
-                const loss = D.add(player.s.trades[this.id].sold, 10).log10();
-
-                return D.div(base, loss);
-            },
-        },
-        densium_slime: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            value() {
-                let base = D(1_000);
-
-                const loss = D.add(player.s.trades[this.id].sold, 10).log10();
-
-                return D.div(base, loss);
-            },
-        },
-        densium_rock: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            value() {
-                let base = D(750);
-
-                const loss = D.add(player.s.trades[this.id].sold, 10).log10();
-
-                return D.div(base, loss);
-            },
-        },
-        magic_densium_ball: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            value() {
-                let base = D(888);
-
-                const loss = D.add(player.s.trades[this.id].sold, 10).log10();
-
-                return D.div(base, loss);
-            },
-        },
-        //todo extended ores equipment
-        // Mined ores
-        copper_ore: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            unlocked() { return inChallenge('b', 12); },
-            value() {
-                let base = D(1);
-
-                const loss = D.add(player.s.trades[this.id].sold, 10).log10();
-
-                return D.div(base, loss);
-            },
-        },
-        tin_ore: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            unlocked() { return inChallenge('b', 12); },
-            value() {
-                let base = D(9);
-
-                const loss = D.add(player.s.trades[this.id].sold, 10).log10();
-
-                return D.div(base, loss);
-            },
-        },
-        bronze_blend: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            unlocked() { return inChallenge('b', 12); },
-            value() {
-                let base = D(20);
-
-                const loss = D.add(player.s.trades[this.id].sold, 10).log10();
-
-                return D.div(base, loss);
-            },
-        },
-        gold_nugget: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            unlocked() { return inChallenge('b', 12); },
-            value() {
-                let base = D(1_000);
-
-                const loss = D.add(player.s.trades[this.id].sold, 10).log10();
-
-                return D.div(base, loss);
-            },
-        },
-        //todo forge equipement
-        densium: {
-            _id: null,
-            get id() { return this._id ??= Object.entries(layers.s.trades).find(([, t]) => t == this)[0]; },
-            unlocked() { return inChallenge('b', 12) && tmp.m.compactor.unlocked; },
-            value() {
-                let base = D(500);
-
-                const loss = D.add(player.s.trades[this.id].sold, 10).log10();
-
-                return D.div(base, loss);
-            },
-        },
+                    return [item, entry];
+                }),
+        )
     },
     branches: ['c'],
     automate() {

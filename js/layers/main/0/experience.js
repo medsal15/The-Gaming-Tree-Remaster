@@ -1009,7 +1009,7 @@ addLayer('xp', {
             position() {
                 let i = 0;
 
-                if (hasChallenge('b', 21)) i = 1;
+                if (hasChallenge('b', 12)) i = 1;
 
                 return [1, i];
             },

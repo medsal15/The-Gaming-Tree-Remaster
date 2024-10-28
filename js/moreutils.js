@@ -1236,23 +1236,24 @@ function shop_display_buy() {
     /** @type {{[row: number]: items[]}} */
     const grid = {};
 
-    Object.entries(tmp.s.trades)
-        .filter(/**@param {[items, Layers['s']['trades'][items]]}*/([item, trade]) => {
-            if (!(trade.unlocked ?? true) || !('cost' in trade)) return false;
+    Object.entries(tmp.s.items)
+        .filter(/**@param{[items,Layers['s']['items'][items]]}*/([item, trade]) => {
+            if (!('cost' in trade)) return false;
             const itemp = tmp.items[item];
             if (!('grid' in itemp) || !(itemp.unlocked ?? true)) return false;
+            const val = itemp.value;
+            if (!('cost' in val) || D.lte(val.cost, 0)) return false;
             return true;
         })
-        .forEach(/**@param {[items, Layers['s']['trades'][items]]}*/([item]) => {
+        .forEach(/**@param {[items,]}*/([item]) => {
             const [row, col] = tmp.items[item].grid;
             (grid[row] ??= [])[col] = item;
         });
 
     return Object.values(grid).map(items => ['row', items.map(item => {
-        const trademp = tmp.s.trades[item],
+        const trademp = tmp.s.items[item],
             tile = item_tile(item, 90),
-            cost = D.times(trademp.cost, player.s.buy_amount)
-                .times(tmp.s.modifiers.trade.buy_mult),
+            cost = D.times(trademp.cost, player.s.buy_amount),
             list = value_coin(cost);
 
         let cost_txt = 'free';
@@ -1265,7 +1266,7 @@ function shop_display_buy() {
         tile.canClick = () => D.gte(player.s.buy_amount, 1) && D.gte(tmp.s.coins.total, cost);
         tile.onClick = () => {
             const buy_amount = D.floor(player.s.buy_amount),
-                cost = buy_amount.times(trademp.cost).times(tmp.s.modifiers.trade.buy_mult);
+                cost = buy_amount.times(trademp.cost);
             gain_items(item, buy_amount);
             spend_coins(cost);
             player.s.spent = D.add(player.s.spent, cost);
@@ -1286,23 +1287,24 @@ function shop_display_sell() {
     /** @type {{[row: number]: items[]}} */
     const grid = {};
 
-    Object.entries(tmp.s.trades)
-        .filter(/**@param {[items, Layers['s']['trades'][items]]}*/([item, trade]) => {
-            if (!(trade.unlocked ?? true) || !('value' in trade)) return false;
+    Object.entries(tmp.s.items)
+        .filter(/**@param{[items,Layers['s']['items'][items]]}*/([item, trade]) => {
+            if (!('value' in trade)) return false;
             const itemp = tmp.items[item];
             if (!('grid' in itemp) || !(itemp.unlocked ?? true)) return false;
+            const val = itemp.value;
+            if (!('value' in val) || D.lte(val.value, 0)) return false;
             return true;
         })
-        .forEach(/**@param {[items, Layers['s']['trades'][items]]}*/([item]) => {
+        .forEach(/**@param {[items,]}*/([item]) => {
             const [row, col] = tmp.items[item].grid;
             (grid[row] ??= [])[col] = item;
         });
 
     return Object.values(grid).map(items => ['row', items.map(item => {
-        const trademp = tmp.s.trades[item],
+        const trademp = tmp.s.items[item],
             tile = item_tile(item, 90),
             value = D.times(trademp.value, player.s.sell_amount)
-                .times(tmp.s.modifiers.trade.sell_mult)
                 .times(tmp.s.modifiers.coin.mult),
             list = value_coin(value);
 

@@ -1847,7 +1847,7 @@ addLayer('m', {
     },
     compactor: {
         materials() {
-            let cost = D(500),
+            let cost = D(200),
                 mult = D.pow(1.25, player.m.compactor.runs);
 
             return D.times(cost, mult);
