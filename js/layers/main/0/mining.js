@@ -4,7 +4,7 @@ const ORE_SIZES = {
     width: 3,
     height: 3,
 };
-//todo rebalance upgrade & compactor costs
+//todo rebalance upgrade costs
 addLayer('m', {
     row: 0,
     position: 1,
@@ -1486,7 +1486,7 @@ addLayer('m', {
             get id() { return this._id ??= Object.entries(layers.m.ores).find(([, r]) => r == this)[0]; },
             color() { return tmp.items.copper_ore.color; },
             name: 'copper ore',
-            position: [0, 1],
+            position: [1, 1],
             health(vein) {
                 vein ??= tmp.m.ores[this.id].vein;
 
@@ -1522,7 +1522,7 @@ addLayer('m', {
             get id() { return this._id ??= Object.entries(layers.m.ores).find(([, r]) => r == this)[0]; },
             color() { return tmp.items.tin_ore.color; },
             name: 'tin ore',
-            position: [1, 1],
+            position: [1, 2],
             health(vein) {
                 vein ??= tmp.m.ores[this.id].vein;
 
