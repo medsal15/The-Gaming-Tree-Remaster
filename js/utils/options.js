@@ -77,3 +77,5 @@ function milestoneShown(layer, id) {
 	}
 	return false;
 }
+
+let formatOption = (opt) => opt ? 'ON' : 'OFF'
