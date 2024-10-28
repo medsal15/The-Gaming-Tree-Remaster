@@ -151,7 +151,7 @@ var systemComponents = {
         <table>
             <tr>
                 <td><button class="opt" onclick="save()">Save</button></td>
-                <td><button class="opt" onclick="toggleOpt('autosave')">Autosave: {{ options.autosave?"ON":"OFF" }}</button></td>
+                <td><button class="opt" onclick="toggleOpt('autosave')">Autosave: {{ formatOption(options.autosave) }}</button></td>
                 <td><button class="opt" onclick="hardReset()">HARD RESET</button></td>
             </tr>
             <tr>
@@ -163,22 +163,22 @@ var systemComponents = {
 				</td>
             </tr>
 			<tr>
-                <td><button class="opt" onclick="toggleOpt('offlineProd')">Offline Prod: {{ options.offlineProd?"ON":"OFF" }}</button></td>
+                <td><button class="opt" onclick="toggleOpt('offlineProd')">Offline Prod: {{ formatOption(options.offlineProd) }}</button></td>
                 <td><button class="opt" onclick="switchTheme()">Theme: {{ getThemeName() }}</button></td>
                 <td><button class="opt" onclick="adjustMSDisp()">Show Milestones: {{ MS_DISPLAYS[MS_SETTINGS.indexOf(options.msDisplay)]}}</button></td>
 			</tr>
             <tr>
-                <td><button class="opt" onclick="toggleOpt('hqTree')">High-Quality Tree: {{ options.hqTree?"ON":"OFF" }}</button></td>
+                <td><button class="opt" onclick="toggleOpt('hqTree')">High-Quality Tree: {{ formatOption(options.hqTree) }}</button></td>
                 <td><button class="opt" onclick="toggleOpt('hideChallenges')">Completed Challenges: {{ options.hideChallenges?"HIDDEN":"SHOWN" }}</button></td>
                 <td><button class="opt" onclick="toggleOpt('forceOneTab'); needsCanvasUpdate = true">Single-Tab Mode: {{ options.forceOneTab?"ALWAYS":"AUTO" }}</button></td>
             </tr>
             <tr>
-				<td><button class="opt" onclick="toggleOpt('hideMilestonePopups')">Show Milestone Popups: {{ options.hideMilestonePopups?"NO":"YES" }}</button></td>
-				<td><button class="opt" onclick="toggleOpt('forceTooltips'); needsCanvasUpdate = true">Shift-Click to Toggle Tooltips: {{ options.forceTooltips?"ON":"OFF" }}</button></td>
-				<td><button class="opt" onclick="shiftDown = !shiftDown">Force Shift on: {{ shiftDown?"ON":"OFF" }}</button></td>
+				<td><button class="opt" onclick="toggleOpt('hideMilestonePopups')">Show Milestone Popups: {{ formatOption(!options.hideMilestonePopups) }}</button></td>
+				<td><button class="opt" onclick="toggleOpt('forceTooltips'); needsCanvasUpdate = true">Shift-Click to Toggle Tooltips: {{ formatOption(options.forceTooltips) }}</button></td>
+				<td><button class="opt" onclick="shiftDown = !shiftDown">Force Shift on: {{ formatOption(shiftDown) }}</button></td>
 			</tr>
 			<tr>
-                <td><button class="opt" onclick="toggleOpt('noRNG'); needsCanvasUpdate = true">Disable Luck: {{ options.noRNG?"ON":"OFF" }}</button></td>
+                <td><button class="opt" onclick="toggleOpt('noRNG'); needsCanvasUpdate = true">Disable Luck: {{ formatOption(options.noRNG) }}</button></td>
                 <td><button v-if="tmp.c.layerShown" class="opt" onclick="changeLootChance(); needsCanvasUpdate = true">Fractional Chance Mode: {{ CHANCE_MODE[options.chanceMode] }}</button></td>
                 <td><button v-if="tmp.c.layerShown" class="opt" onclick="toggleOpt('colCraft'); needsCanvasUpdate = true">Crafting Alignement: {{ options.colCraft?"COLUMNS":"ROWS" }} FIRST</button></td>
 			</tr>
