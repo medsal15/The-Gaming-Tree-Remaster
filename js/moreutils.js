@@ -364,17 +364,32 @@ function bestiary_content(monster) {
         ['display-text', `Health: ${format(player.xp.monsters[monster].health)} / ${format(tmonst.health)}`],
     );
 
-    if (D.gt(tmonst.damage_per_second, 0)) lines.push(['display-text', `Damage per second: ~${format(tmonst.damage_per_second)}`]);
+    if (D.gt(tmonst.damage_per_second, 0)) {
+        const att_per_kill = D.div(tmonst.health, tmonst.damage).ceil();
+        let att_per_sec = tmp.xp.modifiers.speed.passive;
+        if (monster == player.xp.selected) att_per_sec = D.add(att_per_sec, tmp.xp.modifiers.speed.active);
+        let kill_per_time = D.div(att_per_sec, att_per_kill),
+            time_unit = 'second';
+        if (kill_per_time.lt(1)) {
+            kill_per_time = kill_per_time.times(60);
+            time_unit = 'minute';
+        }
+
+        lines.push(
+            ['display-text', `Damage per second: ~${format(tmonst.damage_per_second)}`],
+            ['display-text', `Kills per ${time_unit}: ${format(kill_per_time)}`]
+        );
+    }
     if (inChallenge('b', 31)) {
         lines.push(['display-text', `Damage: ${format(tmp.dea.monsters[monster].damage)}`]);
     }
 
     lines.push('blank');
 
-    /** @type {TabFormatEntries<'xp'>[]} */
-    const upgrade_lines = [];
+    /** @type {string[]} */
+    const specific_lines = [];
 
-    if (hasUpgrade('l', 31)) upgrade_lines.push([
+    if (hasUpgrade('l', 31)) specific_lines.push([
         'display-text',
         `${resourceColor(tmp.l.skill_points.color, tmp.l.upgrades[31].title)} effect: +${format(upgradeEffect('l', 31)[monster])} damage`,
     ]);
@@ -382,61 +397,60 @@ function bestiary_content(monster) {
     switch (monster) {
         case 'slime': {
             if (inChallenge('b', 11)) {
-                const group = tmp.b.challenges[11].group;
-                upgrade_lines.push([
-                    'display-text',
-                    `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[11].name)} active effect: *${formatWhole(2)} health, *${format(1.5)} experience`,
-                ]);
+                const group = tmp.b.challenges[11].group,
+                    text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[11].name)} active effect:\
+                    *${formatWhole(2)} health, *${format(1.5)} experience`;
+                specific_lines.push(text);
             }
             if (inChallenge('b', 21)) {
-                const group = tmp.b.challenges[21].group;
-                upgrade_lines.push([
-                    'display-text',
-                    `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[21].name)} active effect: *${formatWhole(2)} health, /${format(2)} experience`,
-                ]);
+                const group = tmp.b.challenges[21].group,
+                    text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[21].name)} active effect:\
+                    *${formatWhole(2)} health, /${format(2)} experience`;
+                specific_lines.push(text);
             }
             if (hasChallenge('b', 11)) {
-                const group = tmp.b.challenges[11].group;
-                upgrade_lines.push([
-                    'display-text',
-                    `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[11].name)} reward effect: *${format(1.5)} experience`,
-                ]);
+                const group = tmp.b.challenges[11].group,
+                    text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[11].name)} reward effect:\
+                    *${format(1.5)} experience`;
+                specific_lines.push(text);
             }
             if (D.gt(player.items.densium_slime.amount, 0)) {
-                const itemp = tmp.items.densium_slime;
-                upgrade_lines.push([
-                    'display-text',
-                    `${resourceColor(itemp.color, capitalize(itemp.name))} effect: *${format(itemp.effect.slime_mult)} health, experience, kills, and drops`,
-                ]);
+                const itemp = tmp.items.densium_slime,
+                    text = `${resourceColor(itemp.color, capitalize(itemp.name))} effect:\
+                    *${format(itemp.effect.slime_mult)} health, experience, kills, and drops`;
+                specific_lines.push(text);
             }
         }; break;
         case 'skeleton': {
             if (hasUpgrade('m', 53)) {
-                upgrade_lines.push([
-                    'display-text',
-                    `${resourceColor(tmp.items.silver_ore, tmp.m.upgrades[53].title)}: *${formatWhole(upgradeEffect('m', 53))} damage`,
-                ]);
+                const text = `${resourceColor(tmp.items.silver_ore, tmp.m.upgrades[53].title)}:\
+                    *${formatWhole(upgradeEffect('m', 53))} damage`;
+                specific_lines.push(text);
+            }
+            if (D.gt(player.items.lead_coating.amount, 0)) {
+                const itemp = tmp.items.lead_coating,
+                    text = `${resourceColor(itemp.color, capitalize(itemp.name))} effect:\
+                    /${format(itemp.effect.skeleton_damage_div)} damage`;
+                specific_lines.push(text);
             }
         }; break;
     }
-
-    if (upgrade_lines.length > 0) lines.push(...upgrade_lines, 'blank');
+    if (specific_lines.length > 0) lines.push(['display-text', '<u>Specific effects:</u>'], ...specific_lines.map(t => ['display-text', t]), 'blank');
 
     // Add the lore at the end
-    lines.push(
-        ['display-text', tmonst.lore],
-    );
+    lines.push(['display-text', '<u>Notes:</u>'], ['display-text', tmonst.lore], 'blank');
 
-    const own_drops = source_drops(`kill:${monster}`),
+    /** @type {TabFormatEntries<'xp'>[]} */
+    const drop_lines = [],
+        own_drops = source_drops(`kill:${monster}`),
         any_drops = source_drops('kill:any'),
         /** @type {[items, Decimal][]} */
         chances = [...Object.entries(own_drops.chances), ...Object.entries(any_drops.chances)],
         /** @type {[items, {min: Decimal, max: Decimal}][]} */
         ranges = [...Object.entries(own_drops.range), ...Object.entries(any_drops.range)];
     if (ranges.length > 0) {
-        lines.push(
-            'blank',
-            ['display-text', 'Drops:'],
+        drop_lines.push(
+            ['display-text', 'Range:'],
             ['row', ranges.map(([item, range]) => {
                 let tile;
                 if (!(tmp.items[item].unlocked ?? true)) {
@@ -451,9 +465,8 @@ function bestiary_content(monster) {
         );
     }
     if (chances.length > 0) {
-        lines.push(
-            'blank',
-            ['display-text', 'Chance to drop:'],
+        drop_lines.push(
+            ['display-text', 'Chance:'],
             ['row', chances.map(([item, chance]) => {
                 let tile;
                 if (!(tmp.items[item].unlocked ?? true)) {
@@ -467,6 +480,7 @@ function bestiary_content(monster) {
             })],
         );
     }
+    if (drop_lines.length > 0) lines.push(['display-text', '<u>Item drops:</u>'], ...drop_lines, 'blank');
 
     return lines;
 }
@@ -568,6 +582,7 @@ function handbook_content(ore) {
         ['display-text', capitalize(tore.name)],
         'blank',
         ['display-text', `Mined ${resourceColor(tmp.m.broken.color, formatWhole(player.m.ores[ore].broken))} times`],
+        ['display-text', `Mined ${resourceColor(tmp.m.modifiers.vein.color, formatWhole(tmp.m.ores[ore].vein))} veins`],
     ];
 
     if (D.neq(tore.breaks, 1)) lines.push(['display-text', `Each break counts as ${resourceColor(tmp.m.broken.color, format(tore.breaks))} breaks`]);
@@ -604,23 +619,21 @@ function handbook_content(ore) {
         }; break;
     }
 
-    if (upgrade_lines.length > 0) lines.push(...upgrade_lines, 'blank');
+    if (upgrade_lines.length > 0) lines.push(['display-text', '<u>Specific effects:</u>'], ...upgrade_lines, 'blank');
 
-    lines.push(
-        ['display-text', tore.lore],
-        'blank',
-    );
+    lines.push(['display-text', '<u>Notes:</u>'], ['display-text', tore.lore], 'blank',);
 
-    const own_drops = source_drops(`mining:${ore}`),
+    /** @type {TabFormatEntries<'xp'>[]} */
+    const drop_lines = [],
+        own_drops = source_drops(`mining:${ore}`),
         any_drops = source_drops('mining:any'),
         /** @type {[items, Decimal][]} */
         chances = [...Object.entries(own_drops.chances), ...Object.entries(any_drops.chances)],
         /** @type {[items, {min: Decimal, max: Decimal}][]} */
         ranges = [...Object.entries(own_drops.range), ...Object.entries(any_drops.range)];
     if (ranges.length > 0) {
-        lines.push(
-            'blank',
-            ['display-text', 'Drops:'],
+        drop_lines.push(
+            ['display-text', 'Range:'],
             ['row', ranges.map(([item, range]) => {
                 let tile;
                 if (!(tmp.items[item].unlocked ?? true)) {
@@ -635,9 +648,8 @@ function handbook_content(ore) {
         );
     }
     if (chances.length > 0) {
-        lines.push(
-            'blank',
-            ['display-text', 'Chance to drop:'],
+        drop_lines.push(
+            ['display-text', 'Chance:'],
             ['row', chances.map(([item, chance]) => {
                 let tile;
                 if (!(tmp.items[item].unlocked ?? true)) {
@@ -651,6 +663,7 @@ function handbook_content(ore) {
             })],
         );
     }
+    if (drop_lines.length > 0) lines.push(['display-text', '<u>Item drops:</u>'], ...drop_lines, 'blank');
 
     return lines;
 }
@@ -878,9 +891,9 @@ function inventory() {
                     `${capitalize(source_name(source))}: ${format_chance(chance)}`));
             if (Object.entries(range).filter(([, r]) => D.gt(r.max, 0)).length) tooltip_lines.push(...Object.entries(range)
                 .map(/**@param{[items,{min:Decimal,max:Decimal}]}*/([source, range]) => `${capitalize(source_name(source))}: ${format_range(range)}`));
-            if (Object.entries(per_second).filter(([, ps]) => D.gt(ps, 0)).length) tooltip_lines.push(...Object.entries(per_second)
+            if (Object.entries(per_second).filter(([, ps]) => D.neq(ps, 0)).length) tooltip_lines.push(...Object.entries(per_second)
                 .map(/**@param{[string,Decimal]}*/([source, amount]) =>
-                    `${capitalize(source_name(source))}: +${format(amount)} /s`));
+                    `${capitalize(source_name(source))}: ${D.gt(amount, 0) ? '+' : ''}${format(amount)} /s`));
             if (other.length) tooltip_lines.push(...other.map(source => capitalize(source_name(source))));
 
             tooltip += tooltip_lines.join('<br>');
@@ -1073,9 +1086,38 @@ function compendium_content(item) {
         'blank',
     ];
 
-    if ('effectDescription' in itemp) lines.push(['display-text', item_list[item].effectDescription()], 'blank');
+    if ('sources' in itemp) {
+        const {
+            chance = {},
+            per_second = {},
+            range = {},
+            other = [],
+        } = itemp.sources,
+            source_lines = [];
 
-    lines.push(['display-text', itemp.lore]);
+        if (Object.entries(chance).filter(([, c]) => D.gt(c, 0)).length) source_lines.push(...Object.entries(chance)
+            .filter(([, c]) => D.gt(c, 0))
+            .map(/**@param{[string,Decimal]}*/([source, chance]) =>
+                `${capitalize(source_name(source))}: ${format_chance(chance)}`));
+        if (Object.entries(range).filter(([, r]) => D.gt(r.max, 0)).length) source_lines.push(...Object.entries(range)
+            .map(/**@param{[items,{min:Decimal,max:Decimal}]}*/([source, range]) => `${capitalize(source_name(source))}: ${format_range(range)}`));
+        if (Object.entries(per_second).filter(([, ps]) => D.neq(ps, 0)).length) source_lines.push(...Object.entries(per_second)
+            .map(/**@param{[string,Decimal]}*/([source, amount]) =>
+                `${capitalize(source_name(source))}: ${D.gt(amount, 0) ? '+' : ''}${format(amount)} /s`));
+        if (other.length) source_lines.push(...other.map(source => capitalize(source_name(source))));
+
+        if (source_lines.length > 0) {
+            lines.push(
+                ['display-text', '<u>Sources:</u>'],
+                ...source_lines.map(t => ['display-text', t]),
+                'blank',
+            );
+        }
+    }
+
+    if ('effectDescription' in itemp) lines.push(['display-text', '<u>Effect:</u>'], ['display-text', item_list[item].effectDescription()], 'blank');
+
+    lines.push(['display-text', '<u>Notes:</u>'], ['display-text', itemp.lore], 'blank');
 
     return lines;
 }
@@ -1112,7 +1154,7 @@ function bosstiary_content(boss) {
 
     if (inChallenge('b', bosst.challenge)) lines.push(['display-text', 'Currently fighting']);
 
-    lines.push('blank', ['display-text', bosst.lore]);
+    lines.push('blank', ['display-text', '<u>Notes:</u>'], ['display-text', bosst.lore], 'blank');
 
     return lines;
 }

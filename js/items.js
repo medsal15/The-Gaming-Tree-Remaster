@@ -532,6 +532,7 @@ const item_list = {
             Stolen from a dead body, but (hopefully) not a grave.<br>
             Wait long enough, and it becomes archeology.`,
         categories: ['materials', 'skeleton'],
+        unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
     },
     'rib': {
         id: null,
@@ -564,6 +565,7 @@ const item_list = {
             Part of a cage that protected important organs.<br>
             A worthless boomerang.`,
         categories: ['materials', 'skeleton'],
+        unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
     },
     'skull': {
         id: null,
@@ -598,6 +600,7 @@ const item_list = {
             Used to store one of the most important organs in the body.<br>
             Its hollow sockets make you feel unseasy.`,
         categories: ['materials', 'skeleton'],
+        unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
     },
     'slimy_skull': {
         id: null,
@@ -627,6 +630,7 @@ const item_list = {
             The goo is slowly flowing from its sockets...<br>
             Why would you do that?`,
         categories: ['materials', 'skeleton'],
+        unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
     },
     'bone_pick': {
         id: null,
@@ -667,6 +671,7 @@ const item_list = {
             return `Increase damage dealt to enemies by ${xp_damage}, and mining damage by ${m_damage}<br>
                 Mining damage increases by 1 the first time`;
         },
+        unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
     },
     'crystal_skull': {
         id: null,
@@ -722,6 +727,7 @@ const item_list = {
 
             return `Multiply xp gain by ${gain} and cap by ${cap}`;
         },
+        unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
     },
     'bone_slate': {
         id: null,
@@ -757,6 +763,7 @@ const item_list = {
 
             return `Multiply level gain by ${level}`;
         },
+        unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
     },
     'magic_slime_ball': {
         id: null,
@@ -826,6 +833,7 @@ const item_list = {
 
             return `Multiply luck by ${luck} and skull drop chances by ${skull}`;
         },
+        unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
     },
     // Mining
     'stone': {

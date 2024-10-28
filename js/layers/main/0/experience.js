@@ -12,7 +12,12 @@ addLayer('xp', {
     name: 'experience',
     symbol: 'XP',
     color() { return tmp.xp.monsters[player.xp.selected].color; },
-    tooltip() { return `${formatWhole(player.xp.points)} experience<br>${formatWhole(tmp.xp.kill.total)} kills`; },
+    tooltip() {
+        let text = `${formatWhole(player.xp.points)} experience`;
+        if (D.gte(player.xp.points, tmp.xp.modifiers.cap.total)) text += ' (capped)';
+        text += `<br>${formatWhole(tmp.xp.kill.total)} kills`;
+        return text;
+    },
     startData() {
         return {
             unlocked: true,
@@ -392,8 +397,11 @@ addLayer('xp', {
                     return `Unlocked at ${formatWhole(this.kills)} kills`;
                 }
 
-                return `Double XP gain<br>\
-                    Unlock 2 new layers`;
+                let text = 'Double XP gain';
+
+                if (!player.l.unlocked && !player.c.shown) text += '<br>Unlock 2 new layers';
+
+                return text;
             },
             canAfford() { return tmp[this.layer].upgrades[this.id].show; },
             cost: D(500),
@@ -915,8 +923,8 @@ addLayer('xp', {
             position() {
                 let i = 0;
 
-                if (inChallenge('b', 11)) i++;
-                if (inChallenge('b', 21)) i += 2;
+                if (inChallenge('b', 11)) i = 1;
+                if (inChallenge('b', 21)) i = 2;
 
                 return [0, i];
             },
@@ -1001,6 +1009,8 @@ addLayer('xp', {
             position() {
                 let i = 0;
 
+                if (hasChallenge('b', 21)) i = 1;
+
                 return [1, i];
             },
             level(kills) {
@@ -1068,6 +1078,16 @@ addLayer('xp', {
                 }, D.dZero);
 
             return sum.minus(spent);
+        },
+    },
+    level: {
+        total() {
+            const sum = Object.values(tmp.xp.monsters)
+                .filter(data => (data.unlocked ?? true))
+                .map(data => data.level)
+                .reduce((sum, level) => D.add(sum, level), D.dZero);
+
+            return sum;
         },
     },
     modifiers: {

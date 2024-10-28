@@ -4,7 +4,7 @@ const ORE_SIZES = {
     width: 3,
     height: 3,
 };
-//todo ore depths (like monster levels)
+//todo rebalance upgrade & compactor costs
 addLayer('m', {
     row: 0,
     position: 1,
@@ -156,29 +156,36 @@ addLayer('m', {
             buttonStyle: { borderColor() { return tmp.m.nodeStyle.backgroundColor; }, },
         },
         'Upgrades': {
-            content: [
-                ['display-text', () => {
+            content() {
+                /** @type {items[]} */
+                const resources_t1 = ['stone', 'copper_ore', 'tin_ore', 'bronze_blend'],
+                    list_t1 = resources_t1.map(item => `${resourceColor(tmp.items[item].color, formatWhole(player.items[item].amount), 'font-size:1.5em;')} ${tmp.items[item].name}`),
                     /** @type {items[]} */
-                    const resources = ['stone', 'copper_ore', 'tin_ore', 'bronze_blend'],
-                        list = resources.map(item => `${resourceColor(tmp.items[item].color, formatWhole(player.items[item].amount), 'font-size:1.5em;')} ${tmp.items[item].name}`);
+                    resources_t2 = ['densium', 'iron_ore', 'silver_ore', 'electrum_blend'];
 
-                    return `You have ${listFormat.format(list)}.`;
-                }],
-                'blank',
-                ['upgrades', [1, 2, 3]],
-                'blank',
-                'h-line',
-                'blank',
-                ['display-text', () => {
-                    /** @type {items[]} */
-                    const resources = ['densium', 'iron_ore', 'silver_ore', 'electrum_blend'],
-                        list = resources.map(item => `${resourceColor(tmp.items[item].color, formatWhole(player.items[item].amount), 'font-size:1.5em;')} ${tmp.items[item].name}`);
+                /** @type {TabFormatEntries<'m'>[]} */
+                const content = [
+                    ['display-text', `You have ${listFormat.format(list_t1)}.`],
+                    'blank',
+                    ['upgrades', [1, 2, 3]],
+                    'blank',
+                ];
 
-                    return `You have ${listFormat.format(list)}.`;
-                }],
-                'blank',
-                ['upgrades', [4, 5, 6]],
-            ],
+                if (resources_t2.filter(item => tmp.items[item].unlocked).length) {
+                    const res_t2_vis = resources_t2.filter(item => tmp.items[item].unlocked),
+                        list_t2 = res_t2_vis.map(item => `${resourceColor(tmp.items[item].color, formatWhole(player.items[item].amount), 'font-size:1.5em;')} ${tmp.items[item].name}`);
+
+                    content.push(
+                        'h-line',
+                        'blank',
+                        ['display-text', `You have ${listFormat.format(list_t2)}`],
+                        'blank',
+                        ['upgrades', [4, 5, 6]],
+                    );
+                }
+
+                return content;
+            },
             buttonStyle: { borderColor() { return tmp.m.nodeStyle.backgroundColor; }, },
             shouldNotify() { return canAffordLayerUpgrade('m'); },
         },
@@ -591,7 +598,7 @@ addLayer('m', {
             },
             show() { return hasUpgrade(this.layer, this.id - 10) || hasUpgrade(this.layer, this.id) || hasAchievement('ach', 94); },
             item: 'stone',
-            cost: D(256),
+            cost: D(128),
             style() {
                 if (!tmp[this.layer].upgrades[this.id].show) {
                     return {
@@ -693,7 +700,7 @@ addLayer('m', {
             },
             show() { return hasUpgrade(this.layer, this.id - 10) || hasUpgrade(this.layer, this.id) || hasAchievement('ach', 94); },
             item: 'tin_ore',
-            cost: D(16),
+            cost: D(8),
             style() {
                 if (!tmp[this.layer].upgrades[this.id].show) {
                     return {
@@ -1432,10 +1439,13 @@ addLayer('m', {
             color() { return tmp.items.stone.color; },
             name: 'stone',
             position: [1, 0],
-            health() {
-                let base = D.dTen;
+            health(vein) {
+                vein ??= tmp.m.ores[this.id].vein;
 
-                let health = D.times(base, tmp.m?.modifiers.health.mult)
+                let base = D.dTen,
+                    health = D.times(base, tmp.m?.modifiers.health.mult)
+
+                health = D.pow(tmp.m.modifiers.vein.health_mult, vein).times(health);
 
                 health = health.times(item_effect('densium_rock').rock_mult);
 
@@ -1458,12 +1468,18 @@ addLayer('m', {
 
                 return breaks;
             },
-            experience() {
-                let xp = D.times(.25, tmp.m.modifiers.xp.base)
-                    .times(tmp.m.modifiers.xp.mult);
+            experience(vein) {
+                vein ??= tmp.m.ores[this.id].vein;
+
+                let base = D.times(.25, tmp.m.modifiers.xp.base);
+
+                base = D.times(vein, tmp.m.modifiers.vein.xp_add_mult).add(1).times(base);
+
+                let xp = D.times(base, tmp.m.modifiers.xp.mult);
 
                 return xp;
             },
+            vein() { return D.div(player.m.ores[this.id].broken, tmp.m.modifiers.vein.size).floor(); },
         },
         copper: {
             _id: null,
@@ -1471,9 +1487,15 @@ addLayer('m', {
             color() { return tmp.items.copper_ore.color; },
             name: 'copper ore',
             position: [0, 1],
-            health() {
+            health(vein) {
+                vein ??= tmp.m.ores[this.id].vein;
+
                 let base = D(25),
                     health = D.times(base, tmp.m?.modifiers.health.mult);
+
+                health = D.pow(tmp.m.modifiers.vein.health_mult, vein).times(health);
+
+                health = health.times(item_effect('densium_rock').rock_mult);
 
                 return health;
             },
@@ -1482,12 +1504,18 @@ addLayer('m', {
                 Still contains large amounts of stone.`,
             weight() { return D(4); },
             breaks() { return D.dOne; },
-            experience() {
-                let xp = D.times(3, tmp.m.modifiers.xp.base)
-                    .times(tmp.m.modifiers.xp.mult);
+            experience(vein) {
+                vein ??= tmp.m.ores[this.id].vein;
+
+                let base = D.times(3, tmp.m.modifiers.xp.base);
+
+                base = D.times(vein, tmp.m.modifiers.vein.xp_add_mult).add(1).times(base);
+
+                let xp = D.times(base, tmp.m.modifiers.xp.mult);
 
                 return xp;
             },
+            vein() { return D.div(player.m.ores[this.id].broken, tmp.m.modifiers.vein.size).floor(); },
         },
         tin: {
             _id: null,
@@ -1495,9 +1523,15 @@ addLayer('m', {
             color() { return tmp.items.tin_ore.color; },
             name: 'tin ore',
             position: [1, 1],
-            health() {
+            health(vein) {
+                vein ??= tmp.m.ores[this.id].vein;
+
                 let base = D(15),
                     health = D.times(base, tmp.m?.modifiers.health.mult);
+
+                health = D.pow(tmp.m.modifiers.vein.health_mult, vein).times(health);
+
+                health = health.times(item_effect('densium_rock').rock_mult);
 
                 return health;
             },
@@ -1506,12 +1540,18 @@ addLayer('m', {
                 Mostly contains stone.`,
             weight() { return D(1); },
             breaks() { return D.dOne; },
-            experience() {
-                let xp = D.times(6, tmp.m.modifiers.xp.base)
-                    .times(tmp.m.modifiers.xp.mult);
+            experience(vein) {
+                vein ??= tmp.m.ores[this.id].vein;
+
+                let base = D.times(6, tmp.m.modifiers.xp.base);
+
+                base = D.times(vein, tmp.m.modifiers.vein.xp_add_mult).add(1).times(base);
+
+                let xp = D.times(base, tmp.m.modifiers.xp.mult);
 
                 return xp;
             },
+            vein() { return D.div(player.m.ores[this.id].broken, tmp.m.modifiers.vein.size).floor(); },
         },
         coal: {
             _id: null,
@@ -1519,9 +1559,15 @@ addLayer('m', {
             color() { return tmp.items.coal.color; },
             name: 'coal',
             position: [2, 0],
-            health() {
+            health(vein) {
+                vein ??= tmp.m.ores[this.id].vein;
+
                 let base = D(20),
                     health = D.times(base, tmp.m?.modifiers.health.mult);
+
+                health = D.pow(tmp.m.modifiers.vein.health_mult, vein).times(health);
+
+                health = health.times(item_effect('densium_rock').rock_mult);
 
                 return health;
             },
@@ -1531,12 +1577,18 @@ addLayer('m', {
             weight() { return D(5); },
             breaks() { return D.dOne; },
             unlocked() { return hasUpgrade('m', 61); },
-            experience() {
-                let xp = D.times(2, tmp.m.modifiers.xp.base)
-                    .times(tmp.m.modifiers.xp.mult);
+            experience(vein) {
+                vein ??= tmp.m.ores[this.id].vein;
+
+                let base = D.times(2, tmp.m.modifiers.xp.base);
+
+                base = D.times(vein, tmp.m.modifiers.vein.xp_add_mult).add(1).times(base);
+
+                let xp = D.times(base, tmp.m.modifiers.xp.mult);
 
                 return xp;
             },
+            vein() { return D.div(player.m.ores[this.id].broken, tmp.m.modifiers.vein.size).floor(); },
         },
         iron: {
             _id: null,
@@ -1544,9 +1596,15 @@ addLayer('m', {
             color() { return tmp.items.iron_ore.color; },
             name: 'iron',
             position: [2, 1],
-            health() {
+            health(vein) {
+                vein ??= tmp.m.ores[this.id].vein;
+
                 let base = D(50),
                     health = D.times(base, tmp.m?.modifiers.health.mult);
+
+                health = D.pow(tmp.m.modifiers.vein.health_mult, vein).times(health);
+
+                health = health.times(item_effect('densium_rock').rock_mult);
 
                 return health;
             },
@@ -1556,12 +1614,18 @@ addLayer('m', {
             weight() { return D.dOne; },
             breaks() { return D.dOne; },
             unlocked() { return hasUpgrade('m', 61); },
-            experience() {
-                let xp = D.times(4, tmp.m.modifiers.xp.base)
-                    .times(tmp.m.modifiers.xp.mult);
+            experience(vein) {
+                vein ??= tmp.m.ores[this.id].vein;
+
+                let base = D.times(4, tmp.m.modifiers.xp.base);
+
+                base = D.times(vein, tmp.m.modifiers.vein.xp_add_mult).add(1).times(base);
+
+                let xp = D.times(base, tmp.m.modifiers.xp.mult);
 
                 return xp;
             },
+            vein() { return D.div(player.m.ores[this.id].broken, tmp.m.modifiers.vein.size).floor(); },
         },
         silver: {
             _id: null,
@@ -1569,9 +1633,15 @@ addLayer('m', {
             color() { return tmp.items.silver_ore.color; },
             name: 'silver',
             position: [2, 2],
-            health() {
+            health(vein) {
+                vein ??= tmp.m.ores[this.id].vein;
+
                 let base = D(45),
                     health = D.times(base, tmp.m?.modifiers.health.mult);
+
+                health = D.pow(tmp.m.modifiers.vein.health_mult, vein).times(health);
+
+                health = health.times(item_effect('densium_rock').rock_mult);
 
                 return health;
             },
@@ -1581,12 +1651,18 @@ addLayer('m', {
             weight() { return D(.5); },
             breaks() { return D.dOne; },
             unlocked() { return hasUpgrade('m', 61); },
-            experience() {
-                let xp = D.times(8, tmp.m.modifiers.xp.base)
-                    .times(tmp.m.modifiers.xp.mult);
+            experience(vein) {
+                vein ??= tmp.m.ores[this.id].vein;
+
+                let base = D.times(8, tmp.m.modifiers.xp.base);
+
+                base = D.times(vein, tmp.m.modifiers.vein.xp_add_mult).add(1).times(base);
+
+                let xp = D.times(base, tmp.m.modifiers.xp.mult);
 
                 return xp;
             },
+            vein() { return D.div(player.m.ores[this.id].broken, tmp.m.modifiers.vein.size).floor(); },
         },
     },
     bars: {
@@ -1749,6 +1825,12 @@ addLayer('m', {
             cap() { return D.times(tmp.m.modifiers.xp.cap_base, tmp.xp.modifiers.cap.mult); },
             gain_cap() { return D.minus(tmp.m.modifiers.xp.cap, player.m.experience); },
             color: '#BB8822',
+        },
+        vein: {
+            size() { return D.dTen; },
+            health_mult() { return D(1.25); },
+            xp_add_mult() { return D.dOne; },
+            color: '#8822BB',
         },
         size() {
             let size = D.dOne;

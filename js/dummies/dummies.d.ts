@@ -1457,6 +1457,7 @@ declare class LayerData {
     challenges?: { [id: number]: number }
 }
 
+//todo include shop value/cost
 declare class Item<I> {
     readonly id: I
     color: Computable<string>
@@ -1619,6 +1620,10 @@ type Layers = {
             color: string
             total(): Decimal
         }
+        level: {
+            /** Total enemy levels */
+            total(): Decimal
+        }
         modifiers: {
             damage: {
                 base(): Decimal
@@ -1671,7 +1676,7 @@ type Layers = {
             /** Position of the ore in the ore spritesheet */
             position: Computable<[number, number]>
             /** Total health of the ore */
-            health(): Decimal
+            health(vein?: DecimalSource): Decimal
             lore: Computable<string>
             unlocked?(): boolean
             /** Weighted chance to be selected */
@@ -1679,7 +1684,9 @@ type Layers = {
             /** How many breaks on destruction (affects item gain) */
             breaks(): Decimal
             /** Experience gain on break */
-            experience(): Decimal
+            experience(vein?: DecimalSource): Decimal
+            /** How many veins have been broken */
+            vein(): Decimal
         } }
         modifiers: {
             damage: {
@@ -1711,7 +1718,16 @@ type Layers = {
                 /** XP left until limit */
                 gain_cap(): Decimal
                 color: string
-            },
+            }
+            vein: {
+                /** How many ores must be broken before the health increases */
+                size(): Decimal
+                /** How much health is added per vein emptied */
+                health_mult(): Decimal
+                /** How much xp is added per vein emptied */
+                xp_add_mult(): Decimal
+                color: string
+            }
             /** Amount of mined ores */
             size(): number
         }

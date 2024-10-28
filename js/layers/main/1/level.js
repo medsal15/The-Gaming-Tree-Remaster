@@ -430,6 +430,7 @@ addLayer('l', {
     },
     onPrestige(gain) {
         if (D.gt(gain, 1)) giveAchievement('ach', 22);
+        if (D.lte(player.xp.points, 0)) giveAchievement('ach', 101);
     },
     gainMult() {
         let mult = D.dOne;

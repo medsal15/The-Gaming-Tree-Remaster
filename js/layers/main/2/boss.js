@@ -219,8 +219,8 @@ addLayer('b', {
                 return { 'backgroundColor': tmp.b.groups[group].color, };
             },
         },
-        //todo 22: license (no monster killing)
-        // Relics
+        //todo 22: license (no monster killing, reward: ???)
+        // Gods
         31: {
             name: 'Thanatos',
             challengeDescription: `Enemies can strike back and kill you.`,
@@ -236,7 +236,7 @@ addLayer('b', {
                 return { 'backgroundColor': tmp.b.groups[group].color, };
             },
         },
-        //todo 32: Tyche (???, reward is lootboxes)
+        //todo 32: Tyche (lootboxes, reward is luck switches)
     },
     clickables: {
         // Bosstiary
@@ -333,11 +333,12 @@ addLayer('b', {
         },
     },
     automate() {
-        if (!player.b.visible_challenges.includes('11') && D.gte(tmp.xp.kill.total, 490)) {
+        if (!player.b.visible_challenges.includes('11') && D.gte(tmp.xp.kill.total, 360)) {
+            player.b.shown = true;
             player.b.visible_challenges.push('11');
             doPopup('none', `${tmp.b.challenges[11].name}`, 'Boss unlocked', 5, tmp.b.color);
         }
-        if (!player.b.visible_challenges.includes('12') && D.gt(player.items.gold_nugget.amount, 0)) {
+        if (!player.b.visible_challenges.includes('12') && D.gte(player.items.gold_nugget.amount, 1)) {
             player.b.visible_challenges.push('12');
             doPopup('none', `${tmp.b.challenges[12].name}`, 'Boss unlocked', 5, tmp.b.color);
         }

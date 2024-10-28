@@ -1,5 +1,6 @@
 'use strict';
 
+//todo? forge achievements
 addLayer('ach', {
     row: 'side',
     position: 0,
@@ -24,6 +25,7 @@ addLayer('ach', {
 
                     return `You have ${resourceColor(color, formatWhole(owned), 'font-size:1.5em;')} /${resourceColor(color, formatWhole(visible))} achievements`;
                 }],
+                ['display-text', 'Achievements with yellow borders have bonuses'],
                 'blank',
                 ['achievements', () => tmp.ach.categories.normal.rows],
             ],
@@ -53,13 +55,16 @@ addLayer('ach', {
                 }],
                 ['display-text', () => {
                     const owned = player.ach.pool_balls.length;
-                    if (owned > 0) return `???: ${resourceColor(tmp.items.cueball.color, formatWhole(owned))} /${resourceColor(tmp.items.cueball.color, formatWhole(15))}`;
+                    if (owned <= 0) return;
+                    let name = '???';
+                    if (owned > 7) name = 'Balls';
+                    return `${name}: ${resourceColor(tmp.items.cueball.color, formatWhole(owned))} /${resourceColor(tmp.items.cueball.color, formatWhole(15))}`;
                 }],
                 'blank',
                 ['achievements', () => tmp.ach.categories.secret.rows],
             ],
             buttonStyle: { 'border-color'() { return tmp.ach.categories.secret.color; } },
-            unlocked() { return D.gt(tmp.ach.categories.secret.visible.length, 0); },
+            unlocked() { return D.gt(tmp.ach.categories.secret.visible.length, 0) || player.ach.pool_balls.length > 0; },
         },
     },
     achievements: {
@@ -342,7 +347,7 @@ addLayer('ach', {
         55: {
             name: '24k Real',
             tooltip: 'Get gold<br>Reward: +0.25 drop chance multiplier',
-            done() { return D.gt(player.items.gold_nugget.amount, 0); },
+            done() { return D.gte(player.items.gold_nugget.amount, 1); },
             onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.items.gold_nugget.color); },
             style() {
                 let style = {};
@@ -659,9 +664,9 @@ addLayer('ach', {
             unlocked() { return hasAchievement(this.layer, this.id); },
         },
         101: {
-            name: 'Try Clicking Harder',
-            tooltip: 'Switch to double-decker bus distance again',
-            done() { return options.distMode == 'DOUBLEDECKERBUSH'; },
+            name: 'So What Was The Point Of It Then?',
+            tooltip: 'Get a level without any XP experience',
+            done() { return false; },
             onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Secret Completed!', 3, tmp.ach.categories.secret.color); },
             style() {
                 let style = {};
@@ -695,7 +700,7 @@ addLayer('ach', {
             owned() { return player.ach.achievements.filter(id => this.rows.includes(Math.floor(id / 10))); },
         },
         secret: {
-            rows: [10, 6, 2],
+            rows: [6, 2, 10],
             color: '#FF0077',
             visible() {
                 return Object.values(tmp.ach.achievements)
