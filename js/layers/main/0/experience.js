@@ -670,6 +670,11 @@ addLayer('xp', {
                 backgroundColor() { return tmp.xp.color; },
             },
             unlocked() { return D.gt(tmp.xp.modifiers.speed.active, 0); },
+            display() {
+                if (player.items.disco_ball.amount.gt(0)) {
+                    return `${formatWhole(D.times(tmp.xp.modifiers.speed.active, 60))} BPM`;
+                }
+            },
         },
         attack_all: {
             direction: RIGHT,
@@ -680,6 +685,11 @@ addLayer('xp', {
                 backgroundColor() { return tmp.xp.kill.color; },
             },
             unlocked() { return D.gt(tmp.xp.modifiers.speed.passive, 0); },
+            display() {
+                if (player.items.disco_ball.amount.gt(0)) {
+                    return `${formatWhole(D.times(tmp.xp.modifiers.speed.active, 60))} BPM`;
+                }
+            },
         },
         player_health: {
             direction: RIGHT,
@@ -931,7 +941,9 @@ addLayer('xp', {
             level(kills) {
                 let k = D(kills ?? player.xp.monsters[this.id].kills);
 
-                return k.div(10).root(2).floor().add(1);
+                const mod = tmp.xp.modifiers.level;
+
+                return k.div(mod.base).pow(mod.exp).times(mod.mult).floor().add(1);
             },
             health(level) {
                 let l = D(level ?? tmp?.xp?.monsters[this.id].level);
@@ -1016,7 +1028,9 @@ addLayer('xp', {
             level(kills) {
                 let k = D(kills ?? player.xp.monsters[this.id].kills);
 
-                return k.div(10).root(2).floor().add(1);
+                const mod = tmp.xp.modifiers.level;
+
+                return k.div(mod.base).pow(mod.exp).times(mod.mult).floor().add(1);
             },
             health(level) {
                 let l = D(level ?? tmp?.xp?.monsters[this.id].level);
@@ -1127,6 +1141,8 @@ addLayer('xp', {
             active() {
                 let speed = D.dZero;
 
+                speed = speed.add(item_effect('disco_ball').speed);
+
                 if (hasUpgrade('xp', 22)) speed = speed.add(upgradeEffect('xp', 22));
 
                 return speed;
@@ -1212,6 +1228,17 @@ addLayer('xp', {
 
                 return mult;
             },
+        },
+        level: {
+            base() {
+                let base = D.dTen;
+
+                base = base.add(item_effect('gold_star').level_delay);
+
+                return base;
+            },
+            mult() { return D.dOne; },
+            exp() { return D(.5); },
         },
     },
     list() {

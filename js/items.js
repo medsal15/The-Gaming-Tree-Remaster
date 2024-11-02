@@ -1269,7 +1269,6 @@ const item_list = {
         unlocked() { return hasUpgrade('m', 61); },
     },
     // Forge
-    //todo values
     'stone_brick': {
         id: null,
         color: '#BBBBDD',
@@ -1279,6 +1278,11 @@ const item_list = {
         row: 1,
         sources: {
             other: ['forge',],
+        },
+        value: {
+            value() {
+                return D(50);
+            },
         },
         lore: `A brick of solid rock.<br>
             Now this is some useful stone.<br>
@@ -1296,6 +1300,11 @@ const item_list = {
         sources: {
             other: ['forge',],
         },
+        value: {
+            value() {
+                return D(100);
+            },
+        },
         lore: `A solid block of copper.<br>
             Just as useful as copper, but easier to store.<br>
             Proper storage allows slower color change.`,
@@ -1312,6 +1321,11 @@ const item_list = {
         sources: {
             other: ['forge',],
         },
+        value: {
+            value() {
+                return D(900);
+            },
+        },
         lore: `A light yellow ingot.<br>
             The way you store these makes them look even prettier...`,
         categories: ['materials', 'forge'],
@@ -1326,6 +1340,11 @@ const item_list = {
         row: 1,
         sources: {
             other: ['forge',],
+        },
+        value: {
+            value() {
+                return D(400);
+            },
         },
         lore: `A big brown ingot.<br>
             This is much easier to handle.<br>
@@ -1342,6 +1361,11 @@ const item_list = {
         row: 1,
         sources: {
             other: ['forge',],
+        },
+        value: {
+            value() {
+                return D(5_000);
+            },
         },
         lore: `A small, but very rare ingot.<br>
             Somehow, the more you own, the harder it is to find.<br>
@@ -1377,6 +1401,11 @@ const item_list = {
         sources: {
             other: ['forge',],
         },
+        value: {
+            value() {
+                return D(400);
+            },
+        },
         lore: `A gray block of metal.<br>
             Keeps all the positives of iron, but is easier to store.<br>
             Congratulations on reaching the iron age!`,
@@ -1392,6 +1421,11 @@ const item_list = {
         row: 1,
         sources: {
             other: ['forge',],
+        },
+        value: {
+            value() {
+                return D(15_000);
+            },
         },
         lore: `An almost white metal block.<br>
             Looks like you managed to separate the impurities.<br>
@@ -1409,6 +1443,11 @@ const item_list = {
         sources: {
             other: ['forge',],
         },
+        value: {
+            value() {
+                return D(1_500);
+            },
+        },
         lore: `A black metal cube.<br>
             It feels very heavy.<br>
             So that's what was mixed with the silver...`,
@@ -1424,6 +1463,11 @@ const item_list = {
         row: 1,
         sources: {
             other: ['forge',],
+        },
+        value: {
+            value() {
+                return D(43_750);
+            },
         },
         lore: `A pretty light yellow alloy.<br>
             The method of storage used makes them even prettier.<br>
@@ -1894,7 +1938,6 @@ const item_list = {
         },
         unlocked() { return tmp.c.forge.unlocked; },
     },
-    //todo value
     'lead_coating': {
         id: null,
         color: '#113366',
@@ -1904,6 +1947,11 @@ const item_list = {
         row: 1,
         sources: {
             other: ['crafting'],
+        },
+        value: {
+            value() {
+                return D(700);
+            },
         },
         lore: `Lead coating for a weapon.<br>
             It's great for fighting living beings.<br>
@@ -2210,6 +2258,158 @@ const item_list = {
             }
 
             return `Divides forging costs by ${forge_cost}, and bronze ingot use costs by ${cost_div}`;
+        },
+        unlocked() { return tmp.c.forge.unlocked; },
+    },
+    'gold_star': {
+        id: null,
+        color: '#FFFF44',
+        name: 'gold star',
+        icon: [9, 4],
+        row: 1,
+        sources: {
+            other: ['forge',],
+        },
+        lore: `A fancy golden star.<br>
+            Its shine somehow lowers the levels of monsters.<br>
+            It's really, really pretty.`,
+        categories: ['equipment', 'forge'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let level_delay = D(x),
+                cost_div = D.root(x, 2).pow_base(25);
+
+            return { level_delay, cost_div, };
+        },
+        effectDescription(amount) {
+            let level_delay, cost_div;
+            if (shiftDown) {
+                level_delay = '[amount]';
+                cost_div = '[25 ^ 2√(amount)]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                level_delay = formatWhole(effect.level_delay);
+                cost_div = format(effect.cost_div);
+            }
+
+            return `Increases monster level delay by ${level_delay}, and divides gold ingot use costs by ${cost_div}`;
+        },
+        unlocked() { return tmp.c.forge.unlocked; },
+    },
+    'iron_heataxe': {
+        id: null,
+        color: '#8899AA',
+        name: 'iron heataxe',
+        icon: [9, 5],
+        row: 1,
+        sources: {
+            other: ['forge',],
+        },
+        lore: `A pickaxe that channels the heat of your forge.<br>
+            It's heavier than a normal pickaxe.<br>
+            You are wearing gloves, right?`,
+        categories: ['equipment', 'forge'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let damage = D.add(player.c.heat, 1).log10().times(x),
+                cost_div = D.root(x, 4).pow_base(10);
+
+            return { damage, cost_div, };
+        },
+        effectDescription(amount) {
+            let damage, cost_div;
+            if (shiftDown) {
+                damage = '[log10(heat + 1) * amount]';
+                cost_div = '[10 ^ 4√(amount)]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                damage = format(effect.damage);
+                cost_div = format(effect.cost_div);
+            }
+
+            return `Increases mining damage by ${damage}, and divides iron ingot use costs by ${cost_div}`;
+        },
+        unlocked() { return tmp.c.forge.unlocked; },
+    },
+    'disco_ball': {
+        id: null,
+        color: '#DDEEEE',
+        name: 'disco ball',
+        icon: [8, 6],
+        row: 1,
+        sources: {
+            other: ['forge',],
+        },
+        lore: `A shiny ball covered in small silver mirrors.<br>
+            The flashing lights hurt your eyes.<br>
+            Move to the rhythm!`,
+        categories: ['materials', 'forge'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let speed = D.root(x, 2).div(10),
+                cost_div = D.root(x, 4).pow_base(25);
+
+            return { speed, cost_div, };
+        },
+        effectDescription(amount) {
+            let speed, cost_div;
+            if (shiftDown) {
+                speed = '[2√(amount) / 10]';
+                cost_div = '[25 ^ 4√(amount)]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                speed = format(effect.speed);
+                cost_div = format(effect.cost_div);
+            }
+
+            return `Increases auto mining and attacking speed by ${speed}, and divides silver ingot use costs by ${cost_div}`;
+        },
+        unlocked() { return tmp.c.forge.unlocked; },
+    },
+    'electrum_package': {
+        id: null,
+        color: '#EEDDAA',
+        name: 'electrum package',
+        icon: [8, 7],
+        row: 1,
+        sources: {
+            other: ['forge',],
+        },
+        lore: `A light yellow box that helps in crafting.<br>
+            Its weight makes it clunky to use.<br>
+            Wait, why didn't you just make a box out of something easier to find?`,
+        categories: ['materials', 'forge'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let limit = D.times(x, 10),
+                cost_div = D.root(x, 4).pow_base(20);
+
+            return { limit, cost_div, };
+        },
+        effectDescription(amount) {
+            let limit, cost_div;
+            if (shiftDown) {
+                limit = '[amount * 10]';
+                cost_div = '[20 ^ 4√(amount)]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                limit = format(effect.limit);
+                cost_div = format(effect.cost_div);
+            }
+
+            return `Maximum crafting by ${limit}, and divides electrum ingot use costs by ${cost_div}`;
         },
         unlocked() { return tmp.c.forge.unlocked; },
     },

@@ -1465,7 +1465,6 @@ declare class LayerData {
     challenges?: { [id: number]: number }
 }
 
-//todo include shop value/cost
 declare class Item<I> {
     readonly id: I
     color: Computable<string>
@@ -1537,7 +1536,7 @@ type items = 'unknown' |
     'iron_ingot' | 'silver_ingot' | 'lead_ingot' | 'electrum_ingot' |
     'stone_mace' | 'copper_pick' | 'tin_cache' | 'bronze_cart' | 'doubloon' |
     'furnace' | 'iron_rails' | 'silver_coating' | 'electrum_coin_mold' | 'bellow' | 'lead_coating' |
-    'stone_wall' | 'copper_golem' | 'tin_ring' | 'bronze_mold' |
+    'stone_wall' | 'copper_golem' | 'tin_ring' | 'bronze_mold' | 'gold_star' | 'iron_heataxe' | 'disco_ball' | 'electrum_package' |
     'coin_copper' | 'coin_bronze' | 'coin_silver' | 'coin_gold' | 'coin_platinum' |
     'densium_slime' | 'densium_rock' | 'magic_densium_ball' |
     'cueball';
@@ -1682,6 +1681,15 @@ type Layers = {
             }
             drops: {
                 mult(): Decimal
+            }
+            /**
+             * Monster level formula:
+             * `floor((kills / base) ^ exp * mult) + 1`
+             */
+            level: {
+                base(): Decimal
+                mult(): Decimal
+                exp(): Decimal
             }
         }
     }

@@ -1,6 +1,5 @@
 'use strict';
 
-//todo? forge achievements
 addLayer('ach', {
     row: 'side',
     position: 0,
@@ -512,7 +511,7 @@ addLayer('ach', {
             },
             unlocked() { return tmp.m.compactor.unlocked; },
         },
-        //todo forge achievements
+        //todo forge achievements (11X)
         //#endregion Normal
         //#region Bonus
         81: {

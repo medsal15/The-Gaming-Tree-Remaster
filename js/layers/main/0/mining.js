@@ -1689,6 +1689,11 @@ addLayer('m', {
                 backgroundColor() { return tmp.m.nodeStyle.backgroundColor; },
             },
             unlocked() { return D.gt(tmp.m.modifiers.damage.speed, 0); },
+            display() {
+                if (player.items.disco_ball.amount.gt(0)) {
+                    return `${formatWhole(D.times(tmp.m.modifiers.damage.speed, 60))} BPM`;
+                }
+            },
         },
         compactor: {
             direction: RIGHT,
@@ -1725,6 +1730,7 @@ addLayer('m', {
                 let base = D.dZero;
 
                 base = base.add(item_effect('bone_pick').m_damage);
+                base = base.add(item_effect('iron_heataxe').damage);
 
                 if (hasUpgrade('m', 11)) base = base.add(upgradeEffect('m', 11));
                 if (hasUpgrade('m', 33)) base = base.add(upgradeEffect('m', 33));
@@ -1756,6 +1762,8 @@ addLayer('m', {
             total() { return D.times(tmp.m.modifiers.damage.base, tmp.m.modifiers.damage.mult); },
             speed() {
                 let speed = D.dZero;
+
+                speed = speed.add(item_effect('disco_ball').speed);
 
                 if (hasUpgrade('m', 22)) speed = speed.add(upgradeEffect('m', 22));
                 if (hasUpgrade('m', 52)) speed = speed.add(upgradeEffect('m', 52));

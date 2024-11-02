@@ -458,13 +458,174 @@ addLayer('c', {
                 return style;
             },
         },
-        /**
-         * TODO
-         * 41: ??? (Gold)
-         * 42: Heating Pickaxe (heat -> +mining damage)
-         * 43: ??? (Silver)
-         * 44: Electrum Necklace (+luck)
-         */
+        41: {
+            title() { return `${formatWhole(player.items.gold_star.amount)} ${capitalize_words(tmp.items.gold_star.name)}`; },
+            display() {
+                const cost = tmp[this.layer].buyables[this.id].cost;
+                let gold_cost = shiftDown ? '[floor(amount * 2.5 + 5)]' : format(cost);
+
+                return item_list.gold_star.effectDescription() + `<br>
+                    First purchase replaces gold nugget costs with gold ingots<br><br>
+                    Costs: ${gold_cost} gold ingots`
+            },
+            cost(x) {
+                if (tmp[this.layer].deactivated) x = D.dZero;
+
+                let cost = D.times(x, 2.5).add(5).floor();
+
+                return cost;
+            },
+            canAfford() {
+                const cost = tmp[this.layer].buyables[this.id].cost;
+                return D.gte(player.items.gold_ingot.amount, cost);
+            },
+            buy() {
+                if (!this.canAfford()) return;
+
+                const cost = tmp[this.layer].buyables[this.id].cost;
+                player.items.gold_ingot.amount = D.minus(player.items.gold_ingot.amount, cost);
+                gain_items('gold_star', 1);
+                addBuyables(this.layer, this.id, 1);
+            },
+            style() {
+                const style = {
+                    'height': '150px',
+                    'width': '150px',
+                };
+
+                if (canBuyBuyable(this.layer, this.id)) {
+                    Object.assign(style, { 'backgroundColor': tmp.items.gold_star.color });
+                }
+
+                return style;
+            },
+        },
+        42: {
+            title() { return `${formatWhole(player.items.iron_heataxe.amount)} ${capitalize_words(tmp.items.iron_heataxe.name)}`; },
+            display() {
+                const cost = tmp[this.layer].buyables[this.id].cost;
+                let iron_cost = shiftDown ? '[amount * 25 + 25]' : format(cost);
+
+                return item_list.iron_heataxe.effectDescription() + `<br>
+                    First purchase replaces iron ore costs with iron ingots<br><br>
+                    Costs: ${iron_cost} iron ingots`
+            },
+            cost(x) {
+                if (tmp[this.layer].deactivated) x = D.dZero;
+
+                let cost = D.times(x, 25).add(25);
+
+                return cost;
+            },
+            canAfford() {
+                const cost = tmp[this.layer].buyables[this.id].cost;
+                return D.gte(player.items.iron_ingot.amount, cost);
+            },
+            buy() {
+                if (!this.canAfford()) return;
+
+                const cost = tmp[this.layer].buyables[this.id].cost;
+                player.items.iron_ingot.amount = D.minus(player.items.iron_ingot.amount, cost);
+                gain_items('iron_heataxe', 1);
+                addBuyables(this.layer, this.id, 1);
+            },
+            style() {
+                const style = {
+                    'height': '150px',
+                    'width': '150px',
+                };
+
+                if (canBuyBuyable(this.layer, this.id)) {
+                    Object.assign(style, { 'backgroundColor': tmp.items.iron_heataxe.color });
+                }
+
+                return style;
+            },
+        },
+        43: {
+            title() { return `${formatWhole(player.items.disco_ball.amount)} ${capitalize_words(tmp.items.disco_ball.name)}`; },
+            display() {
+                const cost = tmp[this.layer].buyables[this.id].cost;
+                let silver_cost = shiftDown ? '[amount * 20 + 20]' : format(cost);
+
+                return item_list.disco_ball.effectDescription() + `<br>
+                    First purchase replaces silver ore costs with silver ingots<br><br>
+                    Costs: ${silver_cost} silver ingots`
+            },
+            cost(x) {
+                if (tmp[this.layer].deactivated) x = D.dZero;
+
+                let cost = D.times(x, 20).add(20);
+
+                return cost;
+            },
+            canAfford() {
+                const cost = tmp[this.layer].buyables[this.id].cost;
+                return D.gte(player.items.silver_ingot.amount, cost);
+            },
+            buy() {
+                if (!this.canAfford()) return;
+
+                const cost = tmp[this.layer].buyables[this.id].cost;
+                player.items.silver_ingot.amount = D.minus(player.items.silver_ingot.amount, cost);
+                gain_items('disco_ball', 1);
+                addBuyables(this.layer, this.id, 1);
+            },
+            style() {
+                const style = {
+                    'height': '150px',
+                    'width': '150px',
+                };
+
+                if (canBuyBuyable(this.layer, this.id)) {
+                    Object.assign(style, { 'backgroundColor': tmp.items.disco_ball.color });
+                }
+
+                return style;
+            },
+        },
+        44: {
+            title() { return `${formatWhole(player.items.electrum_package.amount)} ${capitalize_words(tmp.items.electrum_package.name)}`; },
+            display() {
+                const cost = tmp[this.layer].buyables[this.id].cost;
+                let electrum_cost = shiftDown ? '[amount * 20 + 20]' : format(cost);
+
+                return item_list.electrum_package.effectDescription() + `<br>
+                    First purchase replaces electrum blend costs with electrum ingots<br><br>
+                    Costs: ${electrum_cost} electrum ingots`
+            },
+            cost(x) {
+                if (tmp[this.layer].deactivated) x = D.dZero;
+
+                let cost = D.times(x, 20).add(20);
+
+                return cost;
+            },
+            canAfford() {
+                const cost = tmp[this.layer].buyables[this.id].cost;
+                return D.gte(player.items.electrum_ingot.amount, cost);
+            },
+            buy() {
+                if (!this.canAfford()) return;
+
+                const cost = tmp[this.layer].buyables[this.id].cost;
+                player.items.electrum_ingot.amount = D.minus(player.items.electrum_ingot.amount, cost);
+                gain_items('electrum_package', 1);
+                addBuyables(this.layer, this.id, 1);
+            },
+            style() {
+                const style = {
+                    'height': '150px',
+                    'width': '150px',
+                };
+
+                if (canBuyBuyable(this.layer, this.id)) {
+                    Object.assign(style, { 'backgroundColor': tmp.items.electrum_package.color });
+                }
+
+                return style;
+            },
+        },
     },
     clickables: {
         ...crafting_toggles(),
@@ -554,7 +715,13 @@ addLayer('c', {
         },
     },
     crafting: {
-        max() { return D.dTen; },
+        max() {
+            let max = D.dTen;
+
+            max = max.add(item_effect('electrum_package').limit);
+
+            return max;
+        },
         crafted() { return Object.values(player.c.recipes).reduce((sum, rec) => D.add(sum, rec.crafted), D.dZero); },
         speed() {
             let speed = D.dOne;
@@ -1949,6 +2116,12 @@ addLayer('c', {
                     ['gold_nugget', D.sumGeometricSeries(count, 4, 1.125, all)],
                 ];
 
+                if (D.gt(getBuyableAmount('c', 41), 0)) {
+                    const gold_row = costs.find(([item]) => item == 'gold_nugget');
+                    gold_row[0] = 'gold_ingot';
+                    gold_row[1] = D.div(gold_row[1], item_effect('gold_star').cost_div);
+                }
+
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
 
                 return costs;
@@ -1971,6 +2144,7 @@ addLayer('c', {
             formulas: {
                 consumes: {
                     'gold_nugget': '4 * 1.125 ^ amount',
+                    'gold_ingot'() { return `${this.gold_nugget} / ${format(item_effect('gold_star').cost_div)}`; },
                 },
                 produces: {
                     'doubloon': 'amount',
@@ -2045,6 +2219,12 @@ addLayer('c', {
                     ['bone', D.sumGeometricSeries(count, 15, 1.8, all)],
                 ];
 
+                if (D.gt(getBuyableAmount('c', 42), 0)) {
+                    const iron_row = costs.find(([item]) => item == 'clear_iron_ore');
+                    iron_row[0] = 'iron_ingot';
+                    iron_row[1] = D.div(iron_row[1], item_effect('iron_heataxe').cost_div);
+                }
+
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
 
                 return costs;
@@ -2067,6 +2247,7 @@ addLayer('c', {
             formulas: {
                 consumes: {
                     'clear_iron_ore': '10 * 2 ^ amount',
+                    'iron_ingot'() { return `${this.clear_iron_ore} / ${format(item_effect('iron_heataxe').cost_div)}`; },
                     'bone': '15 * 1.8 ^ amount',
                 },
                 produces: {
@@ -2090,6 +2271,12 @@ addLayer('c', {
                     ['slime_goo', D.sumGeometricSeries(count, 25, 1.8, all)],
                 ];
 
+                if (D.gt(getBuyableAmount('c', 42), 0)) {
+                    const silver_row = costs.find(([item]) => item == 'silver_ore');
+                    silver_row[0] = 'silver_ingot';
+                    silver_row[1] = D.div(silver_row[1], item_effect('disco_ball').cost_div);
+                }
+
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
 
                 return costs;
@@ -2112,6 +2299,7 @@ addLayer('c', {
             formulas: {
                 consumes: {
                     'silver_ore': '7 * 1.25 ^ amount',
+                    'silver_ingot'() { return `${this.silver_ore} / ${format(item_effect('disco_ball').cost_div)}`; },
                     'slime_goo': '25 * 1.8 ^ amount',
                 },
                 produces: {
@@ -2133,6 +2321,12 @@ addLayer('c', {
                 let costs = [
                     ['electrum_blend', D.sumGeometricSeries(count, 7, 1.1, all)],
                 ];
+
+                if (D.gt(getBuyableAmount('c', 42), 0)) {
+                    const electrum_row = costs.find(([item]) => item == 'electrum_blend');
+                    electrum_row[0] = 'electrum_ingot';
+                    electrum_row[1] = D.div(electrum_row[1], item_effect('electrum_package').cost_div);
+                }
                 // Get the current value
                 if (!value_coin.values?.length) value_coin(1);
                 const value = D.sumGeometricSeries(count, 15, 2, all).times(value_coin.values.find(([i]) => i == 'coin_bronze')[1]);
@@ -2160,6 +2354,7 @@ addLayer('c', {
             formulas: {
                 consumes: {
                     'electrum_blend': '7 * 1.25 ^ amount',
+                    'electrum_ingot'() { return `${this.electrum_blend} / ${format(item_effect('electrum_package').cost_div)}`; },
                     'coin_copper': '',
                     'coin_bronze': '25 * 1.8 ^ amount',
                     'coin_silver': '',

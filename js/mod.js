@@ -35,8 +35,10 @@ let VERSION = {
 let changelog = `<h1>Changelog:</h1><br>
 	<h3>v0.2: Bones and Stones</h3><br>
 		- Update vue to 2.7.16 and TMT to 2.7<br>
-		- ???<br>
 		- Improve import modal.<br>
+		- Add forge and compactor.<br>
+		- Rebalance mining.<br>
+		- A new layer.<br>
 		- Update endgame: Enter the second boss fight.<br>
 	<h3>v0.1: Basics</h3><br>
 		- Rewrote XP, C, L.<br>
