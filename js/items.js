@@ -1,3 +1,13 @@
+const item_grid_rows = {
+    slime: 0,
+    skeleton: 1,
+    golem: 2,
+    ores_basic: 3,
+    ores_advanced: 4,
+    ores_advanced_equipment: 5,
+    densium: 6,
+    ingots: 7,
+};
 /**
  * @type {{[id in items]: Item<id>}}
  */
@@ -17,7 +27,7 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.slime.color; },
         name: 'slime goo',
-        grid: [0, 0],
+        grid: [item_grid_rows.slime, 0],
         icon() {
             let icon = [0, 0];
 
@@ -71,7 +81,7 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.slime.color; },
         name: 'slime core shard',
-        grid: [0, 1],
+        grid: [item_grid_rows.slime, 1],
         icon() {
             let icon = [0, 1];
 
@@ -125,7 +135,7 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.slime.color; },
         name: 'slime core',
-        grid: [0, 2],
+        grid: [item_grid_rows.slime, 2],
         icon() {
             let icon = [0, 2];
 
@@ -182,7 +192,7 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.slime.color; },
         name: 'dense slime core',
-        grid: [0, 3],
+        grid: [item_grid_rows.slime, 3],
         icon() {
             let icon = [0, 3];
 
@@ -226,7 +236,7 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.slime.color; },
         name: 'slime crystal',
-        grid: [0, 4],
+        grid: [item_grid_rows.slime, 4],
         icon() {
             let icon = [1, 0];
 
@@ -304,7 +314,7 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.slime.color; },
         name: 'slime knife',
-        grid: [0, 5],
+        grid: [item_grid_rows.slime, 5],
         icon() {
             let icon = [1, 1];
 
@@ -375,7 +385,7 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.slime.color; },
         name: 'slime injector',
-        grid: [0, 6],
+        grid: [item_grid_rows.slime, 6],
         icon() {
             let icon = [1, 2];
 
@@ -468,7 +478,7 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.slime.color; },
         name: 'slime die',
-        grid: [0, 7],
+        grid: [item_grid_rows.slime, 7],
         icon() {
             let icon = [1, 3];
 
@@ -545,7 +555,7 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.skeleton.color; },
         name: 'bone',
-        grid: [1, 0],
+        grid: [item_grid_rows.skeleton, 0],
         icon: [2, 0],
         row: 1,
         sources: {
@@ -583,7 +593,7 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.skeleton.color; },
         name: 'rib',
-        grid: [1, 1],
+        grid: [item_grid_rows.skeleton, 1],
         icon: [2, 1],
         row: 1,
         sources: {
@@ -621,7 +631,7 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.skeleton.color; },
         name: 'skull',
-        grid: [1, 2],
+        grid: [item_grid_rows.skeleton, 2],
         icon: [2, 2],
         row: 1,
         sources: {
@@ -661,7 +671,7 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.skeleton.color; },
         name: 'slimy skull',
-        grid: [1, 3],
+        grid: [item_grid_rows.skeleton, 3],
         icon() {
             let icon = [2, 3];
 
@@ -696,7 +706,7 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.skeleton.color; },
         name: 'bone pick',
-        grid: [1, 4],
+        grid: [item_grid_rows.skeleton, 4],
         icon: [3, 0],
         row: 1,
         sources: {
@@ -742,7 +752,7 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.skeleton.color; },
         name: 'crystal skull',
-        grid: [1, 5],
+        grid: [item_grid_rows.skeleton, 5],
         icon() {
             let icon = [3, 1];
 
@@ -803,7 +813,7 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.skeleton.color; },
         name: 'bone slate',
-        grid: [1, 6],
+        grid: [item_grid_rows.skeleton, 6],
         icon: [3, 2],
         row: 1,
         sources: {
@@ -848,7 +858,7 @@ const item_list = {
             else if (inChallenge('b', 21)) return 'Magic 10 Ball';
             return 'Magic 14 Ball';
         },
-        grid: [1, 7],
+        grid: [item_grid_rows.skeleton, 7],
         icon() {
             let icon = [3, 3];
 
@@ -915,12 +925,142 @@ const item_list = {
         },
         unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
     },
+    // Golem
+    'mud': {
+        id: null,
+        color() { return tmp.xp.monsters.golem.color; },
+        name: 'mud',
+        grid: [item_grid_rows.golem, 0],
+        icon: [11, 0],
+        row: 1,
+        sources: {
+            chance() {
+                if (D.eq(tmp.c.chance_multiplier, 0) || inChallenge('b', 12)) return {};
+
+                let chance = D(1 / 4);
+
+                chance = chance.times(tmp.c.chance_multiplier);
+                chance = chance.times(tmp.xp.modifiers.drops.mult);
+
+                return { 'kill:golem': chance };
+            },
+            other() {
+                /** @type {drop_sources[]} */
+                const other = [];
+
+                if (inChallenge('b', 12)) other.push('shop');
+
+                return other;
+            },
+        },
+        value: {
+            cost() {
+                if (inChallenge('b', 12)) return D(9);
+            },
+        },
+        lore() {
+            if (inChallenge('b', 12)) return `A large chunk of wet dirt.<br>
+                Rumors of gold hidden inside have heavily increased their worth.<br>
+                It leaves stains everywhere.`;
+
+            return `A large chunk of wet dirt.<br>
+                Considered worthless by most people.<br>
+                It leaves stains everywhere.`;
+        },
+        categories: ['materials', 'golem'],
+        unlocked() { return tmp.xp.monsters.golem.unlocked; },
+    },
+    'mud_brick': {
+        id: null,
+        color() { return tmp.xp.monsters.golem.color; },
+        name: 'mudbrick',
+        grid: [item_grid_rows.golem, 1],
+        icon: [11, 1],
+        row: 1,
+        sources: {
+            other: ['forge',],
+        },
+        value: {
+            value() { return D(100); },
+        },
+        lore: `A solid chunk of dried mud.<br>
+            Solid enough to use, too fragile to strike.<br>
+            Commonly used as a cheap material for construction.`,
+        categories: ['materials', 'golem'],
+        unlocked() { return tmp.xp.monsters.golem.unlocked; },
+    },
+    'golem_eye': {
+        id: null,
+        color() { return tmp.xp.monsters.golem.color; },
+        name: 'golem eye',
+        grid: [item_grid_rows.golem, 2],
+        icon: [11, 2],
+        row: 1,
+        sources: {
+            chance() {
+                if (D.eq(tmp.c.chance_multiplier, 0) || inChallenge('b', 12)) return {};
+
+                let chance = D(1 / 13);
+
+                chance = chance.times(tmp.c.chance_multiplier);
+                chance = chance.times(tmp.xp.modifiers.drops.mult);
+
+                return { 'kill:golem': chance };
+            },
+            other() {
+                /** @type {drop_sources[]} */
+                const other = [];
+
+                if (inChallenge('b', 12)) other.push('shop');
+
+                return other;
+            },
+        },
+        value: {
+            cost() {
+                if (inChallenge('b', 12)) return D(25);
+            },
+        },
+        lore: `The eye of a golem.<br>
+            Has the ability to determine what it sees.<br>
+            If only you found a way to record pictures with it, it would forever change the arts!`,
+        categories: ['materials', 'golem'],
+        unlocked() { return tmp.xp.monsters.golem.unlocked; },
+    },
+    'golem_core': {
+        id: null,
+        color() { return tmp.xp.monsters.golem.color; },
+        name: 'golem core',
+        grid: [item_grid_rows.golem, 3],
+        icon: [11, 3],
+        row: 1,
+        sources: {
+            other() {
+                /** @type {drop_sources[]} */
+                const other = ['crafting'];
+
+                if (inChallenge('b', 12)) other.push('shop');
+
+                return other;
+            },
+        },
+        value: {
+            cost() {
+                if (inChallenge('b', 12)) return D(75);
+            },
+        },
+        lore: `The core of a golem.<br>
+            Filled with magic power, which used to animate a golem.<br>
+            Extremely solid, whoever made this is clearly proficient at crafting.`,
+        categories: ['materials', 'golem'],
+        unlocked() { return tmp.xp.monsters.golem.unlocked; },
+    },
     // Mining
     'stone': {
         id: null,
         color: '#BBBBDD',
         name: 'stone',
-        grid: [2, 0],
+        grid: [item_grid_rows.ores_basic, 0],
         icon: [4, 0],
         row: 0,
         sources: {
@@ -952,7 +1092,7 @@ const item_list = {
         id: null,
         color: '#FFAA11',
         name: 'copper ore',
-        grid: [2, 1],
+        grid: [item_grid_rows.ores_basic, 1],
         icon: [4, 1],
         row: 0,
         sources: {
@@ -986,7 +1126,7 @@ const item_list = {
         id: null,
         color: '#FFFFCC',
         name: 'tin ore',
-        grid: [2, 2],
+        grid: [item_grid_rows.ores_basic, 2],
         icon: [4, 2],
         row: 0,
         sources: {
@@ -1020,7 +1160,7 @@ const item_list = {
         id: null,
         color: '#BB7744',
         name: 'bronze blend',
-        grid: [2, 3],
+        grid: [item_grid_rows.ores_basic, 3],
         icon: [4, 3],
         row: 0,
         sources: {
@@ -1041,7 +1181,7 @@ const item_list = {
         id: null,
         color: '#FFFF44',
         name: 'gold nugget',
-        grid: [3, 0],
+        grid: [item_grid_rows.ores_advanced, 0],
         icon: [4, 4],
         row: 0,
         sources: {
@@ -1101,7 +1241,7 @@ const item_list = {
         id: null,
         color: '#445566',
         name: 'densium',
-        grid: [5, 0],
+        grid: [item_grid_rows.densium, 0],
         icon: [4, 5],
         row: 0,
         sources: {
@@ -1122,7 +1262,7 @@ const item_list = {
         id: null,
         color: '#333344',
         name: 'coal',
-        grid: [3, 1],
+        grid: [item_grid_rows.ores_advanced, 1],
         icon: [4, 6],
         row: 0,
         sources: {
@@ -1162,7 +1302,7 @@ const item_list = {
         id: null,
         color: '#BB2222',
         name: 'iron ore',
-        grid: [3, 2],
+        grid: [item_grid_rows.ores_advanced, 2],
         icon: [4, 7],
         row: 0,
         sources: {
@@ -1196,7 +1336,7 @@ const item_list = {
         id: null,
         color: '#8899AA',
         name: 'rustless iron ore',
-        grid: [3, 3],
+        grid: [item_grid_rows.ores_advanced, 3],
         icon: [4, 8],
         row: 0,
         sources: {
@@ -1217,7 +1357,7 @@ const item_list = {
         id: null,
         color: '#DDEEEE',
         name: 'silver ore',
-        grid: [3, 4],
+        grid: [item_grid_rows.ores_advanced, 4],
         icon: [4, 9],
         row: 0,
         sources: {
@@ -1251,7 +1391,7 @@ const item_list = {
         id: null,
         color: '#EEDDAA',
         name: 'electrum blend',
-        grid: [3, 5],
+        grid: [item_grid_rows.ores_advanced, 5],
         icon: [4, 10],
         row: 0,
         sources: {
@@ -1273,7 +1413,7 @@ const item_list = {
         id: null,
         color: '#BBBBDD',
         name: 'stone brick',
-        grid: [5, 0],
+        grid: [item_grid_rows.ingots, 0],
         icon: [8, 0],
         row: 1,
         sources: {
@@ -1294,7 +1434,7 @@ const item_list = {
         id: null,
         color: '#FFAA11',
         name: 'copper ingot',
-        grid: [5, 1],
+        grid: [item_grid_rows.ingots, 1],
         icon: [8, 1],
         row: 1,
         sources: {
@@ -1315,7 +1455,7 @@ const item_list = {
         id: null,
         color: '#FFFFCC',
         name: 'tin ingot',
-        grid: [5, 2],
+        grid: [item_grid_rows.ingots, 2],
         icon: [8, 2],
         row: 1,
         sources: {
@@ -1335,7 +1475,7 @@ const item_list = {
         id: null,
         color: '#BB7744',
         name: 'bronze ingot',
-        grid: [5, 3],
+        grid: [item_grid_rows.ingots, 3],
         icon: [8, 3],
         row: 1,
         sources: {
@@ -1356,7 +1496,7 @@ const item_list = {
         id: null,
         color: '#FFFF44',
         name: 'gold ingot',
-        grid: [5, 4],
+        grid: [item_grid_rows.ingots, 4],
         icon: [8, 4],
         row: 1,
         sources: {
@@ -1395,7 +1535,7 @@ const item_list = {
         id: null,
         color: '#8899AA',
         name: 'iron ingot',
-        grid: [5, 5],
+        grid: [item_grid_rows.ingots, 5],
         icon: [8, 5],
         row: 1,
         sources: {
@@ -1416,7 +1556,7 @@ const item_list = {
         id: null,
         color: '#DDEEEE',
         name: 'silver ingot',
-        grid: [5, 6],
+        grid: [item_grid_rows.ingots, 6],
         icon: [8, 6],
         row: 1,
         sources: {
@@ -1437,7 +1577,7 @@ const item_list = {
         id: null,
         color: '#113366',
         name: 'lead ingot',
-        grid: [5, 7],
+        grid: [item_grid_rows.ingots, 7],
         icon: [8, 7],
         row: 1,
         sources: {
@@ -1458,7 +1598,7 @@ const item_list = {
         id: null,
         color: '#EEDDAA',
         name: 'electrum ingot',
-        grid: [5, 8],
+        grid: [item_grid_rows.ingots, 8],
         icon: [8, 8],
         row: 1,
         sources: {
@@ -1480,7 +1620,7 @@ const item_list = {
         id: null,
         color: '#BBBBDD',
         name: 'stone mace',
-        grid: [2, 4],
+        grid: [item_grid_rows.ores_basic, 4],
         icon: [5, 0],
         row: 1,
         sources: {
@@ -1530,7 +1670,7 @@ const item_list = {
             return `#${color_between(low, high, progress).map(n => n.toString(16).padStart(2, '0')).join('')}`;
         },
         name: 'copper pick',
-        grid: [2, 5],
+        grid: [item_grid_rows.ores_basic, 5],
         icon: [5, 1],
         row: 1,
         sources: {
@@ -1583,7 +1723,7 @@ const item_list = {
         id: null,
         color: '#FFFFCC',
         name: 'tin cache',
-        grid: [2, 6],
+        grid: [item_grid_rows.ores_basic, 6],
         icon: [5, 2],
         row: 1,
         sources: {
@@ -1627,7 +1767,7 @@ const item_list = {
         id: null,
         color: '#BB7744',
         name: 'bronze cart',
-        grid: [2, 7],
+        grid: [item_grid_rows.ores_basic, 7],
         icon: [5, 3],
         row: 1,
         sources: {
@@ -1678,7 +1818,7 @@ const item_list = {
         id: null,
         color: '#FFFF44',
         name: 'doubloon',
-        grid: [4, 0],
+        grid: [item_grid_rows.ores_advanced_equipment, 0],
         icon: [5, 4],
         row: 1,
         sources: {
@@ -1719,7 +1859,7 @@ const item_list = {
         id: null,
         color: '#9999AA',
         name: 'furnace',
-        grid: [4, 1],
+        grid: [item_grid_rows.ores_advanced_equipment, 1],
         icon: [9, 0],
         row: 1,
         sources: {
@@ -1765,7 +1905,7 @@ const item_list = {
         id: null,
         color: '#8899AA',
         name: 'iron rails',
-        grid: [4, 2],
+        grid: [item_grid_rows.ores_advanced_equipment, 2],
         icon: [9, 1],
         row: 1,
         sources: {
@@ -1809,7 +1949,7 @@ const item_list = {
         id: null,
         color: '#DDEEEE',
         name: 'silver coating',
-        grid: [4, 3],
+        grid: [item_grid_rows.ores_advanced_equipment, 3],
         icon: [9, 2],
         row: 1,
         sources: {
@@ -1850,7 +1990,7 @@ const item_list = {
         id: null,
         color: '#EEDDAA',
         name: 'electrum coin mold',
-        grid: [4, 4],
+        grid: [item_grid_rows.ores_advanced_equipment, 4],
         icon: [9, 3],
         row: 1,
         sources: {
@@ -1891,7 +2031,7 @@ const item_list = {
         id: null,
         color() { return tmp.c.modifiers.heat.color; },
         name: 'bellow',
-        grid: [4, 5],
+        grid: [item_grid_rows.ores_advanced_equipment, 5],
         icon() {
             let icon = [9, 4];
 
@@ -1942,7 +2082,7 @@ const item_list = {
         id: null,
         color: '#113366',
         name: 'lead coating',
-        grid: [4, 6],
+        grid: [item_grid_rows.ores_advanced_equipment, 6],
         icon: [9, 5],
         row: 1,
         sources: {
@@ -1986,7 +2126,7 @@ const item_list = {
         id: null,
         color: '#445566',
         name: 'densium slime',
-        grid: [5, 1],
+        grid: [item_grid_rows.densium, 1],
         icon: [7, 0],
         row: 1,
         sources: {
@@ -2027,7 +2167,7 @@ const item_list = {
         id: null,
         color: '#445566',
         name: 'densium rock',
-        grid: [5, 2],
+        grid: [item_grid_rows.densium, 2],
         icon: [7, 1],
         row: 1,
         sources: {
@@ -2068,7 +2208,7 @@ const item_list = {
         id: null,
         color: '#445566',
         name: 'magic densium ball',
-        grid: [5, 3],
+        grid: [item_grid_rows.densium, 3],
         icon: [7, 2],
         row: 1,
         sources: {
@@ -2516,7 +2656,7 @@ const item_list = {
 
 const ITEM_SIZES = {
     width: 12,
-    height: 11,
+    height: 12,
 };
 /**
  * @type {{[row in Layer['row']]: items[]}}

@@ -363,6 +363,7 @@ function bestiary_content(monster) {
         'blank',
         ['display-text', `Health: ${format(player.xp.monsters[monster].health)} / ${format(tmonst.health)}`],
     );
+    if (D.gt(tmonst.defense ?? 0, 0)) lines.push(['display-text', `Defense: ${format(tmonst.defense)}`]);
 
     if (D.gt(tmonst.damage_per_second, 0)) {
         const att_per_kill = D.div(tmonst.health, tmonst.damage).ceil();

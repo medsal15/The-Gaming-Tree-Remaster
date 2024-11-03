@@ -24,15 +24,19 @@ let VERSION = {
 	/**
 	 * The mod's version number, displayed at the top right of the tree tab.
 	 */
-	num: 'R0.2',
+	num: 'R0.3',
 	/**
 	 * The version's name, displayed alongside the number in the info tab.
 	 */
-	name: 'Bones and Stones',
-	beta: false,
+	name: '//todo',
+	beta: true,
 };
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h3>v0.3: ???</h3>
+		- //todo<br>
+		- Add a new enemy.<br>
+		- Update endgame: ???<br>
 	<h3>v0.2: Bones and Stones</h3><br>
 		- Update vue to 2.7.16 and TMT to 2.7<br>
 		- Improve import modal.<br>

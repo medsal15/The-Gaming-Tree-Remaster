@@ -1,7 +1,7 @@
 'use strict';
 
 const MONSTER_SIZES = {
-    width: 2,
+    width: 3,
     height: 3,
 };
 addLayer('xp', {
@@ -778,7 +778,7 @@ addLayer('xp', {
 
                 const selected = player.xp.selected;
 
-                return D.gt(player.xp.monsters[selected].health, 0);
+                return D.gt(player.xp.monsters[selected].health, 0) && D.gt(tmp.xp.monsters[selected].damage, 0);
             },
         },
         13: {
@@ -984,7 +984,11 @@ addLayer('xp', {
 
                 if (hasUpgrade('l', 31)) base = base.add(upgradeEffect('l', 31)[this.id]);
 
-                return D.times(base, tmp.xp.modifiers.damage.mult);
+                let damage = D.times(base, tmp.xp.modifiers.damage.mult);
+
+                damage = damage.minus(tmp.xp.monsters[this.id].defense ?? 0).max(0);
+
+                return damage;
             },
             damage_per_second() {
                 let mult = D.dZero;
@@ -1063,6 +1067,8 @@ addLayer('xp', {
                 damage = damage.times(item_effect('silver_coating').skeleton_damage_mult);
                 damage = damage.div(item_effect('lead_coating').skeleton_damage_div);
 
+                damage = damage.minus(tmp.xp.monsters[this.id].defense ?? 0).max(0);
+
                 return damage;
             },
             damage_per_second() {
@@ -1079,6 +1085,73 @@ addLayer('xp', {
                     Tough in a fight, but not on the level of a guard.`;
             },
             unlocked() { return hasChallenge('b', 11); },
+        },
+        golem: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.xp.monsters).find(mon => layers.xp.monsters[mon] == this); },
+            color() { return '#BB7766'; },
+            name: 'golem',
+            position() {
+                let i = 0;
+
+                return [2, i];
+            },
+            level(kills) {
+                let k = D(kills ?? player.xp.monsters[this.id].kills);
+
+                const mod = tmp.xp.modifiers.level;
+
+                return k.div(mod.base).pow(mod.exp).times(mod.mult).floor().add(1);
+            },
+            health(level) {
+                let l = D(level ?? tmp?.xp?.monsters[this.id].level);
+
+                const level_mult = D.minus(l, 1).pow_base(2);
+
+                let health = D.times(level_mult, 10).times(tmp.xp?.modifiers.health.mult ?? 1);
+
+                return health;
+            },
+            defense(level) {
+                let l = D(level ?? tmp?.xp?.monsters[this.id].level);
+
+                return D.pow(2, l).minus(1);
+            },
+            experience(level) {
+                const l = D(level ?? tmp.xp.monsters[this.id].level);
+
+                let xp = D.times(l, tmp.xp.modifiers.xp.mult).times(4);
+
+                xp = xp.pow(1.5);
+
+                return xp;
+            },
+            kills() { return D.dOne; },
+            damage() {
+                let base = tmp.xp.modifiers.damage.base;
+
+                if (hasUpgrade('l', 31)) base = base.add(upgradeEffect('l', 31)[this.id]);
+
+                let damage = D.times(base, tmp.xp.modifiers.damage.mult);
+
+                damage = damage.minus(tmp.xp.monsters[this.id].defense ?? 0).max(0);
+
+                return damage;
+            },
+            damage_per_second() {
+                let mult = D.dZero;
+
+                if (this.id == player.xp.selected && D.gt(tmp.xp.modifiers.speed.active, 0)) mult = D.add(mult, tmp.xp.modifiers.speed.active);
+                if (D.gt(tmp.xp.modifiers.speed.passive, 0)) mult = D.add(mult, tmp.xp.modifiers.speed.passive);
+
+                return D.times(mult, tmp.xp.monsters[this.id].damage);
+            },
+            lore() {
+                return `A crude humanoid made of mud.<br>
+                    Its defense seem to increase with its level.<br>
+                    Its core is pretty and shiny.`;
+            },
+            unlocked() { return hasUpgrade('s', 33); },
         },
     },
     kill: {

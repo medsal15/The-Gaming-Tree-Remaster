@@ -1,6 +1,7 @@
 'use strict';
 
 //todo rebalance mining items costs
+//todo option to display crafting as buyables
 addLayer('c', {
     name: 'crafting',
     row: 1,
@@ -906,6 +907,79 @@ addLayer('c', {
             categories: ['materials', 'skeleton', 'slime',],
             unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
         },
+        golem_core: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                /** @type {[items, Decimal][]} */
+                let costs = [
+                    ['slime_core', D.times(10, count)],
+                    ['golem_eye', D.times(5, count)],
+                ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['golem_core', count],
+                ];
+            },
+            formulas: {
+                consumes: {
+                    'slime_core': '10 * count',
+                    'golem_eye': '5 * count',
+                },
+                produces: {
+                    'golem_core': 'count',
+                },
+            },
+            categories: ['materials', 'golem',],
+        },
+        press_mud: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                /** @type {[items, Decimal][]} */
+                let costs = [
+                    ['mud', D.times(20, count)],
+                ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['mud_brick', count],
+                ];
+            },
+            duration() {
+                let duration = D(60);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'mud': '20 * count',
+                },
+                produces: {
+                    'mud_brick': 'count',
+                },
+                duration: '60 seconds',
+            },
+            categories: ['materials', 'golem',],
+            unlocked() { return tmp.xp.monsters.golem.unlocked; },
+        },
         bronze_blend: {
             _id: null,
             get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
@@ -1020,6 +1094,47 @@ addLayer('c', {
             unlocked() { return hasUpgrade('m', 61); },
         },
         // Forge Materials
+        smelt_mud: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                let costs = [
+                    ['mud', D.times(count, 10)],
+                ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.forge.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['mud_brick', count],
+                ];
+            },
+            duration() {
+                let duration = D(20);
+
+                return D.div(duration, tmp.c.forge.speed);
+            },
+            heat: D.dTen,
+            formulas: {
+                consumes: {
+                    'mud': '10 amount',
+                },
+                produces: {
+                    'mud_brick': 'amount',
+                },
+                duration: '20 seconds',
+                heat: '10',
+            },
+            categories: ['materials', 'forge', 'golem',],
+            unlocked() { return tmp.c.forge.unlocked && tmp.items.mud_brick.unlocked; },
+        },
         stone_brick: {
             _id: null,
             get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },

@@ -1529,6 +1529,7 @@ type items = 'unknown' |
     'slime_goo' | 'slime_core_shard' | 'slime_core' | 'dense_slime_core' |
     'slime_crystal' | 'slime_knife' | 'slime_injector' | 'slime_die' |
     'bone' | 'rib' | 'skull' | 'slimy_skull' |
+    'mud' | 'mud_brick' | 'golem_eye' | 'golem_core' |
     'bone_pick' | 'crystal_skull' | 'bone_slate' | 'magic_slime_ball' |
     'stone' | 'copper_ore' | 'tin_ore' | 'bronze_blend' | 'gold_nugget' | 'densium' |
     'coal' | 'iron_ore' | 'clear_iron_ore' | 'silver_ore' | 'electrum_blend' |
@@ -1540,8 +1541,17 @@ type items = 'unknown' |
     'coin_copper' | 'coin_bronze' | 'coin_silver' | 'coin_gold' | 'coin_platinum' |
     'densium_slime' | 'densium_rock' | 'magic_densium_ball' |
     'cueball';
+/**
+ * TODO 4 golem items
+ * mud house (mud bricks; ???)
+ * weakness finder (eye + ???; +mining/xp damage)
+ * magic generator (core + electrum + ???; ???)
+ * record golem (eye + core + stone?; +chance, chance drop core)
+ *
+ * densium golem (+1 golem/golem)
+ */
 
-type monsters = 'slime' | 'skeleton';
+type monsters = 'slime' | 'skeleton' | 'golem';
 
 type ores = 'stone' | 'copper' | 'tin' |
     'coal' | 'iron' | 'silver';
@@ -1630,6 +1640,8 @@ type Layers = {
             level(kills?: DecimalSource): Decimal
             /** Maximum health of the monster at a given level */
             health(level?: DecimalSource): Decimal
+            /** Damage reduction */
+            defense?(level?: DecimalSource): Decimal
             /** XP gained on kill */
             experience(level?: DecimalSource): Decimal
             /** How many kills on kill (affects item gain) */
