@@ -587,7 +587,7 @@ function handbook_content(ore) {
     ];
 
     if (D.neq(tore.breaks, 1)) lines.push(['display-text', `Each break counts as ${resourceColor(tmp.m.broken.color, format(tore.breaks))} breaks`]);
-    if (hasUpgrade('m', 63)) lines.push(['display-text', `Gives ${resourceColor(tmp.m.modifiers.xp.color, format(tore.experience))} experience on break`]);
+    if (D.gt(tmp.m.modifiers.xp.gain, 0)) lines.push(['display-text', `Gives ${resourceColor(tmp.m.modifiers.xp.color, format(tore.experience))} experience on break`]);
 
     lines.push(
         'blank',
@@ -687,7 +687,7 @@ function strike_ore(damage) {
  */
 function crafting_toggles() {
     /** @type {categories[]} */
-    const list = ['materials', 'equipment', 'slime', 'skeleton', 'mining', 'forge'],
+    const list = ['materials', 'equipment', 'slime', 'skeleton', 'mining', 'forge', 'golem'],
         /** @type {(cat: categories) => boolean} */
         unlocked = cat => {
             switch (cat) {
@@ -698,6 +698,8 @@ function crafting_toggles() {
                     return tmp.xp.monsters.slime.unlocked ?? true;
                 case 'skeleton':
                     return tmp.xp.monsters.skeleton.unlocked ?? true;
+                case 'golem':
+                    return tmp.xp.monsters.golem.unlocked ?? true;
                 case 'mining':
                     return tmp.m.layerShown;
                 case 'forge':
@@ -710,6 +712,7 @@ function crafting_toggles() {
             'equipment': 'Equipment',
             'slime': 'Slime',
             'skeleton': 'Skeleton',
+            'golem': 'Golem',
             'mining': 'Mining',
             'forge': 'Forge',
         },
@@ -719,6 +722,7 @@ function crafting_toggles() {
             'equipment': () => tmp.c.color,
             'slime': () => tmp.xp.monsters.slime.color,
             'skeleton': () => tmp.xp.monsters.skeleton.color,
+            'golem': () => tmp.xp.monsters.golem.color,
             'mining': () => tmp.m.color,
             'forge': () => tmp.c.modifiers.heat.color,
         };

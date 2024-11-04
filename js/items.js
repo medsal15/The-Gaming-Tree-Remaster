@@ -52,14 +52,14 @@ const item_list = {
                 /** @type {drop_sources[]} */
                 const other = [];
 
-                if (inChallenge('b', 12)) other.push('shop');
+                if (inChallenge('b', 12) || inChallenge('b', 22)) other.push('shop');
 
                 return other;
             },
         },
         value: {
             cost() {
-                if (inChallenge('b', 12)) return D(5);
+                if (inChallenge('b', 12) || inChallenge('b', 22)) return D(5);
             },
         },
         lore() {
@@ -106,14 +106,14 @@ const item_list = {
                 /** @type {drop_sources[]} */
                 const other = [];
 
-                if (inChallenge('b', 12)) other.push('shop');
+                if (inChallenge('b', 12) || inChallenge('b', 22)) other.push('shop');
 
                 return other;
             },
         },
         value: {
             cost() {
-                if (inChallenge('b', 12)) return D(15);
+                if (inChallenge('b', 12) || inChallenge('b', 22)) return D(15);
             },
         },
         lore() {
@@ -162,14 +162,14 @@ const item_list = {
                 /** @type {drop_sources[]} */
                 const other = ['crafting'];
 
-                if (inChallenge('b', 12)) other.push('shop');
+                if (inChallenge('b', 12) || inChallenge('b', 22)) other.push('shop');
 
                 return other;
             },
         },
         value: {
             cost() {
-                if (inChallenge('b', 12)) return D(50);
+                if (inChallenge('b', 12) || inChallenge('b', 22)) return D(50);
             },
         },
         lore() {
@@ -205,9 +205,7 @@ const item_list = {
         sources: {
             other() {
                 /** @type {drop_sources[]} */
-                const other = ['crafting'];
-
-                if (inChallenge('b', 12)) other.push('shop');
+                const other = ['crafting', 'shop'];
 
                 return other;
             },
@@ -573,14 +571,14 @@ const item_list = {
                 /** @type {drop_sources[]} */
                 const other = [];
 
-                if (inChallenge('b', 12)) other.push('shop');
+                if (inChallenge('b', 12) || inChallenge('b', 22)) other.push('shop');
 
                 return other;
             },
         },
         value: {
             cost() {
-                if (inChallenge('b', 12)) return D(7);
+                if (inChallenge('b', 12) || inChallenge('b', 22)) return D(7);
             },
         },
         lore: `A big rod mostly made of calcium.<br>
@@ -611,14 +609,14 @@ const item_list = {
                 /** @type {drop_sources[]} */
                 const other = [];
 
-                if (inChallenge('b', 12)) other.push('shop');
+                if (inChallenge('b', 12) || inChallenge('b', 22)) other.push('shop');
 
                 return other;
             },
         },
         value: {
             cost() {
-                if (inChallenge('b', 12)) return D(20);
+                if (inChallenge('b', 12) || inChallenge('b', 22)) return D(20);
             },
         },
         lore: `A curved bone.<br>
@@ -651,14 +649,14 @@ const item_list = {
                 /** @type {drop_sources[]} */
                 const other = ['crafting'];
 
-                if (inChallenge('b', 12)) other.push('shop');
+                if (inChallenge('b', 12) || inChallenge('b', 22)) other.push('shop');
 
                 return other;
             },
         },
         value: {
             cost() {
-                if (inChallenge('b', 12)) return D(60);
+                if (inChallenge('b', 12) || inChallenge('b', 22)) return D(60);
             },
         },
         lore: `The head of a skeleton.<br>
@@ -684,9 +682,7 @@ const item_list = {
         sources: {
             other() {
                 /** @type {drop_sources[]} */
-                const other = ['crafting'];
-
-                if (inChallenge('b', 12)) other.push('shop');
+                const other = ['crafting', 'shop'];
 
                 return other;
             },
@@ -948,18 +944,18 @@ const item_list = {
                 /** @type {drop_sources[]} */
                 const other = [];
 
-                if (inChallenge('b', 12)) other.push('shop');
+                if (inChallenge('b', 12) || inChallenge('b', 22)) other.push('shop');
 
                 return other;
             },
         },
         value: {
             cost() {
-                if (inChallenge('b', 12)) return D(9);
+                if (inChallenge('b', 12) || inChallenge('b', 22)) return D(9);
             },
         },
         lore() {
-            if (inChallenge('b', 12)) return `A large chunk of wet dirt.<br>
+            if (inChallenge('b', 12) || inChallenge('b', 22)) return `A large chunk of wet dirt.<br>
                 Rumors of gold hidden inside have heavily increased their worth.<br>
                 It leaves stains everywhere.`;
 
@@ -1011,14 +1007,14 @@ const item_list = {
                 /** @type {drop_sources[]} */
                 const other = [];
 
-                if (inChallenge('b', 12)) other.push('shop');
+                if (inChallenge('b', 12) || inChallenge('b', 22)) other.push('shop');
 
                 return other;
             },
         },
         value: {
             cost() {
-                if (inChallenge('b', 12)) return D(25);
+                if (inChallenge('b', 12) || inChallenge('b', 22)) return D(25);
             },
         },
         lore: `The eye of a golem.<br>
@@ -1039,14 +1035,14 @@ const item_list = {
                 /** @type {drop_sources[]} */
                 const other = ['crafting'];
 
-                if (inChallenge('b', 12)) other.push('shop');
+                if (inChallenge('b', 12) || inChallenge('b', 22)) other.push('shop');
 
                 return other;
             },
         },
         value: {
             cost() {
-                if (inChallenge('b', 12)) return D(75);
+                if (inChallenge('b', 12) || inChallenge('b', 22)) return D(75);
             },
         },
         lore: `The core of a golem.<br>

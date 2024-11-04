@@ -1679,6 +1679,7 @@ type Layers = {
             }
             xp: {
                 mult(): Decimal
+                exp(): Decimal
             }
             cap: {
                 base(): Decimal

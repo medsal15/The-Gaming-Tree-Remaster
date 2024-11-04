@@ -32,7 +32,10 @@ addLayer('m', {
                 D.dZero);
         let text = `${formatWhole(player.items.stone.amount)} stone<br>${formatWhole(sum)} ores`;
 
-        if (hasUpgrade('m', 63)) text += `<br>${formatWhole(player.m.experience)} experience`;
+        if (D.gt(tmp.m.modifiers.xp.gain, 0)) {
+            text += `<br>${formatWhole(player.m.experience)} experience`;
+            if (D.gte(player.m.experience, tmp.m.modifiers.xp.cap)) text += ' (capped)';
+        }
 
         return text;
     },
@@ -87,7 +90,7 @@ addLayer('m', {
                     return `You have ${listFormat.format(list)}.`;
                 }],
                 ['display-text', () => {
-                    if (!hasUpgrade('m', 63)) return '';
+                    if (D.lte(tmp.m.modifiers.xp.gain, 0)) return '';
 
                     const color = tmp.m.modifiers.xp.color,
                         gain = tmp.m.modifiers.xp.gain,
@@ -1226,7 +1229,11 @@ addLayer('m', {
             description() {
                 if (!tmp[this.layer].upgrades[this.id].show) return `Buy ${tmp[this.layer].upgrades[this.id - 10].title} to unlock`;
 
-                let text = 'Unlock mining experience.<br>Double mining experience gain';
+                let text = '';
+
+                if (!inChallenge('b', 22) && !hasChallenge('b', 22)) text += 'Unlock mining experience.<br>';
+
+                text += 'Double mining experience gain';
 
                 return text;
             },
@@ -1477,6 +1484,8 @@ addLayer('m', {
 
                 let xp = D.times(base, tmp.m.modifiers.xp.mult);
 
+                xp = D.pow(xp, tmp.xp.modifiers.xp.exp);
+
                 return xp;
             },
             vein() { return D.div(player.m.ores[this.id].broken, tmp.m.modifiers.vein.size).floor(); },
@@ -1513,6 +1522,8 @@ addLayer('m', {
 
                 let xp = D.times(base, tmp.m.modifiers.xp.mult);
 
+                xp = D.pow(xp, tmp.xp.modifiers.xp.exp);
+
                 return xp;
             },
             vein() { return D.div(player.m.ores[this.id].broken, tmp.m.modifiers.vein.size).floor(); },
@@ -1548,6 +1559,8 @@ addLayer('m', {
                 base = D.times(vein, tmp.m.modifiers.vein.xp_add_mult).add(1).times(base);
 
                 let xp = D.times(base, tmp.m.modifiers.xp.mult);
+
+                xp = D.pow(xp, tmp.xp.modifiers.xp.exp);
 
                 return xp;
             },
@@ -1586,6 +1599,8 @@ addLayer('m', {
 
                 let xp = D.times(base, tmp.m.modifiers.xp.mult);
 
+                xp = D.pow(xp, tmp.xp.modifiers.xp.exp);
+
                 return xp;
             },
             vein() { return D.div(player.m.ores[this.id].broken, tmp.m.modifiers.vein.size).floor(); },
@@ -1623,6 +1638,8 @@ addLayer('m', {
 
                 let xp = D.times(base, tmp.m.modifiers.xp.mult);
 
+                xp = D.pow(xp, tmp.xp.modifiers.xp.exp);
+
                 return xp;
             },
             vein() { return D.div(player.m.ores[this.id].broken, tmp.m.modifiers.vein.size).floor(); },
@@ -1659,6 +1676,8 @@ addLayer('m', {
                 base = D.times(vein, tmp.m.modifiers.vein.xp_add_mult).add(1).times(base);
 
                 let xp = D.times(base, tmp.m.modifiers.xp.mult);
+
+                xp = D.pow(xp, tmp.xp.modifiers.xp.exp);
 
                 return xp;
             },
@@ -1721,6 +1740,9 @@ addLayer('m', {
             width: 400,
             fillStyle: {
                 backgroundColor() { return tmp.items.densium.color; },
+            },
+            baseStyle: {
+                backgroundColor() { if (player.m.compactor.running) return '#333344'; },
             },
         },
     },
@@ -1806,7 +1828,7 @@ addLayer('m', {
             base() {
                 let base = D.dZero;
 
-                if (hasUpgrade('m', 63)) base = D.dOne;
+                if (hasUpgrade('m', 63) || inChallenge('b', 22) || hasChallenge('b', 22)) base = D.dOne;
 
                 return base;
             },
@@ -1912,7 +1934,7 @@ addLayer('m', {
                 gain_items(drops);
             }
 
-            if (hasUpgrade('m', 63)) {
+            if (D.gt(tmp.m.modifiers.xp.gain, 0)) {
                 const xp = tmp.m.modifiers.xp.gain;
                 player.m.experience = D.add(player.m.experience, xp);
             }

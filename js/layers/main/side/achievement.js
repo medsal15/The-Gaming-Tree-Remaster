@@ -36,7 +36,7 @@ addLayer('ach', {
                         owned = tmp.ach.categories.bonus.owned.length,
                         visible = tmp.ach.categories.bonus.visible.length;
 
-                    return `You have ${resourceColor(color, formatWhole(owned), 'font-size:1.5em;')} /${resourceColor(color, formatWhole(visible))} achievements`;
+                    return `You have ${resourceColor(color, formatWhole(owned), 'font-size:1.5em;')} /${resourceColor(color, formatWhole(visible))} bonus achievements`;
                 }],
                 'blank',
                 ['achievements', () => tmp.ach.categories.bonus.rows],
@@ -480,7 +480,7 @@ addLayer('ach', {
         },
         94: {
             name: 'Rustless',
-            tooltip: 'Get some iron<br>Reward: Mining upgrades stay unlocked',
+            tooltip: 'Get some iron<br>Reward: 1st and 2nd tier of mining upgrades stay unlocked',
             done() { return D.gt(player.items.clear_iron_ore.amount, 0); },
             onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.items.clear_iron_ore.color); },
             style() {
@@ -511,7 +511,7 @@ addLayer('ach', {
             },
             unlocked() { return tmp.m.compactor.unlocked; },
         },
-        //todo forge achievements (11X)
+        //todo forge achievements (12X)
         //#endregion Normal
         //#region Bonus
         81: {
@@ -583,6 +583,20 @@ addLayer('ach', {
                 return style;
             },
             unlocked() { return hasChallenge('b', 21); },
+        },
+        111: {
+            name: 'You Are Now Legally Hunting',
+            tooltip: 'Get a monster hunting license (and a mining one too!)',
+            done() { return hasChallenge('b', 22); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.b.groups.mini.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.b.groups.mini.color;
+
+                return style;
+            },
+            unlocked() { return hasChallenge('b', 12); },
         },
         //#endregion Bonus
         //#region Secret
@@ -670,7 +684,8 @@ addLayer('ach', {
             style() {
                 let style = {};
 
-                style['background-color'] = tmp.ach.categories.secret.color;
+                style['background-color'] = tmp.l.color;
+                style['border'] = `solid 3px ${tmp.ach.categories.secret.color}`;
 
                 return style;
             },
@@ -690,7 +705,7 @@ addLayer('ach', {
             owned() { return player.ach.achievements.filter(id => this.rows.includes(Math.floor(id / 10))); },
         },
         bonus: {
-            rows: [8],
+            rows: [8, 11],
             color: '#0077FF',
             visible() {
                 return Object.values(tmp.ach.achievements)

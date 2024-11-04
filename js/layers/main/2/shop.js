@@ -54,7 +54,7 @@ addLayer('s', {
                     return `You have ${listFormat.format(list)}`;
                 }],
                 ['column', () => {
-                    if (inChallenge('b', 12)) return [
+                    if (inChallenge('b', 12) || inChallenge('b', 22)) return [
                         'blank',
                         ['layer-proxy', ['b', [['bar', 'progress']]]],
                     ];
@@ -122,7 +122,11 @@ addLayer('s', {
                     cost = listFormat.format(list.map(([item, amount]) => `${formatWhole(amount)} ${tmp.items[item].name}`));
                 return `Cost: ${cost}`;
             },
-            pay() { spend_coins(tmp[this.layer].upgrades[this.id].cost); },
+            canAfford() { return D.gte(tmp.s.coins.total, tmp[this.layer].upgrades[this.id].cost); },
+            pay() {
+                if (!D.gte(tmp.s.coins.total, tmp[this.layer].upgrades[this.id].cost)) return;
+                spend_coins(tmp[this.layer].upgrades[this.id].cost);
+            },
             currencyLocation() { return tmp.s.coins; },
             currencyInternalName: 'total',
         },
@@ -137,7 +141,11 @@ addLayer('s', {
                     cost = listFormat.format(list.map(([item, amount]) => `${formatWhole(amount)} ${tmp.items[item].name}`));
                 return `Cost: ${cost}`;
             },
-            pay() { spend_coins(tmp[this.layer].upgrades[this.id].cost); },
+            canAfford() { return D.gte(tmp.s.coins.total, tmp[this.layer].upgrades[this.id].cost); },
+            pay() {
+                if (!D.gte(tmp.s.coins.total, tmp[this.layer].upgrades[this.id].cost)) return;
+                spend_coins(tmp[this.layer].upgrades[this.id].cost);
+            },
             currencyLocation() { return tmp.s.coins; },
             currencyInternalName: 'total',
         },
@@ -152,7 +160,11 @@ addLayer('s', {
                     cost = listFormat.format(list.map(([item, amount]) => `${formatWhole(amount)} ${tmp.items[item].name}`));
                 return `Cost: ${cost}`;
             },
-            pay() { spend_coins(tmp[this.layer].upgrades[this.id].cost); },
+            canAfford() { return D.gte(tmp.s.coins.total, tmp[this.layer].upgrades[this.id].cost); },
+            pay() {
+                if (!D.gte(tmp.s.coins.total, tmp[this.layer].upgrades[this.id].cost)) return;
+                spend_coins(tmp[this.layer].upgrades[this.id].cost);
+            },
             currencyLocation() { return tmp.s.coins; },
             currencyInternalName: 'total',
         },
@@ -179,7 +191,11 @@ addLayer('s', {
                     cost = listFormat.format(list.map(([item, amount]) => `${formatWhole(amount)} ${tmp.items[item].name}`));
                 return `Cost: ${cost}`;
             },
-            pay() { spend_coins(tmp[this.layer].upgrades[this.id].cost); },
+            canAfford() { return D.gte(tmp.s.coins.total, tmp[this.layer].upgrades[this.id].cost); },
+            pay() {
+                if (!D.gte(tmp.s.coins.total, tmp[this.layer].upgrades[this.id].cost)) return;
+                spend_coins(tmp[this.layer].upgrades[this.id].cost);
+            },
             currencyLocation() { return tmp.s.coins; },
             currencyInternalName: 'total',
         },
@@ -194,7 +210,11 @@ addLayer('s', {
                     cost = listFormat.format(list.map(([item, amount]) => `${formatWhole(amount)} ${tmp.items[item].name}`));
                 return `Cost: ${cost}`;
             },
-            pay() { spend_coins(tmp[this.layer].upgrades[this.id].cost); },
+            canAfford() { return D.gte(tmp.s.coins.total, tmp[this.layer].upgrades[this.id].cost); },
+            pay() {
+                if (!D.gte(tmp.s.coins.total, tmp[this.layer].upgrades[this.id].cost)) return;
+                spend_coins(tmp[this.layer].upgrades[this.id].cost);
+            },
             currencyLocation() { return tmp.s.coins; },
             currencyInternalName: 'total',
         },
@@ -207,7 +227,11 @@ addLayer('s', {
                     cost = listFormat.format(list.map(([item, amount]) => `${formatWhole(amount)} ${tmp.items[item].name}`));
                 return `Cost: ${cost}`;
             },
-            pay() { spend_coins(tmp[this.layer].upgrades[this.id].cost); },
+            canAfford() { return D.gte(tmp.s.coins.total, tmp[this.layer].upgrades[this.id].cost); },
+            pay() {
+                if (!D.gte(tmp.s.coins.total, tmp[this.layer].upgrades[this.id].cost)) return;
+                spend_coins(tmp[this.layer].upgrades[this.id].cost);
+            },
             currencyLocation() { return tmp.s.coins; },
             currencyInternalName: 'total',
         },
@@ -228,7 +252,11 @@ addLayer('s', {
                     cost = listFormat.format(list.map(([item, amount]) => `${formatWhole(amount)} ${tmp.items[item].name}`));
                 return `Cost: ${cost}`;
             },
-            pay() { spend_coins(tmp[this.layer].upgrades[this.id].cost); },
+            canAfford() { return D.gte(tmp.s.coins.total, tmp[this.layer].upgrades[this.id].cost); },
+            pay() {
+                if (!D.gte(tmp.s.coins.total, tmp[this.layer].upgrades[this.id].cost)) return;
+                spend_coins(tmp[this.layer].upgrades[this.id].cost);
+            },
             currencyLocation() { return tmp.s.coins; },
             currencyInternalName: 'total',
         },
@@ -248,7 +276,11 @@ addLayer('s', {
                     cost = listFormat.format(list.map(([item, amount]) => `${formatWhole(amount)} ${tmp.items[item].name}`));
                 return `Cost: ${cost}`;
             },
-            pay() { spend_coins(tmp[this.layer].upgrades[this.id].cost); },
+            canAfford() { return D.gte(tmp.s.coins.total, tmp[this.layer].upgrades[this.id].cost); },
+            pay() {
+                if (!D.gte(tmp.s.coins.total, tmp[this.layer].upgrades[this.id].cost)) return;
+                spend_coins(tmp[this.layer].upgrades[this.id].cost);
+            },
             currencyLocation() { return tmp.s.coins; },
             currencyInternalName: 'total',
         },
@@ -273,7 +305,11 @@ addLayer('s', {
                     cost = listFormat.format(list.map(([item, amount]) => `${formatWhole(amount)} ${tmp.items[item].name}`));
                 return `Cost: ${cost}`;
             },
-            pay() { spend_coins(tmp[this.layer].upgrades[this.id].cost); },
+            canAfford() { return D.gte(tmp.s.coins.total, tmp[this.layer].upgrades[this.id].cost) && hasChallenge('b', 12); },
+            pay() {
+                if (!D.gte(tmp.s.coins.total, tmp[this.layer].upgrades[this.id].cost)) return;
+                spend_coins(tmp[this.layer].upgrades[this.id].cost);
+            },
             currencyLocation() { return tmp.s.coins; },
             currencyInternalName: 'total',
             canAfford() { return hasChallenge('b', 12) && D.gte(tmp.s.coins.total, tmp[this.layer].upgrades[this.id].cost); },
@@ -386,6 +422,7 @@ addLayer('s', {
             // Reset trades
             player.s.trades = layers.s.startData().trades;
             player.s.resetTime = 0;
+            if (hasChallenge('b', 22)) player.s.resetTime = 300;
             return;
         }
 

@@ -219,7 +219,35 @@ addLayer('b', {
                 return { 'backgroundColor': tmp.b.groups[group].color, };
             },
         },
-        //todo 22: license (no monster killing, reward: ???)
+        22: {
+            name: 'Hunting License Fee',
+            challengeDescription: `Turns out you need a license to hunt monsters.<br>\
+                You cannot kill enemies for the duration of the challenge, but mining XP is automatically unlocked.`,
+            goalDescription: 'Earn 40 bronze coins to pay the fee',
+            rewardDescription: 'Keep mining experience unlocked, start with 5 minutes in shop time, +^.1 XP gain exponent',
+            canComplete() { return D.gte(player.items.coin_bronze.amount, 40); },
+            progress() { return D.div(tmp.s.coins.total, 40_00); },
+            display() {
+                const progress_list = value_coin(tmp.s.coins.total),
+                    goal_list = value_coin(40_00);
+
+                if (!progress_list.length) progress_list.push(['coin_copper', D.dZero]);
+                if (!goal_list.length) goal_list.push(['coin_copper', D.dZero]);
+
+                const progress_txt = listFormat.format(progress_list.map(([coin, spent]) => `${formatWhole(spent)} ${tmp.items[coin].name}`)),
+                    goal_txt = listFormat.format(goal_list.map(([coin, spent]) => `${formatWhole(spent)} ${tmp.items[coin].name}`));
+
+                return `${progress_txt} / ${goal_txt}`;
+            },
+            unlocked() { return hasChallenge('b', 12); },
+            group: 'mini',
+            buttonStyle() {
+                const group = tmp[this.layer].challenges[this.id].group
+                return { 'backgroundColor': tmp.b.groups[group].color, };
+            },
+            onExit() { tmp.s.coins.list.forEach(([item]) => player.items[item].amount = D.dZero); },
+            onEnter() { tmp.s.coins.list.forEach(([item]) => player.items[item].amount = D.dZero); },
+        },
         // Gods
         31: {
             name: 'Thanatos',
@@ -236,7 +264,7 @@ addLayer('b', {
                 return { 'backgroundColor': tmp.b.groups[group].color, };
             },
         },
-        //todo 32: Ek Chuah (stock market, reward: ???)
+        //todo 32: ???
     },
     clickables: {
         // Bosstiary
@@ -384,6 +412,27 @@ addLayer('b', {
                 Angry that you defeated its parent, it now seeks revenge.<br>
                 Sends its personal guard to defeat you.`,
             challenge: 21,
+        },
+        'undead_bureaucrat': {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.b.bosses).find(([, r]) => r == this)[0]; },
+            unlocked() { return tmp.b.challenges[22].unlocked; },
+            name: 'undead bureaucrat',
+            position: [1, 1],
+            lore() {
+                if (inChallenge('b', this.challenge)) return `"I see you're trying to pay the license fee.<br>
+                    It costs 40 bronze coins. Spent money doesn't count. Lady Goldtooth does not work for us.<br>
+                    Just be glad it's not a subscription anymore. The amount of complains I still have to deal with..."`;
+                if (hasChallenge('b', this.challenge)) return `"Thank you for your contribution.<br>
+                        Your hunting license has been delivered to your residence, if you have one, or will be handed over shortly at the hunter guild.<br>
+                        Losing your hunting license will incur a fee of 5 bronze coins for rescribing.<br>
+                        We do not take returns on your license, even if your face was badly drawn."`;
+                return `"Look, I get it. You've been doing that for a while, and can't stop.<br>
+                    We don't want you to either. You've been helpful in keeping the monster populations down.<br>
+                    But you broke the law. We can't change that. You'll need to pay the fine and the fee for a monster hunting license.<br>
+                    I haven't had a break in 3 years, so if I misspell 'hunting' as 'mining', it's not my fault."`;
+            },
+            challenge: 22,
         },
         // Relics
         'thanatos': {

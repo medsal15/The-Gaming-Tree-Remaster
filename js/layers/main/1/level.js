@@ -244,7 +244,7 @@ addLayer('l', {
 
                 return text;
             },
-            effect() { return D.add(player.xp.points, 10).log10(); },
+            effect() { return D.add(tmp.l.baseAmount, 10).log10(); },
             effectDisplay() { return `*${format(upgradeEffect(this.layer, this.id))}`; },
             style() {
                 let style = {};
@@ -392,7 +392,7 @@ addLayer('l', {
     baseAmount() {
         let amount = player.xp.points;
 
-        if (hasUpgrade('m', 63)) amount = D.add(amount, player.m.experience);
+        if (D.gt(tmp.m.modifiers.xp.gain, 0)) amount = D.add(amount, player.m.experience);
 
         return amount;
     },

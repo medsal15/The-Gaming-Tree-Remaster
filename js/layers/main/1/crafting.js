@@ -83,6 +83,7 @@ addLayer('c', {
                         });
 
                     if (types.materials.length) {
+                        lines.push('h-line', 'blank');
                         const cost_mult = tmp.c.modifiers.materials.cost_mult;
                         if (D.neq_tolerance(cost_mult, 1, 1e-3)) {
                             lines.push(['display-text', `Material cost divider: /${resourceColor(colors[options.theme].points, format(D.pow(cost_mult, -1)))}`],);
@@ -92,6 +93,7 @@ addLayer('c', {
                         if (types.equipment.length) lines.push('blank');
                     }
                     if (types.equipment.length) {
+                        lines.push('h-line', 'blank');
                         const cost_mult = tmp.c.modifiers.equipment.cost_mult;
                         if (D.neq_tolerance(cost_mult, 1, 1e-3)) {
                             lines.push(['display-text', `Equipment cost divider: /${resourceColor(colors[options.theme].points, format(D.pow(cost_mult, -1)))}`],);
@@ -940,6 +942,7 @@ addLayer('c', {
                 },
             },
             categories: ['materials', 'golem',],
+            unlocked() { return tmp.xp.monsters.golem.unlocked; },
         },
         press_mud: {
             _id: null,

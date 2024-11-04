@@ -970,6 +970,8 @@ addLayer('xp', {
 
                 xp = D.times(xp, item_effect('densium_slime').slime_mult);
 
+                xp = D.pow(xp, tmp.xp.modifiers.xp.exp);
+
                 return xp;
             },
             kills() {
@@ -1052,6 +1054,8 @@ addLayer('xp', {
 
                 xp = xp.pow(1.25);
 
+                xp = D.pow(xp, tmp.xp.modifiers.xp.exp);
+
                 return xp;
             },
             kills() { return D.dOne; },
@@ -1124,6 +1128,8 @@ addLayer('xp', {
 
                 xp = xp.pow(1.5);
 
+                xp = D.pow(xp, tmp.xp.modifiers.xp.exp);
+
                 return xp;
             },
             kills() { return D.dOne; },
@@ -1192,6 +1198,8 @@ addLayer('xp', {
                 return base;
             },
             mult() {
+                if (inChallenge('b', 22)) return D.dZero;
+
                 let mult = D.dOne;
 
                 if (hasUpgrade('xp', 11)) mult = mult.times(upgradeEffect('xp', 11));
@@ -1247,6 +1255,13 @@ addLayer('xp', {
                 mult = mult.times(buyableEffect('dea', 23));
 
                 return mult;
+            },
+            exp() {
+                let exp = D.dOne;
+
+                if (hasChallenge('b', 22)) exp = exp.add(.1);
+
+                return exp;
             },
         },
         cap: {
