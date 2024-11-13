@@ -117,6 +117,7 @@ addLayer('b', {
                 if (!tmp.b.challenges[12].unlocked) {
                     return D.div(player.items.gold_nugget.amount, 1);
                 }
+                //todo unlock 13 with magic core
                 return D.dZero;
             },
             display() {
@@ -130,6 +131,7 @@ addLayer('b', {
                     const name = (tmp.items.gold_nugget.unlocked ?? true) ? tmp.items.gold_nugget.name : 'unknown';
                     return `Mine ${formatWhole(player.items.gold_nugget.amount)} / ${formatWhole(1)} ${name}`;
                 }
+                //todo unlock 13 with magic core
                 return 'Not fighting a boss';
             },
             fillStyle: {
@@ -202,6 +204,13 @@ addLayer('b', {
                 tmp.s.coins.list.forEach(([item]) => player.items[item].amount = D.dZero);
             },
         },
+        /**
+         * TODO 13: Enter the Golem Factory
+         *
+         * slime -> slime golems (+defense, ↑health, +mud, ↓slime goo, ↑slime core shards, ↑slime core)
+         * skeleton -> bone golems (+defense, ↑health, +mud, ↓skull, ↑rib, ↑bone)
+         * golem -> bronze golem (↑↑defense, ↑health, +bronze blend, ↓mud)
+         */
         // Mini
         21: {
             name: 'Slime Monarch',
@@ -264,7 +273,54 @@ addLayer('b', {
                 return { 'backgroundColor': tmp.b.groups[group].color, };
             },
         },
-        //todo 32: ???
+        32: {
+            name: 'Ek Chuah',
+            challengeDescription() {
+                let text = `You have 4 packages to deliver around the world.\
+                    You also have to buy them first.\
+                    Some layers may be locked depending on your location.`;
+
+                if (hasChallenge(this.layer, this.id)) text += '<br><span class="warning">Redoing this challenge will not be profitable</span>';
+
+                return text;
+            },
+            goalDescription: `Deliver all 4 packages`,
+            rewardDescription: ``, //todo
+            canComplete() {
+                /** @type {items[]} */
+                const list = ['package_1', 'package_2', 'package_3', 'package_4'],
+                    delivered = list.filter(item => D.eq(player.items[item].amount, 0) && D.eq(player.items[item].total, 1));
+                return delivered.length == list.length;
+            },
+            progress() {
+                /** @type {items[]} */
+                const list = ['package_1', 'package_2', 'package_3', 'package_4'],
+                    delivered = list.filter(item => D.eq(player.items[item].amount, 0) && D.eq(player.items[item].total, 1));
+                return delivered.length / list.length;
+            },
+            display() {
+                /** @type {items[]} */
+                const list = ['package_1', 'package_2', 'package_3', 'package_4'],
+                    delivered = list.filter(item => D.eq(player.items[item].amount, 0) && D.eq(player.items[item].total, 1));
+
+                return `${formatWhole(delivered.length)} / ${formatWhole(list.length)} packages delivered`;
+            },
+            unlocked() { return hasChallenge('b', 22); },
+            group: 'relic',
+            buttonStyle() {
+                const group = tmp[this.layer].challenges[this.id].group;
+                return { 'backgroundColor': tmp.b.groups[group].color, };
+            },
+            onExit() {
+                /** @type {items[]} */
+                const list = ['package_1', 'package_2', 'package_3', 'package_4'];
+                list.forEach(item => {
+                    player.items[item].amount = D.dZero;
+                    player.items[item].total = D.dZero;
+                });
+            },
+            onEnter() { player.wor.position = [12, 12]; },
+        },
     },
     clickables: {
         // Bosstiary
@@ -272,7 +328,7 @@ addLayer('b', {
             style: {
                 'background-image': `url(./resources/images/UI.png)`,
                 'background-repeat': 'no-repeat',
-                'image-rendering': 'crisp-edges',
+                'image-rendering': 'pixelated',
                 'background-size': `${UI_SIZES.width * 120}px ${UI_SIZES.height * 120}px`,
                 'background-position': '-120px -120px',
             },
@@ -296,7 +352,7 @@ addLayer('b', {
             style: {
                 'background-image': `url(./resources/images/UI.png)`,
                 'background-repeat': 'no-repeat',
-                'image-rendering': 'crisp-edges',
+                'image-rendering': 'pixelated',
                 'background-size': `${UI_SIZES.width * 120}px ${UI_SIZES.height * 120}px`,
                 'background-position': '-120px 0',
             },
@@ -370,6 +426,7 @@ addLayer('b', {
             player.b.visible_challenges.push('12');
             doPopup('none', `${tmp.b.challenges[12].name}`, 'Boss unlocked', 5, tmp.b.color);
         }
+        //todo unlock 13 with magic core
     },
     prestigeNotify() { return !activeChallenge('b') && [11].some(id => tmp.b.challenges[id].unlocked && !hasChallenge('b', id)); },
     shouldNotify() {
@@ -439,12 +496,23 @@ addLayer('b', {
             _id: null,
             get id() { return this._id ??= Object.entries(layers.b.bosses).find(([, r]) => r == this)[0]; },
             unlocked() { return tmp.b.challenges[31].unlocked; },
-            name: 'thanatos',
+            name: 'Thanatos',
             position: [0, 2],
             lore: `An ancient god that presides over death.<br>
                 Unhappy over the large amount of souls sent over to him.<br>
                 Do you understand how much paperwork has to be filled for each soul?`,
             challenge: 31,
+        },
+        'ek_chuah': {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.b.bosses).find(([, r]) => r == this)[0]; },
+            unlocked() { return tmp.b.challenges[32].unlocked; },
+            name: 'Ek Chuah',
+            position: [1, 2],
+            lore: `An ancient god that presides over trade and cacao.<br>
+                Your entrepreneurship has inspired him to hire you.<br>
+                It's just a small delivery, how hard could it be?`,
+            challenge: 32,
         },
     },
     list() { return Object.keys(layers.b.bosses).filter(boss => tmp.b.bosses[boss].unlocked ?? true); },

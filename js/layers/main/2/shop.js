@@ -415,6 +415,13 @@ addLayer('s', {
             pitem.amount = D.mod(pitem.amount, cap);
             gain_items(next, carry);
         });
+
+        if (D.mod(player.s.buy_amount, 1).neq(0)) {
+            player.s.buy_amount = D.round(player.s.buy_amount);
+        }
+        if (D.mod(player.s.sell_amount, 1).neq(0)) {
+            player.s.sell_amount = D.round(player.s.sell_amount);
+        }
     },
     doReset(layer) {
         if (tmp[layer].row < this.row) return;

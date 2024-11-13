@@ -11,7 +11,10 @@ addLayer('xp', {
     resource: 'experience',
     name: 'experience',
     symbol: 'XP',
-    color() { return tmp.xp.monsters[player.xp.selected].color; },
+    color() {
+        if (player.xp.selected) return tmp.xp.monsters[player.xp.selected].color;
+        else return tmp.xp.monsters.slime.color;
+    },
     tooltip() {
         let text = `${formatWhole(player.xp.points)} experience`;
         if (D.gte(player.xp.points, tmp.xp.modifiers.cap.total)) text += ' (capped)';
@@ -48,24 +51,30 @@ addLayer('xp', {
                 ['display-text', () => {
                     const selected = player.xp.selected,
                         color = tmp.xp.color,
-                        gain = D.min(tmp.xp.monsters[selected].experience, tmp.xp.modifiers.cap.gain),
-                        gain_txt = D.gt(gain, 0) ? ` (+${resourceColor(color, format(gain))})` : '',
                         cap = tmp.xp.modifiers.cap.total;
+                    let gain_txt = '';
+                    if (selected) {
+                        const gain = D.min(tmp.xp.monsters[selected].experience, tmp.xp.modifiers.cap.gain);
+                        gain_txt = D.gt(gain, 0) ? ` (+${resourceColor(color, format(gain))})` : '';
+                    }
 
                     return `You have ${resourceColor(color, formatWhole(player.xp.points), 'font-size:1.5em;')}${gain_txt}\
                         /${resourceColor(color, formatWhole(cap))} experience`;
                 }],
                 ['display-text', () => {
-                    const current = player.xp.monsters[player.xp.selected].kills,
-                        /** @type {string[]} */
-                        kill_ext = [],
-                        tmonst = tmp.xp.monsters[player.xp.selected];
+                    const selected = player.xp.selected;
                     let kill_txt = '';
+                    if (selected) {
+                        const current = player.xp.monsters[selected].kills,
+                            /** @type {string[]} */
+                            kill_ext = [],
+                            tmonst = tmp.xp.monsters[selected];
 
-                    if (D.neq(tmonst.kills, 1)) kill_ext.push(resourceColor(tmp.xp.kill.color, `+${formatWhole(tmonst.kills)}`));
-                    if (D.neq(current, tmp.xp.kill.total)) kill_ext.push(resourceColor(tmp.xp.kill.color, formatWhole(current)));
+                        if (D.neq(tmonst.kills, 1)) kill_ext.push(resourceColor(tmp.xp.kill.color, `+${formatWhole(tmonst.kills)}`));
+                        if (D.neq(current, tmp.xp.kill.total)) kill_ext.push(resourceColor(tmp.xp.kill.color, formatWhole(current)));
 
-                    if (kill_ext.length) kill_txt = ` (${kill_ext.join(',')})`;
+                        if (kill_ext.length) kill_txt = ` (${kill_ext.join(',')})`;
+                    }
 
                     return `You have killed ${resourceColor(tmp.xp.kill.color, formatWhole(tmp.xp.kill.total), 'font-size:1.5em;')}${kill_txt} enemies`;
                 }],
@@ -73,16 +82,22 @@ addLayer('xp', {
                 ['display-text', () => {
                     const selected = player.xp.selected;
 
+                    if (!selected) return `You are not fighting`;
+
                     return `You are fighting a level ${resourceColor(tmp.l.color, formatWhole(tmp.xp.monsters[selected].level))} ${tmp.xp.monsters[selected].name}`;
                 }],
                 ['raw-html', () => {
+                    const selected = player.xp.selected;
+
+                    if (!selected) return `<div style="width: 240px; height: 240px; overflow: hidden"></div>`;
+
                     return `<div style="width: 240px; height: 240px; overflow: hidden">
                             <img src="./resources/images/enemies.png"
                                 style="width: ${MONSTER_SIZES.width * 100}%;
                                     height: ${MONSTER_SIZES.height * 100}%;
-                                    margin-left: ${-240 * tmp.xp.monsters[player.xp.selected].position[0]}px;
-                                    margin-top: ${-240 * tmp.xp.monsters[player.xp.selected].position[1]}px;
-                                    image-rendering: crisp-edges;"/>
+                                    margin-left: ${-240 * tmp.xp.monsters[selected].position[0]}px;
+                                    margin-top: ${-240 * tmp.xp.monsters[selected].position[1]}px;
+                                    image-rendering: pixelated;"/>
                         </div>`;
                 }],
                 ['bar', 'health'],
@@ -93,25 +108,27 @@ addLayer('xp', {
                 ['clickables', [1]],
                 'blank',
                 ['display-text', () => {
-                    const selected = player.xp.selected,
-                        damage = tmp.xp.monsters[selected].damage;
+                    const selected = player.xp.selected;
+                    if (!selected) return;
 
+                    const damage = tmp.xp.monsters[selected].damage;
                     return `Attack for ${format(damage)} damage`;
                 }],
                 ['display-text', 'Hold to click 5 times per second'],
                 ['bar', 'player_health'],
                 'blank',
                 ['display-text', () => {
-                    if (D.lte(tmp.c.chance_multiplier, 0)) return '';
+                    const selected = player.xp.selected;
+                    if (D.lte(tmp.c.chance_multiplier, 0) || !selected) return '';
 
                     let drops = 'nothing',
                         count = '';
-                    const last_drops = player.xp.monsters[player.xp.selected].last_drops,
-                        last_count = player.xp.monsters[player.xp.selected].last_drops_times;
+                    const last_drops = player.xp.monsters[selected].last_drops,
+                        last_count = player.xp.monsters[selected].last_drops_times;
                     if (last_drops.length) drops = listFormat.format(last_drops.map(([item, amount]) => `${format(amount)} ${tmp.items[item].name}`));
                     if (last_count.gt(1)) count = ` (${formatWhole(last_count)})`;
 
-                    return `${capitalize(tmp.xp.monsters[player.xp.selected].name)} dropped ${drops}${count}`;
+                    return `${capitalize(tmp.xp.monsters[selected].name)} dropped ${drops}${count}`;
                 }],
             ],
         },
@@ -623,10 +640,14 @@ addLayer('xp', {
             progress() {
                 const selected = player.xp.selected;
 
+                if (!selected) return 0;
+
                 return D.div(player.xp.monsters[selected].health, tmp.xp.monsters[selected].health);
             },
             display() {
                 const selected = player.xp.selected;
+
+                if (!selected) return;
 
                 return `${format(player.xp.monsters[selected].health)} / ${format(tmp.xp.monsters[selected].health)}`;
             },
@@ -739,7 +760,7 @@ addLayer('xp', {
                 height: '120px',
                 'background-image': `url(./resources/images/UI.png)`,
                 'background-repeat': 'no-repeat',
-                'image-rendering': 'crisp-edges',
+                'image-rendering': 'pixelated',
                 'background-size': `${UI_SIZES.width * 120}px ${UI_SIZES.height * 120}px`,
                 'background-position': '-240px -120px',
             },
@@ -762,7 +783,7 @@ addLayer('xp', {
                 height: '180px',
                 'background-image': `url(./resources/images/UI.png)`,
                 'background-repeat': 'no-repeat',
-                'image-rendering': 'crisp-edges',
+                'image-rendering': 'pixelated',
                 'background-size': `${UI_SIZES.width * 100}% ${UI_SIZES.height * 100}%`,
             },
             onClick: attack_monster,
@@ -778,6 +799,8 @@ addLayer('xp', {
 
                 const selected = player.xp.selected;
 
+                if (!selected) return;
+
                 return D.gt(player.xp.monsters[selected].health, 0) && D.gt(tmp.xp.monsters[selected].damage, 0);
             },
         },
@@ -787,7 +810,7 @@ addLayer('xp', {
                 height: '120px',
                 'background-image': `url(./resources/images/UI.png)`,
                 'background-repeat': 'no-repeat',
-                'image-rendering': 'crisp-edges',
+                'image-rendering': 'pixelated',
                 'background-size': `${UI_SIZES.width * 120}px ${UI_SIZES.height * 120}px`,
                 'background-position': '-240px 0',
             },
@@ -809,7 +832,7 @@ addLayer('xp', {
             style: {
                 'background-image': `url(./resources/images/UI.png)`,
                 'background-repeat': 'no-repeat',
-                'image-rendering': 'crisp-edges',
+                'image-rendering': 'pixelated',
                 'background-size': `${UI_SIZES.width * 120}px ${UI_SIZES.height * 120}px`,
                 'background-position': '-120px -120px',
             },
@@ -833,7 +856,7 @@ addLayer('xp', {
             style: {
                 'background-image': `url(./resources/images/UI.png)`,
                 'background-repeat': 'no-repeat',
-                'image-rendering': 'crisp-edges',
+                'image-rendering': 'pixelated',
                 'background-size': `${UI_SIZES.width * 120}px ${UI_SIZES.height * 120}px`,
                 'background-position': '-120px 0',
             },
@@ -912,6 +935,21 @@ addLayer('xp', {
 
         if (D.gte(player.xp.attack_time_selected, 1)) player.xp.attack_time_selected = D.minus(player.xp.attack_time_selected, 1);
         if (D.gte(player.xp.attack_time_all, 1)) player.xp.attack_time_all = D.minus(player.xp.attack_time_all, 1);
+
+        if (!tmp.xp.list.includes(player.xp.selected)) {
+            if (tmp.xp.list.length) {
+                player.xp.selected = tmp.xp.list[0];
+            } else {
+                player.xp.selected = false;
+            }
+        }
+        if (!tmp.xp.list.includes(player.xp.lore)) {
+            if (tmp.xp.list.length) {
+                player.xp.lore = tmp.xp.list[0];
+            } else {
+                player.xp.lore = false;
+            }
+        }
     },
     update(diff) {
         if (inChallenge('b', 31) && D.lte(player.dea.health, 0)) return;
@@ -1330,9 +1368,13 @@ addLayer('xp', {
         },
     },
     list() {
-        return Object.values(tmp.xp.monsters)
+        let list = Object.values(tmp.xp.monsters)
             .filter(mon => mon.unlocked ?? true)
             .map(mon => mon.id);
+
+        if (inChallenge('b', 32) && Array.isArray(tmp.wor.overrides.xp.monsters)) list = list.filter(monster => tmp.wor.overrides.xp.monsters.includes(monster));
+
+        return list;
     },
     doReset(layer) {
         if (tmp[layer].row <= this.row) return;

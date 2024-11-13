@@ -598,6 +598,62 @@ addLayer('ach', {
             },
             unlocked() { return hasChallenge('b', 12); },
         },
+        112: {
+            name: 'packidge',
+            tooltip: 'Buy a mysterious package',
+            done() { return ['package_1', 'package_2', 'package_3', 'package_4'].some(item => D.gte(player.items[item].amount, 1)); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.wor.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.wor.color;
+
+                return style;
+            },
+            unlocked() { return hasChallenge('b', 22); },
+        },
+        113: {
+            name: 'Mandatory Beach Episode',
+            tooltip: 'Go to the beach',
+            done() { return world.map?.[player.wor.position[0]]?.[player.wor.position[1]] == 'B'; },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.wor.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.wor.color;
+
+                return style;
+            },
+            unlocked() { return hasChallenge('b', 22); },
+        },
+        114: {
+            name: 'Into The Fire',
+            tooltip: 'Fall in lava',
+            done() { return world.map?.[player.wor.position[0]]?.[player.wor.position[1]] == 'L'; },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.wor.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.wor.color;
+
+                return style;
+            },
+            unlocked() { return hasChallenge('b', 22); },
+        },
+        115: {
+            name: 'Mg. Worldwide',
+            tooltip: 'Explore 150 tiles',
+            done() { return player.wor.visited.length >= 150; },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.wor.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.wor.color;
+
+                return style;
+            },
+            unlocked() { return hasChallenge('b', 22); },
+        },
         //#endregion Bonus
         //#region Secret
         21: {

@@ -99,6 +99,7 @@ addLayer('dea', {
                 player.dea.survives = D.dZero;
                 addPoints('dea', 1);
                 doReset('dea', true);
+                player.wor.position = [12, 12];
             },
         },
     },

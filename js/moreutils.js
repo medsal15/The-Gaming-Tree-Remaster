@@ -1,6 +1,6 @@
 const UI_SIZES = {
-    width: 3,
-    height: 2,
+    width: 4,
+    height: 3,
 };
 /**
  * Checks if an upgrade can be purchased in a layer
@@ -329,10 +329,12 @@ function square(list, size) {
 /**
  * Returns the content for lore in the XP tabFormat
  *
- * @param {monsters} monster
+ * @param {monsters|false} monster
  * @returns {TabFormatEntries<'xp'>[]}
  */
 function bestiary_content(monster) {
+    if (!monster) return [];
+
     const tmonst = tmp.xp.monsters[monster];
 
     if (!(tmonst.unlocked ?? true)) return [];
@@ -347,7 +349,7 @@ function bestiary_content(monster) {
                         height: ${MONSTER_SIZES.height * 100}%;
                         margin-left: ${-240 * tmonst.position[0]}px;
                         margin-top: ${-240 * tmonst.position[1]}px;
-                        image-rendering: crisp-edges;"/>
+                        image-rendering: pixelated;"/>
             </div>`
         ],
         ['display-text', capitalize(tmonst.name)],
@@ -518,7 +520,7 @@ function attack_monster(monster, damage) {
 /**
  * Gets a random ore for mining
  *
- * @returns {ores}
+ * @returns {ores|false}
  */
 function random_ore() {
     if (!tmp.m) return 'stone';
@@ -528,6 +530,8 @@ function random_ore() {
         .filter(ore => (ore.unlocked ?? true) && D.gt(ore.weight, 0))
         .map(ore => [ore.id, ore.weight]),
         sum = list.reduce((sum, [, weight]) => D.add(sum, weight), D.dZero);
+
+    if (!list.length) return false;
 
     let rand = sum.times(Math.random()),
         i = 0;
@@ -544,7 +548,7 @@ function random_ore() {
  * @returns {ores[]}
  */
 function random_ores(length) {
-    return Array.from({ length }, () => random_ore());
+    return Array.from({ length }, () => random_ore()).filter(o => o);
 }
 /**
  * Returns the total weight of all unlocked ores
@@ -559,10 +563,12 @@ function total_ore_weights() {
 /**
  * Returns the content for lore in the mining tabFormat
  *
- * @param {ores} ore
+ * @param {ores|false} ore
  * @returns {TabFormatEntries<'m'>[]}
  */
 function handbook_content(ore) {
+    if (!ore) return [];
+
     const tore = tmp.m.ores[ore];
 
     if (!(tore.unlocked ?? true)) return [];
@@ -577,7 +583,7 @@ function handbook_content(ore) {
                             height: ${ORE_SIZES.height * 100}%;
                             margin-left: ${-240 * tore.position[0]}px;
                             margin-top: ${-240 * tore.position[1]}px;
-                            image-rendering: crisp-edges;"/>
+                            image-rendering: pixelated;"/>
                 </div>`
         ],
         ['display-text', capitalize(tore.name)],
@@ -1009,7 +1015,13 @@ function crafting_show_recipe(recipe) {
         }],
         ['tile', {
             text: `Craft ${formatWhole(precipe.target)}${craft}${total}`,
-            canClick() { return D.lte(precipe.making, 0) && crafting_can(recipe); },
+            canClick() {
+                if (inChallenge('b', 32)) {
+                    if (D.gt(trecipe.heat, 0) && !tmp.wor.overrides.c.forgable) return false;
+                    if (D.lte(trecipe.heat, 0) && !tmp.wor.overrides.c.craftable) return false;
+                }
+                return D.lte(precipe.making, 0) && crafting_can(recipe);
+            },
             onClick() {
                 gain_items(trecipe.consumes.map(([item, amount]) => [item, amount.neg()]));
                 precipe.making = precipe.target;
@@ -1149,7 +1161,7 @@ function bosstiary_content(boss) {
                         height: ${BOSS_SIZES.height * 100}%;
                         margin-left: ${-240 * bosst.position[0]}px;
                         margin-top: ${-240 * bosst.position[1]}px;
-                        image-rendering: crisp-edges;"/>
+                        image-rendering: pixelated;"/>
             </div>`
         ],
         ['display-text', capitalize(bosst.name)],
@@ -1256,22 +1268,30 @@ function shop_display_buy() {
         });
 
     return Object.values(grid).map(items => ['row', items.map(item => {
+        let buy_amount = player.s.buy_amount;
+        if (tmp.items[item].value.limit instanceof Decimal) {
+            buy_amount = D.min(buy_amount, tmp.items[item].value.limit);
+        }
+
         const trademp = tmp.s.items[item],
             tile = item_tile(item, 90),
-            cost = D.times(trademp.cost, player.s.buy_amount),
+            cost = D.times(trademp.cost, buy_amount),
             list = value_coin(cost);
 
         let cost_txt = 'free';
         if (list.length > 2) list.length = 2;
         if (list.length > 0) cost_txt = listFormat.format(list.map(([item, amount]) => `${formatWhole(amount)} ${tmp.items[item].name}`));
 
-        tile.text = `${formatWhole(player.s.buy_amount)} ${capitalize(tmp.items[item].name)}<br>
+        tile.text = `${formatWhole(buy_amount)} ${capitalize(tmp.items[item].name)}<br>
             You have ${formatWhole(player.items[item].amount)}<br><br>
             Cost: ${cost_txt}`;
-        tile.canClick = () => D.gte(player.s.buy_amount, 1) && D.gte(tmp.s.coins.total, cost);
+        tile.canClick = () => {
+            if (inChallenge('b', 32) && !tmp.wor.overrides.s.can_buy) return false;
+
+            return D.gte(buy_amount, 1) && D.gte(tmp.s.coins.total, cost)
+        };
         tile.onClick = () => {
-            const buy_amount = D.floor(player.s.buy_amount),
-                cost = buy_amount.times(trademp.cost);
+            const cost = buy_amount.times(trademp.cost);
             gain_items(item, buy_amount);
             spend_coins(cost);
             player.s.spent = D.add(player.s.spent, cost);
@@ -1320,7 +1340,11 @@ function shop_display_sell() {
         tile.text = `${formatWhole(player.s.sell_amount)} ${capitalize(tmp.items[item].name)}<br>
             You have ${formatWhole(player.items[item].amount)}<br><br>
             Value: ${value_txt}`;
-        tile.canClick = () => D.gte(player.s.sell_amount, 1) && D.gte(player.items[item].amount, player.s.sell_amount);
+        tile.canClick = () => {
+            if (inChallenge('b', 32) && !tmp.wor.overrides.s.can_sell) return false;
+
+            return D.gte(player.s.sell_amount, 1) && D.gte(player.items[item].amount, player.s.sell_amount)
+        };
         tile.onClick = () => {
             const sell_amount = D.floor(player.s.sell_amount),
                 value = D.times(trademp.value, sell_amount).times(tmp.s.modifiers.trade.sell_mult).times(tmp.s.modifiers.coin.mult);

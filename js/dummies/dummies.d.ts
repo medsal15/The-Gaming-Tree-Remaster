@@ -1519,6 +1519,8 @@ declare class Item<I> {
          * Value for selling 1
          */
         value?: Computable<Decimal>
+        /** Maximum amount the player can buy */
+        limit?: Computable<Decimal>
     }
 
     effect(amount?: DecimalSource): any
@@ -1526,11 +1528,15 @@ declare class Item<I> {
 }
 
 type items = 'unknown' |
+    // Slime
     'slime_goo' | 'slime_core_shard' | 'slime_core' | 'dense_slime_core' |
     'slime_crystal' | 'slime_knife' | 'slime_injector' | 'slime_die' |
+    // Skeleton
     'bone' | 'rib' | 'skull' | 'slimy_skull' |
-    'mud' | 'mud_brick' | 'golem_eye' | 'golem_core' |
     'bone_pick' | 'crystal_skull' | 'bone_slate' | 'magic_slime_ball' |
+    // Golem
+    'mud' | 'mud_brick' | 'golem_eye' | 'golem_core' |
+    // Mining
     'stone' | 'copper_ore' | 'tin_ore' | 'bronze_blend' | 'gold_nugget' | 'densium' |
     'coal' | 'iron_ore' | 'clear_iron_ore' | 'silver_ore' | 'electrum_blend' |
     'stone_brick' | 'copper_ingot' | 'tin_ingot' | 'bronze_ingot' | 'gold_ingot' |
@@ -1540,10 +1546,12 @@ type items = 'unknown' |
     'stone_wall' | 'copper_golem' | 'tin_ring' | 'bronze_mold' | 'gold_star' | 'iron_heataxe' | 'disco_ball' | 'electrum_package' |
     'coin_copper' | 'coin_bronze' | 'coin_silver' | 'coin_gold' | 'coin_platinum' |
     'densium_slime' | 'densium_rock' | 'magic_densium_ball' |
+    // Special
+    'package_1' | 'package_2' | 'package_3' | 'package_4' |
     'cueball';
 /**
  * TODO 4 golem items
- * mud house (mud bricks; ???)
+ * mud kiln (mud bricks + stone; +forge speed, ???)
  * weakness finder (eye + ???; +mining/xp damage)
  * magic generator (core + electrum + ???; ???)
  * record golem (eye + core + stone?; +chance, chance drop core)
@@ -1622,6 +1630,30 @@ type Layers = {
                 name: Computable<string>
                 reset_gain(): Decimal
                 formula: Computable<string>
+            }
+        }
+    }
+    wor: Layer<'wor'> & {
+        overrides: {
+            xp: {
+                /** Monsters available on the current location */
+                monsters(): monsters[]
+            }
+            m: {
+                /** Ores available on the current location */
+                ores(): ores[]
+            }
+            c: {
+                /** Whether normal crafting can be done */
+                craftable(): boolean
+                /** Whether forging can be done */
+                forgable(): boolean
+            }
+            s: {
+                /** Whether buying can be done */
+                can_buy(): boolean
+                /** Whether selling can be done */
+                can_sell(): boolean
             }
         }
     }
@@ -1996,10 +2028,16 @@ type Player = {
         health: Decimal
         survives: Decimal
     } & { [res in death_resources]: Decimal }
+    wor: LayerData & {
+        position: [row: number, col: number]
+        delivered: Record<items, boolean>
+        visited: [row: number, col: number][]
+        zoom: number
+    }
     // Row 0
     xp: LayerData & {
-        selected: monsters
-        lore: monsters
+        selected: monsters | false
+        lore: monsters | false
         monsters: { [monster in monsters]: {
             kills: Decimal
             health: Decimal
@@ -2014,7 +2052,7 @@ type Player = {
         previous: ores[]
         last_drops: [items, Decimal][]
         health: Decimal
-        lore: ores
+        lore: ores | false
         ores: { [ore in ores]: {
             broken: Decimal
         } }
@@ -2085,3 +2123,35 @@ type Player = {
 function gain_items(items: [items, DecimalSource][]): void
 /** Adds the item in question to the player data */
 function gain_items(item: items, amount: DecimalSource): void
+
+type WorldMap = {
+    map: string[][]
+    info: Record<string, {
+        color: string
+        name: string
+        lore?: string
+        /** Icon on the map */
+        icon?: [number, number]
+        overrides?: {
+            /** Monsters on the location, if there are any */
+            monsters?: monsters[]
+            /** Ores on the location, if there are any */
+            ores?: ores[]
+            /** If true, crafting can be done */
+            craftable?: boolean
+            /** If true, forging can be done */
+            forgable?: boolean
+            /** If true, buying can be done */
+            buy?: boolean
+            /** If true, selling can be done */
+            sell?: boolean
+        }
+        /** If true, the tile cannot be walked on */
+        solid?: boolean
+        /** If set, an item can be delivered there for value */
+        package?: {
+            item: items
+            value: Computable<Decimal>
+        }
+    }>
+};

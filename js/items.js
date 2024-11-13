@@ -7,6 +7,7 @@ const item_grid_rows = {
     ores_advanced_equipment: 5,
     densium: 6,
     ingots: 7,
+    special: 8,
 };
 /**
  * @type {{[id in items]: Item<id>}}
@@ -2640,7 +2641,8 @@ const item_list = {
         id: null,
         color: '#FFFFFF',
         name: 'cueball',
-        //todo icon & grid
+        icon: [12, 0],
+        grid: [item_grid_rows.special, 0],
         row: 'side',
         lore: `A spherical white ball.<br>
             Where did it come from? You don't remember picking it up...<br>
@@ -2648,11 +2650,99 @@ const item_list = {
         categories: [],
         unlocked() { return D.gt(player.items[this.id].amount, 0); },
     },
+    'package_1': {
+        id: null,
+        color: '#DDAA66',
+        name: 'strange package',
+        icon: [12, 1],
+        grid: [item_grid_rows.special, 1],
+        row: 'side',
+        sources: {
+            other: ['shop'],
+        },
+        value: {
+            cost() {
+                if (inChallenge('b', 32) && D.lte(player.items[this.id].total, 0)) return D(500);
+            },
+            limit: D.dOne,
+        },
+        lore: `A box containing something. It's marked with a red square.<br>\
+            You're not allowed to open it.<br>\
+            It faintly smells like cocoa.`,
+        categories: [],
+        unlocked() { return inChallenge('b', 32); },
+    },
+    'package_2': {
+        id: null,
+        color: '#DDAA66',
+        name: 'bizarre package',
+        icon: [12, 2],
+        grid: [item_grid_rows.special, 2],
+        row: 'side',
+        sources: {
+            other: ['shop'],
+        },
+        value: {
+            cost() {
+                if (inChallenge('b', 32) && D.lte(player.items[this.id].total, 0)) return D(750);
+            },
+            limit: D.dOne,
+        },
+        lore: `A box containing something. It's marked with a blue triangle.<br>\
+            You're not allowed to open it.<br>\
+            It faintly smells like cocoa.`,
+        categories: [],
+        unlocked() { return inChallenge('b', 32); },
+    },
+    'package_3': {
+        id: null,
+        color: '#DDAA66',
+        name: 'curious package',
+        icon: [12, 3],
+        grid: [item_grid_rows.special, 3],
+        row: 'side',
+        sources: {
+            other: ['shop'],
+        },
+        value: {
+            cost() {
+                if (inChallenge('b', 32) && D.lte(player.items[this.id].total, 0)) return D(1_000);
+            },
+            limit: D.dOne,
+        },
+        lore: `A box containing something. It's marked with a yellow circle.<br>\
+            You're not allowed to open it.<br>\
+            It faintly smells like cocoa.`,
+        categories: [],
+        unlocked() { return inChallenge('b', 32); },
+    },
+    'package_4': {
+        id: null,
+        color: '#DDAA66',
+        name: 'unusual package',
+        icon: [12, 4],
+        grid: [item_grid_rows.special, 4],
+        row: 'side',
+        sources: {
+            other: ['shop'],
+        },
+        value: {
+            cost() {
+                if (inChallenge('b', 32) && D.lte(player.items[this.id].total, 0)) return D(1_250);
+            },
+            limit: D.dOne,
+        },
+        lore: `A box containing something. It's marked with a green diamond.<br>\
+            You're not allowed to open it.<br>\
+            It faintly smells like cocoa.`,
+        categories: [],
+        unlocked() { return inChallenge('b', 32); },
+    },
 };
 
 const ITEM_SIZES = {
     width: 12,
-    height: 12,
+    height: 13,
 };
 /**
  * @type {{[row in Layer['row']]: items[]}}
@@ -2739,7 +2829,7 @@ function item_tile(item, size = 80) {
             'background-image': `url(./resources/images/items.png)`,
             'background-origin': `border-box`,
             'background-repeat': `no-repeat`,
-            'image-rendering': 'crisp-edges',
+            'image-rendering': 'pixelated',
             'background-size': `${ITEM_SIZES.width * size}px ${ITEM_SIZES.height * size}px`,
             'background-position-x': `${itemp.icon[1] * -size}px`,
             'background-position-y': `${itemp.icon[0] * -size}px`,
@@ -2773,7 +2863,7 @@ function item_tile_unknown() {
             'background-image': `url(./resources/images/unknown.png)`,
             'background-origin': `border-box`,
             'background-repeat': `no-repeat`,
-            'image-rendering': 'crisp-edges',
+            'image-rendering': 'pixelated',
             'background-size': `80px 80px`,
             'transform': 'initial',
         },

@@ -110,6 +110,7 @@ addLayer('m', {
                         if (count == 1) return name;
                         return `${formatWhole(count)} ${name}`;
                     });
+                    if (!text.length) text.push('nothing');
 
                     return `You are mining ${listFormat.format(text)}`;
                 }],
@@ -120,9 +121,19 @@ addLayer('m', {
                                     height: ${ORE_SIZES.height * 100}%;
                                     margin-left: ${-240 * tmp.m.ores[ore].position[0]}px;
                                     margin-top: ${-240 * tmp.m.ores[ore].position[1]}px;
-                                    image-rendering: crisp-edges;"/>
-                        </div>`]),
-                        sq = square(list);
+                                    image-rendering: pixelated;"/>
+                        </div>`]);
+                    if (!list.length) {
+                        list.push(['raw-html', `<div style="width: 240px; height: 240px; overflow: hidden">
+                                <img src="./resources/images/ores.png"
+                                    style="width: ${ORE_SIZES.width * 100}%;
+                                        height: ${ORE_SIZES.height * 100}%;
+                                        margin-left: 0;
+                                        margin-top: 0;
+                                        image-rendering: pixelated;"/>
+                            </div>`]);
+                    }
+                    const sq = square(list);
                     return sq.map(imgs => ['row', imgs])
                 }],
                 ['bar', 'health'],
@@ -1337,10 +1348,13 @@ addLayer('m', {
                 height: '180px',
                 'background-image': `url(./resources/images/UI.png)`,
                 'background-repeat': 'no-repeat',
-                'image-rendering': 'crisp-edges',
+                'image-rendering': 'pixelated',
                 'background-size': `${UI_SIZES.width * 100}% ${UI_SIZES.height * 100}%`,
                 'background-position-y': '-180px',
-                backgroundColor() { return tmp.m.nodeStyle.backgroundColor; },
+                backgroundColor() {
+                    if (tmp.m.clickables[11].canClick) return tmp.m.nodeStyle.backgroundColor;
+                    return colors[options.theme].locked;
+                },
             },
             onClick: strike_ore,
             onHold() {
@@ -1352,7 +1366,7 @@ addLayer('m', {
             canClick() {
                 if (inChallenge('b', 31) && D.lte(player.dea.health, 0)) return false;
 
-                return D.gt(player.m.health, 0);
+                return D.gt(player.m.health, 0) && player.m.targets.length;
             },
         },
         // Handbook
@@ -1361,7 +1375,7 @@ addLayer('m', {
                 const style = {
                     'background-image': `url(./resources/images/UI.png)`,
                     'background-repeat': 'no-repeat',
-                    'image-rendering': 'crisp-edges',
+                    'image-rendering': 'pixelated',
                     'background-size': `${UI_SIZES.width * 120}px ${UI_SIZES.height * 120}px`,
                     'background-position': '-120px -120px',
                 };
@@ -1395,7 +1409,7 @@ addLayer('m', {
                 const style = {
                     'background-image': `url(./resources/images/UI.png)`,
                     'background-repeat': 'no-repeat',
-                    'image-rendering': 'crisp-edges',
+                    'image-rendering': 'pixelated',
                     'background-size': `${UI_SIZES.width * 120}px ${UI_SIZES.height * 120}px`,
                     'background-position': '-120px 0',
                 };
@@ -1489,6 +1503,10 @@ addLayer('m', {
                 return xp;
             },
             vein() { return D.div(player.m.ores[this.id].broken, tmp.m.modifiers.vein.size).floor(); },
+            unlocked() {
+                if (inChallenge('b', 32)) return tmp.wor.overrides.m.ores.includes(this.id);
+                return true;
+            },
         },
         copper: {
             _id: null,
@@ -1527,6 +1545,10 @@ addLayer('m', {
                 return xp;
             },
             vein() { return D.div(player.m.ores[this.id].broken, tmp.m.modifiers.vein.size).floor(); },
+            unlocked() {
+                if (inChallenge('b', 32)) return tmp.wor.overrides.m.ores.includes(this.id);
+                return true;
+            },
         },
         tin: {
             _id: null,
@@ -1565,6 +1587,10 @@ addLayer('m', {
                 return xp;
             },
             vein() { return D.div(player.m.ores[this.id].broken, tmp.m.modifiers.vein.size).floor(); },
+            unlocked() {
+                if (inChallenge('b', 32)) return tmp.wor.overrides.m.ores.includes(this.id);
+                return true;
+            },
         },
         coal: {
             _id: null,
@@ -1589,7 +1615,10 @@ addLayer('m', {
                 Technically made entirely of rocks.`,
             weight() { return D(5); },
             breaks() { return D.dOne; },
-            unlocked() { return hasUpgrade('m', 61); },
+            unlocked() {
+                if (inChallenge('b', 32)) return tmp.wor.overrides.m.ores.includes(this.id);
+                return hasUpgrade('m', 61);
+            },
             experience(vein) {
                 vein ??= tmp.m.ores[this.id].vein;
 
@@ -1628,7 +1657,10 @@ addLayer('m', {
                 The red comes from oxidation. Refining this might be tough...`,
             weight() { return D.dOne; },
             breaks() { return D.dOne; },
-            unlocked() { return hasUpgrade('m', 61); },
+            unlocked() {
+                if (inChallenge('b', 32)) return tmp.wor.overrides.m.ores.includes(this.id);
+                return hasUpgrade('m', 61);
+            },
             experience(vein) {
                 vein ??= tmp.m.ores[this.id].vein;
 
@@ -1667,7 +1699,10 @@ addLayer('m', {
                 Now this is a valuable ore!`,
             weight() { return D(.5); },
             breaks() { return D.dOne; },
-            unlocked() { return hasUpgrade('m', 61); },
+            unlocked() {
+                if (inChallenge('b', 32)) return tmp.wor.overrides.m.ores.includes(this.id);
+                return hasUpgrade('m', 61);
+            },
             experience(vein) {
                 vein ??= tmp.m.ores[this.id].vein;
 
@@ -1895,18 +1930,38 @@ addLayer('m', {
         },
         unlocked() { return hasUpgrade('s', 22) || hasAchievement('b', 65); },
     },
-    list() { return Object.keys(layers.m.ores).filter(/**@param{ores}ore*/ore => tmp.m.ores[ore].unlocked ?? true); },
+    list() {
+        let list = Object.keys(layers.m.ores).filter(/**@param{ores}ore*/ore => tmp.m.ores[ore].unlocked ?? true);
+
+        if (inChallenge('b', 32) && Array.isArray(tmp.wor.overrides.m.ores)) list = list.filter(monster => tmp.wor.overrides.m.ores.includes(monster));
+
+        return list;
+    },
     items: ['copper_ore', 'tin_ore', 'gold_nugget', 'iron_ore', 'clear_iron_ore', 'silver_ore'],
     minerals: [
         'stone', 'copper_ore', 'tin_ore', 'bronze_blend', 'gold_nugget', 'densium',
         'coal', 'iron_ore', 'clear_iron_ore', 'silver_ore', 'electrum_blend',
     ],
     automate() {
-        if (player.m.targets.length != tmp.m.modifiers.size) {
-            const targets = random_ores(tmp.m.modifiers.size),
-                health = targets.map(ore => tmp.m.ores[ore].health).reduce((sum, health) => D.add(sum, health), D.dZero);
-            player.m.targets = targets;
-            player.m.health = health;
+        if (!tmp.m.list.includes(player.m.lore)) {
+            if (tmp.m.list.length) {
+                player.m.lore = tmp.m.list[0];
+            } else {
+                player.m.lore = false;
+            }
+        }
+
+        if (player.m.targets.some(ore => !tmp.m.list.includes(ore)) || player.m.targets.length != tmp.m.modifiers.size) {
+            if (tmp.m.list.length) {
+                const targets = random_ores(tmp.m.modifiers.size),
+                    health = targets.map(ore => tmp.m.ores[ore].health).reduce((sum, health) => D.add(sum, health), D.dZero);
+                player.m.targets = targets;
+                player.m.health = health;
+            } else {
+                player.m.targets = [];
+                player.m.health = D.dZero;
+                return;
+            }
         }
         if (D.gt(player.m.health, tmp.m.modifiers.health.total)) {
             player.m.health = tmp.m.modifiers.health.total;
@@ -1952,9 +2007,11 @@ addLayer('m', {
             player.m.health = health;
 
             if (hasUpgrade('m', 64)) {
-                const selected = player.xp.selected,
-                    damage = D.times(tmp.xp.monsters[selected].damage, upgradeEffect('m', 64));
-                attack_monster(player.xp.selected, damage);
+                const selected = player.xp.selected;
+                if (selected) {
+                    const damage = D.times(tmp.xp.monsters[selected].damage, upgradeEffect('m', 64));
+                    attack_monster(selected, damage);
+                }
             }
         }
 
