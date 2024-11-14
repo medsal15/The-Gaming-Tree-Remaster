@@ -116,32 +116,32 @@ const world = {
         'SR': {
             color: '#553333',
             name: 'wastelands sign',
-            lore: `<-- <span style="color:#DD3322">Colocamp</span><br>\
-                --> Fecht<br>\
+            lore: `← <span style="color:#DD3322">Colocamp</span><br>\
+                → Fecht<br>\
                 ↓ <span style="color:#FFAA11">Sequorcap</span>`,
             icon: [1, 2],
         },
         'SY': {
             color: '#553333',
             name: 'mountain sign',
-            lore: `--> <span style="color:#FFFF44">Solinfra</span><br>\
-                <-- <span style="color:#FFAA11">Sequorcap</span><br>\
+            lore: `→ <span style="color:#FFFF44">Solinfra</span><br>\
+                ← <span style="color:#FFAA11">Sequorcap</span><br>\
                 ↓ Forest`,
             icon: [1, 2],
         },
         'SB': {
             color: '#553333',
             name: 'ocean sign',
-            lore: `<-- Wastelands<br>\
-                --> <span style="color:#FFAA11">Sequorcap</span><br>\
+            lore: `← Wastelands<br>\
+                → <span style="color:#FFAA11">Sequorcap</span><br>\
                 ↓ <span style="color:#2299DD">Saiwipeysk</span>`,
             icon: [1, 2],
         },
         'SG': {
             color: '#553333',
             name: 'forest sign',
-            lore: `<-- Grasweud<br>\
-                --> <span style="color:#11AA22">Harfyri</span><br>\
+            lore: `← Grasweud<br>\
+                → <span style="color:#11AA22">Harfyri</span><br>\
                 ↑ <span style="color:#FFAA11">Sequorcap</span>`,
             icon: [1, 2],
         },

@@ -34,9 +34,9 @@ let VERSION = {
 
 let changelog = `<h1>Changelog:</h1><br>
 	<h3>v0.3: ???</h3>
-		- //todo<br>
+		- Add 2 new layers.<br>
 		- Add a new enemy.<br>
-		- Update endgame: ???<br>
+		- Update endgame: Enter the third boss fight<br>
 	<h3>v0.2: Bones and Stones</h3><br>
 		- Update vue to 2.7.16 and TMT to 2.7<br>
 		- Improve import modal.<br>
@@ -99,7 +99,7 @@ var displayThings = [
 
 // Determines when the game "ends"
 function isEndgame() {
-	return inChallenge('b', 12);
+	return inChallenge('b', 41);
 }
 
 

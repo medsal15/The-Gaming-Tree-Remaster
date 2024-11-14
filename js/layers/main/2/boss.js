@@ -205,7 +205,7 @@ addLayer('b', {
             },
         },
         /**
-         * TODO 13: Enter the Golem Factory
+         * TODO 41: Enter the Golem Factory
          *
          * slime -> slime golems (+defense, ↑health, +mud, ↓slime goo, ↑slime core shards, ↑slime core)
          * skeleton -> bone golems (+defense, ↑health, +mud, ↓skull, ↑rib, ↑bone)
@@ -285,7 +285,7 @@ addLayer('b', {
                 return text;
             },
             goalDescription: `Deliver all 4 packages`,
-            rewardDescription: ``, //todo
+            rewardDescription: `You can buy basic monster drops again, and stone may now drop mud`, //todo is this good enough?
             canComplete() {
                 /** @type {items[]} */
                 const list = ['package_1', 'package_2', 'package_3', 'package_4'],

@@ -53,14 +53,14 @@ const item_list = {
                 /** @type {drop_sources[]} */
                 const other = [];
 
-                if (inChallenge('b', 12) || inChallenge('b', 22)) other.push('shop');
+                if (inChallenge('b', 12) || inChallenge('b', 22) || hasChallenge('b', 32)) other.push('shop');
 
                 return other;
             },
         },
         value: {
             cost() {
-                if (inChallenge('b', 12) || inChallenge('b', 22)) return D(5);
+                if (inChallenge('b', 12) || inChallenge('b', 22) || hasChallenge('b', 32)) return D(5);
             },
         },
         lore() {
@@ -107,14 +107,14 @@ const item_list = {
                 /** @type {drop_sources[]} */
                 const other = [];
 
-                if (inChallenge('b', 12) || inChallenge('b', 22)) other.push('shop');
+                if (inChallenge('b', 12) || inChallenge('b', 22) || hasChallenge('b', 32)) other.push('shop');
 
                 return other;
             },
         },
         value: {
             cost() {
-                if (inChallenge('b', 12) || inChallenge('b', 22)) return D(15);
+                if (inChallenge('b', 12) || inChallenge('b', 22) || hasChallenge('b', 32)) return D(15);
             },
         },
         lore() {
@@ -163,14 +163,14 @@ const item_list = {
                 /** @type {drop_sources[]} */
                 const other = ['crafting'];
 
-                if (inChallenge('b', 12) || inChallenge('b', 22)) other.push('shop');
+                if (inChallenge('b', 12) || inChallenge('b', 22) || hasChallenge('b', 32)) other.push('shop');
 
                 return other;
             },
         },
         value: {
             cost() {
-                if (inChallenge('b', 12) || inChallenge('b', 22)) return D(50);
+                if (inChallenge('b', 12) || inChallenge('b', 22) || hasChallenge('b', 32)) return D(50);
             },
         },
         lore() {
@@ -572,14 +572,14 @@ const item_list = {
                 /** @type {drop_sources[]} */
                 const other = [];
 
-                if (inChallenge('b', 12) || inChallenge('b', 22)) other.push('shop');
+                if (inChallenge('b', 12) || inChallenge('b', 22) || hasChallenge('b', 32)) other.push('shop');
 
                 return other;
             },
         },
         value: {
             cost() {
-                if (inChallenge('b', 12) || inChallenge('b', 22)) return D(7);
+                if (inChallenge('b', 12) || inChallenge('b', 22) || hasChallenge('b', 32)) return D(7);
             },
         },
         lore: `A big rod mostly made of calcium.<br>
@@ -610,14 +610,14 @@ const item_list = {
                 /** @type {drop_sources[]} */
                 const other = [];
 
-                if (inChallenge('b', 12) || inChallenge('b', 22)) other.push('shop');
+                if (inChallenge('b', 12) || inChallenge('b', 22) || hasChallenge('b', 32)) other.push('shop');
 
                 return other;
             },
         },
         value: {
             cost() {
-                if (inChallenge('b', 12) || inChallenge('b', 22)) return D(20);
+                if (inChallenge('b', 12) || inChallenge('b', 22) || hasChallenge('b', 32)) return D(20);
             },
         },
         lore: `A curved bone.<br>
@@ -650,14 +650,14 @@ const item_list = {
                 /** @type {drop_sources[]} */
                 const other = ['crafting'];
 
-                if (inChallenge('b', 12) || inChallenge('b', 22)) other.push('shop');
+                if (inChallenge('b', 12) || inChallenge('b', 22) || hasChallenge('b', 32)) other.push('shop');
 
                 return other;
             },
         },
         value: {
             cost() {
-                if (inChallenge('b', 12) || inChallenge('b', 22)) return D(60);
+                if (inChallenge('b', 12) || inChallenge('b', 22) || hasChallenge('b', 32)) return D(60);
             },
         },
         lore: `The head of a skeleton.<br>
@@ -941,22 +941,35 @@ const item_list = {
 
                 return { 'kill:golem': chance };
             },
+            range() {
+                let min = D(1),
+                    max = D(3);
+
+                let mult = tmp.m.modifiers.range.mult;
+
+                min = D.times(min, mult);
+                max = D.times(max, mult);
+
+                return {
+                    'mining:stone': { min, max },
+                };
+            },
             other() {
                 /** @type {drop_sources[]} */
                 const other = [];
 
-                if (inChallenge('b', 12) || inChallenge('b', 22)) other.push('shop');
+                if (inChallenge('b', 12) || inChallenge('b', 22) || hasChallenge('b', 32)) other.push('shop');
 
                 return other;
             },
         },
         value: {
             cost() {
-                if (inChallenge('b', 12) || inChallenge('b', 22)) return D(9);
+                if (inChallenge('b', 12) || inChallenge('b', 22) || hasChallenge('b', 32)) return D(9);
             },
         },
         lore() {
-            if (inChallenge('b', 12) || inChallenge('b', 22)) return `A large chunk of wet dirt.<br>
+            if (inChallenge('b', 12) || inChallenge('b', 22) || hasChallenge('b', 32)) return `A large chunk of wet dirt.<br>
                 Rumors of gold hidden inside have heavily increased their worth.<br>
                 It leaves stains everywhere.`;
 
@@ -965,7 +978,7 @@ const item_list = {
                 It leaves stains everywhere.`;
         },
         categories: ['materials', 'golem'],
-        unlocked() { return tmp.xp.monsters.golem.unlocked; },
+        unlocked() { return tmp.xp.monsters.golem.unlocked || hasChallenge('b', 32); },
     },
     'mud_brick': {
         id: null,
@@ -984,7 +997,7 @@ const item_list = {
             Solid enough to use, too fragile to strike.<br>
             Commonly used as a cheap material for construction.`,
         categories: ['materials', 'golem'],
-        unlocked() { return tmp.xp.monsters.golem.unlocked; },
+        unlocked() { return tmp.xp.monsters.golem.unlocked || hasChallenge('b', 32); },
     },
     'golem_eye': {
         id: null,
@@ -1008,14 +1021,14 @@ const item_list = {
                 /** @type {drop_sources[]} */
                 const other = [];
 
-                if (inChallenge('b', 12) || inChallenge('b', 22)) other.push('shop');
+                if (inChallenge('b', 12) || inChallenge('b', 22) || hasChallenge('b', 32)) other.push('shop');
 
                 return other;
             },
         },
         value: {
             cost() {
-                if (inChallenge('b', 12) || inChallenge('b', 22)) return D(25);
+                if (inChallenge('b', 12) || inChallenge('b', 22) || hasChallenge('b', 32)) return D(25);
             },
         },
         lore: `The eye of a golem.<br>
@@ -1036,14 +1049,14 @@ const item_list = {
                 /** @type {drop_sources[]} */
                 const other = ['crafting'];
 
-                if (inChallenge('b', 12) || inChallenge('b', 22)) other.push('shop');
+                if (inChallenge('b', 12) || inChallenge('b', 22) || hasChallenge('b', 32)) other.push('shop');
 
                 return other;
             },
         },
         value: {
             cost() {
-                if (inChallenge('b', 12) || inChallenge('b', 22)) return D(75);
+                if (inChallenge('b', 12) || inChallenge('b', 22) || hasChallenge('b', 32)) return D(75);
             },
         },
         lore: `The core of a golem.<br>

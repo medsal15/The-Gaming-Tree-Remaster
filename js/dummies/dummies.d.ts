@@ -1553,7 +1553,7 @@ type items = 'unknown' |
  * TODO 4 golem items
  * mud kiln (mud bricks + stone; +forge speed, ???)
  * weakness finder (eye + ???; +mining/xp damage)
- * magic generator (core + electrum + ???; ???)
+ * arcane generator (core + electrum + ???; unlock Arcanism)
  * record golem (eye + core + stone?; +chance, chance drop core)
  *
  * densium golem (+1 golem/golem)
@@ -1915,6 +1915,14 @@ type Layers = {
             }
         }
     }
+    /**
+     * TODO: Arcanism
+     * connected to crafting
+     * automation for crafting/forging
+     *  factorio like
+     * spells for boosts
+     * transmutation (slime goo -> bone, etc.)
+     */
     // Row 2
     b: Layer<'b'> & {
         challenges?: {

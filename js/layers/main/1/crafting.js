@@ -981,7 +981,7 @@ addLayer('c', {
                 duration: '60 seconds',
             },
             categories: ['materials', 'golem',],
-            unlocked() { return tmp.xp.monsters.golem.unlocked; },
+            unlocked() { return tmp.items.mud.unlocked && tmp.items.mud_brick.unlocked; },
         },
         bronze_blend: {
             _id: null,
@@ -1136,7 +1136,7 @@ addLayer('c', {
                 heat: '10',
             },
             categories: ['materials', 'forge', 'golem',],
-            unlocked() { return tmp.c.forge.unlocked && tmp.items.mud_brick.unlocked; },
+            unlocked() { return tmp.c.forge.unlocked && tmp.items.mud.unlocked && tmp.items.mud_brick.unlocked; },
         },
         stone_brick: {
             _id: null,
