@@ -612,25 +612,35 @@ addLayer('wor', {
                 zoom = player.wor.zoom,
                 /** @type {[row: number, col: number][]} */
                 drawn = [],
+                img = new Image,
                 /** @type {(row: number, col: number) => void} */
                 draw_tile = (row, col) => {
                     const info = world.info[world.map[row][col]];
                     ctx.fillStyle = info.color;
                     ctx.fillRect(col * zoom, row * zoom, zoom, zoom);
+                    if (info.icon) {
+                        ctx.imageSmoothingEnabled = false;
+                        ctx.drawImage(img,
+                            16 * info.icon[1], 16 * info.icon[0], 16, 16,
+                            col * zoom, row * zoom, zoom, zoom,
+                        );
+                    }
                 };
+            img.src = './resources/images/map_icons.png';
             player.wor.visited.forEach(([row, col]) => {
                 for (let x = -2; x <= 2; x++) {
                     for (let y = -2; y <= 2; y++) {
                         const tx = row + x,
                             ty = col + y;
-                        if (!drawn.some(([r, c]) => r == tx && c == ty)) {
+                        if (ty >= 0 && ty < 25 &&
+                            tx >= 0 && tx < 25 &&
+                            !drawn.some(([r, c]) => r == tx && c == ty)) {
                             drawn.push([tx, ty]);
                             draw_tile(tx, ty);
                         }
                     }
                 }
             });
-            //todo remove duplicates
         }
     },
     overrides: {
