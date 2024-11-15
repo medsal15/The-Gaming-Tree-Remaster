@@ -117,7 +117,9 @@ addLayer('b', {
                 if (!tmp.b.challenges[12].unlocked) {
                     return D.div(player.items.gold_nugget.amount, 1);
                 }
-                //todo unlock 13 with magic core
+                if (!tmp.b.challenges[41].unlocked) {
+                    return D.div(player.items.arcane_generator.amount, 1);
+                }
                 return D.dZero;
             },
             display() {
@@ -131,7 +133,10 @@ addLayer('b', {
                     const name = (tmp.items.gold_nugget.unlocked ?? true) ? tmp.items.gold_nugget.name : 'unknown';
                     return `Mine ${formatWhole(player.items.gold_nugget.amount)} / ${formatWhole(1)} ${name}`;
                 }
-                //todo unlock 13 with magic core
+                if (!tmp.b.challenges[12].unlocked) {
+                    const name = (tmp.items.arcane_generator.unlocked ?? true) ? tmp.items.arcane_generator.name : 'unknown';
+                    return `Craft ${formatWhole(player.items.arcane_generator.amount)} / ${formatWhole(1)} ${name}`;
+                }
                 return 'Not fighting a boss';
             },
             fillStyle: {
@@ -202,6 +207,22 @@ addLayer('b', {
                 layerDataReset('s');
                 if (has_33) player.s.upgrades.push(33);
                 tmp.s.coins.list.forEach(([item]) => player.items[item].amount = D.dZero);
+            },
+        },
+        41: {
+            name: 'The Golem Factory',
+            challengeDescription: `Enter the Golem Factory to find the golem's secrets.<br>
+                All monsters are replaced with golems variants.`,
+            goalDescription: '???',
+            rewardDescription: '???',
+            canComplete() { return false; },
+            progress() { return 0; },
+            display() { return `???`; },
+            unlocked() { return player.b.shown && player.b.visible_challenges.includes(this.id); },
+            group: 'boss',
+            buttonStyle() {
+                const group = tmp[this.layer].challenges[this.id].group
+                return { 'backgroundColor': tmp.b.groups[group].color, };
             },
         },
         /**
@@ -388,7 +409,7 @@ addLayer('b', {
                     .reduce((sum, id) => D.add(sum, challengeCompletions('b', id)), D.dZero);
             },
             color() { return tmp.b.color; },
-            rows: [1],
+            rows: [1, 4],
         },
         mini: {
             completions() {
@@ -426,7 +447,10 @@ addLayer('b', {
             player.b.visible_challenges.push('12');
             doPopup('none', `${tmp.b.challenges[12].name}`, 'Boss unlocked', 5, tmp.b.color);
         }
-        //todo unlock 41 with magic core
+        if (!player.b.visible_challenges.includes('41') && D.gte(player.items.arcane_generator.amount, 1)) {
+            player.b.visible_challenges.push('41');
+            doPopup('none', `${tmp.b.challenges[41].name}`, 'Boss unlocked', 5, tmp.b.color);
+        }
     },
     prestigeNotify() { return !activeChallenge('b') && [11].some(id => tmp.b.challenges[id].unlocked && !hasChallenge('b', id)); },
     shouldNotify() {

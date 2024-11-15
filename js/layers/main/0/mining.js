@@ -1138,7 +1138,7 @@ addLayer('m', {
             description() {
                 if (!tmp[this.layer].upgrades[this.id].show) return `Buy ${tmp[this.layer].upgrades[this.id - 10].title} to unlock`;
 
-                return 'Automatically mine current ore once per second<br>Mine an additionnal ore at once';
+                return 'Unlock deeper ores<br>Mine an additionnal ore at once';
             },
             show() { return hasUpgrade(this.layer, this.id - 10) || hasUpgrade(this.layer, this.id) || hasAchievement('ach', 94); },
             effect() { return D.dOne; },

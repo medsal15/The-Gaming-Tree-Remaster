@@ -323,9 +323,9 @@ function square(list, size) {
 
     return sq;
 }
-const category_utils = {
+const CATEG_UTILS = {
     /** @type {categories[]} List of categories */
-    list: ['slime', 'skeleton', 'golem', 'mining', 'densium', 'forge'],
+    list: ['slime', 'skeleton', 'golem', 'mining', 'deep_mining', 'densium', 'forge', 'arca'],
     /** @type {categories[]} Extra categories */
     ext: ['materials', 'equipment'],
     /**
@@ -347,11 +347,15 @@ const category_utils = {
                 return tmp.c.forge.unlocked;
             case 'densium':
                 return tmp.m.compactor.unlocked;
+            case 'deep_mining':
+                return hasUpgrade('m', 61);
             case 'shop':
                 return tmp.s.layerShown;
             case 'materials':
             case 'equipment':
                 return tmp.c.layerShown;
+            case 'arca':
+                return tmp.a.layerShown;
         }
     },
     /**
@@ -364,9 +368,11 @@ const category_utils = {
         'skeleton': () => tmp.xp.monsters.skeleton.name,
         'golem': () => tmp.xp.monsters.golem.name,
         'mining': () => tmp.m.name,
+        'deep_mining': () => 'deep ' + tmp.m.name,
         'forge': () => 'forge',
         'densium': () => tmp.items.densium.name,
         'shop': () => tmp.s.name,
+        'arca': () => tmp.a.name,
         'materials': () => 'materials',
         'equipment': () => 'equipment',
     },
@@ -379,10 +385,12 @@ const category_utils = {
         'slime': () => tmp.xp.monsters.slime.color,
         'skeleton': () => tmp.xp.monsters.skeleton.color,
         'golem': () => tmp.xp.monsters.golem.color,
-        'mining': () => tmp.m.color,
+        'mining': () => tmp.items.copper_ore.color,
+        'deep_mining': () => tmp.items.clear_iron_ore.color,
         'forge': () => tmp.c.modifiers.heat.color,
         'densium': () => tmp.items.densium.color,
         'shop': () => tmp.s.color,
+        'arca': () => tmp.a.color,
         'materials': () => tmp.c.color,
         'equipment': () => tmp.c.color,
     },
@@ -764,10 +772,7 @@ function crafting_show_recipe(recipe) {
 
     if (vis.craftable == 'show' && !crafting_can(recipe, D.dOne) && D.lte(precipe.making, 0)) return []
 
-    if (!(trecipe.unlocked ?? true) || (
-        trecipe.categories.some(cat => vis[cat] == 'hide') &&
-        !trecipe.categories.some(cat => vis[cat] == 'show')
-    )) return [];
+    if (!(trecipe.unlocked ?? true)) return [];
 
     const craft = D.gt(precipe.making, 0) ? `<br>Crafting ${formatWhole(precipe.making)}` : '',
         total = trecipe.static ? `<br>Crafted ${formatWhole(precipe.crafted)}` : '',
@@ -795,22 +800,19 @@ function crafting_show_recipe(recipe) {
                 },
                 display() {
                     if ('duration' in trecipe) {
+                        let time = player.c.recipes[trecipe.id].time;
+                        if (D.gt(player.a.chains[recipe].built, 0)) {
+                            const thain = tmp.a.chains[recipe];
+                            time = D.div(player.a.chains[recipe].time, thain?.time_multiplier ?? 10);
+                        }
                         if (shiftDown) return `${trecipe.formulas.duration}`;
-                        return `${formatTime(player.c.recipes[trecipe.id].time)} / ${formatTime(trecipe.duration)}`;
+                        return `${formatTime(time)} / ${formatTime(trecipe.duration)}`;
                     }
                 },
                 fillStyle: {
-                    'backgroundColor': colors[options.theme][3],
+                    'backgroundColor': D.lte(player.a.chains[recipe].built, 0) ? colors[options.theme][3] : tmp.a.color,
                 },
             }],
-            'blank',
-            line(square(trecipe.produces.map(([item, prod]) => {
-                const tile = item_tile(item),
-                    text = shiftDown ? `[${trecipe.formulas.produces[item]}]` : format(prod);
-                tile.text = `${capitalize(tmp.items[item].name)}<br>${text}`;
-
-                return ['tile', tile];
-            }))),
             'blank',
         ];
 
@@ -830,46 +832,56 @@ function crafting_show_recipe(recipe) {
         );
     }
 
-    rec.push(['column', [
-        ['tile', {
-            text: '+',
-            style: {
-                height: '30px',
-                width: '40px',
-            },
-            canClick() { return D.lt(precipe.target, tmp.c.crafting.max); },
-            onClick() { precipe.target = D.add(precipe.target, 1).min(tmp.c.crafting.max); },
-            onHold() { precipe.target = D.add(precipe.target, 1).min(tmp.c.crafting.max); },
-        }],
-        ['tile', {
-            text: `Craft ${formatWhole(precipe.target)}${craft}${total}`,
-            canClick() {
-                if (inChallenge('b', 32)) {
-                    if (D.gt(trecipe.heat, 0) && !tmp.wor.overrides.c.forgable) return false;
-                    if (D.lte(trecipe.heat, 0) && !tmp.wor.overrides.c.craftable) return false;
-                }
-                return D.lte(precipe.making, 0) && crafting_can(recipe);
-            },
-            onClick() {
-                gain_items(trecipe.consumes.map(([item, amount]) => [item, amount.neg()]));
-                precipe.making = precipe.target;
-                precipe.time = D.dZero;
-            },
-            style: {
-                height: '60px',
-            },
-        }],
-        ['tile', {
-            text: '-',
-            style: {
-                height: '30px',
-                width: '40px',
-            },
-            canClick() { return D.gt(precipe.target, 1); },
-            onClick() { precipe.target = D.minus(precipe.target, 1).max(1); },
-            onHold() { precipe.target = D.minus(precipe.target, 1).max(1); },
-        }],
-    ]]);
+    rec.push(
+        line(square(trecipe.produces.map(([item, prod]) => {
+            const tile = item_tile(item),
+                text = shiftDown ? `[${trecipe.formulas.produces[item]}]` : format(prod);
+            tile.text = `${capitalize(tmp.items[item].name)}<br>${text}`;
+
+            return ['tile', tile];
+        }))),
+        'blank',
+        ['column', [
+            ['tile', {
+                text: '+',
+                style: {
+                    height: '30px',
+                    width: '40px',
+                },
+                canClick() { return D.lt(precipe.target, tmp.c.crafting.max); },
+                onClick() { precipe.target = D.add(precipe.target, 1).min(tmp.c.crafting.max); },
+                onHold() { precipe.target = D.add(precipe.target, 1).min(tmp.c.crafting.max); },
+            }],
+            ['tile', {
+                text: `Craft ${formatWhole(precipe.target)}${craft}${total}`,
+                canClick() {
+                    if (inChallenge('b', 32)) {
+                        if (D.gt(trecipe.heat, 0) && !tmp.wor.overrides.c.forgable) return false;
+                        if (D.lte(trecipe.heat, 0) && !tmp.wor.overrides.c.craftable) return false;
+                    }
+                    return D.lte(player.a.chains[recipe].built, 0) && D.lte(precipe.making, 0) && crafting_can(recipe);
+                },
+                onClick() {
+                    gain_items(trecipe.consumes.map(([item, amount]) => [item, amount.neg()]));
+                    precipe.making = precipe.target;
+                    precipe.time = D.dZero;
+                },
+                style: {
+                    height: '60px',
+                },
+            }],
+            ['tile', {
+                text: '-',
+                style: {
+                    height: '30px',
+                    width: '40px',
+                },
+                canClick() { return D.gt(precipe.target, 1); },
+                onClick() { precipe.target = D.minus(precipe.target, 1).max(1); },
+                onHold() { precipe.target = D.minus(precipe.target, 1).max(1); },
+            }],
+        ]],
+    );
 
     return ['row', rec];
 }
@@ -894,7 +906,7 @@ function crafting_default_amount(recipe, amount) {
 function crafting_default_all_time(recipe, all_time) {
     if (all_time && D.gt(all_time, 0)) return D(all_time);
     if (!(tmp.c.recipes[recipe].static ?? false)) return D.dZero;
-    return player.c.recipes[recipe].crafted;
+    return D.floor(player.c.recipes[recipe].crafted);
 }
 /**
  * Checks whether a recipe can run
@@ -920,7 +932,7 @@ function compendium_content(item) {
     if (!item) return [];
     const itemp = tmp.items[item];
 
-    if (!(itemp.unlocked ?? true)) return [];
+    if (!itemp || !(itemp.unlocked ?? true)) return [];
 
     /** @type {TabFormatEntries<'c'>[]} */
     const lines = [
@@ -972,7 +984,7 @@ function compendium_content(item) {
  * @returns {Record<string, TabFormat<'c'>>}
  */
 function crafting_subtabs_craft() {
-    return Object.fromEntries(category_utils.list.map(/**@return {[categories, TabFormat<'c'>]}*/cat => {
+    return Object.fromEntries(CATEG_UTILS.list.map(/**@return {[categories, TabFormat<'c'>]}*/cat => {
         return [cat, {
             content: [
                 ['column', () => {
@@ -1013,15 +1025,13 @@ function crafting_subtabs_craft() {
                     return lines;
                 }],
             ],
-            name: () => capitalize(category_utils.names[cat]()),
-            buttonStyle: {
-                'border-color': category_utils.color[cat],
-            },
+            name: () => capitalize(CATEG_UTILS.names[cat]()),
+            buttonStyle: { 'border-color': CATEG_UTILS.color[cat], },
             unlocked() {
-                return category_utils.unlocked(cat) && Object.values(tmp.c.recipes)
+                return CATEG_UTILS.unlocked(cat) && Object.values(tmp.c.recipes)
                     .some(data => D.eq(data.heat, 0) && (data.unlocked ?? true) && data.categories.includes(cat));
             },
-            shouldNotify() {
+            prestigeNotify() {
                 return Object.values(tmp.c.recipes)
                     .some(data => D.eq(data.heat, 0) && (data.unlocked ?? true) && data.categories.includes(cat) && crafting_can(data.id));
             },
@@ -1035,7 +1045,7 @@ function crafting_subtabs_craft() {
  */
 function crafting_subtabs_inventory() {
     /** @type {categories[]} */
-    const list = [...category_utils.list, ...category_utils.ext];
+    const list = [...CATEG_UTILS.list, ...CATEG_UTILS.ext];
 
     return Object.fromEntries(list.map(/**@return {[categories, TabFormat<'c'>]}*/cat => {
         return [cat, {
@@ -1084,11 +1094,9 @@ function crafting_subtabs_inventory() {
                     return square(tiles, 8).map(row => ['row', row]);
                 }],
             ],
-            name: () => capitalize(category_utils.names[cat]()),
-            buttonStyle: {
-                'border-color': category_utils.color[cat],
-            },
-            unlocked() { return category_utils.unlocked(cat); },
+            name: () => capitalize(CATEG_UTILS.names[cat]()),
+            buttonStyle: { 'border-color': CATEG_UTILS.color[cat], },
+            unlocked() { return CATEG_UTILS.unlocked(cat); },
         }];
     }));
 }
@@ -1098,7 +1106,7 @@ function crafting_subtabs_inventory() {
  * @returns {Record<string, TabFormat<'c'>>}
  */
 function crafting_subtabs_forge() {
-    return Object.fromEntries(category_utils.list.map(/**@return {[categories, TabFormat<'c'>]}*/cat => {
+    return Object.fromEntries(CATEG_UTILS.list.map(/**@return {[categories, TabFormat<'c'>]}*/cat => {
         return [cat, {
             content: [
                 ['column', () => {
@@ -1139,18 +1147,173 @@ function crafting_subtabs_forge() {
                     return lines;
                 }],
             ],
-            name: () => capitalize(category_utils.names[cat]()),
-            buttonStyle: {
-                'border-color': category_utils.color[cat],
-            },
+            name: () => capitalize(CATEG_UTILS.names[cat]()),
+            buttonStyle: { 'border-color': CATEG_UTILS.color[cat], },
             unlocked() {
-                return category_utils.unlocked(cat) && Object.values(tmp.c.recipes)
+                return CATEG_UTILS.unlocked(cat) && Object.values(tmp.c.recipes)
                     .some(data => D.gt(data.heat, 0) && (data.unlocked ?? true) && data.categories.includes(cat));
             },
-            shouldNotify() {
+            prestigeNotify() {
                 return Object.values(tmp.c.recipes)
                     .some(data => D.gt(data.heat, 0) && (data.unlocked ?? true) && data.categories.includes(cat) && crafting_can(data.id));
             }
+        }];
+    }));
+}
+
+// arcane
+/**
+ * Returns the display for a crafting chain
+ *
+ * @returns {TabFormatEntries<'a'>}
+ */
+function arcane_show_chain(chain) {
+    const phain = player.a.chains[chain],
+        trecipe = tmp.c.recipes[chain],
+        thain = tmp.a.chains[chain];
+
+    if (!(trecipe.unlocked ?? true)) return [];
+
+    /** @type {[items, Decimal][]} */
+    const cost = thain?.items ?? [
+        ['extractor', D(trecipe.consumes.length)],
+        ['inserter', D(trecipe.produces.length)],
+        [D.gt(trecipe.heat, 0) ? 'smelter' : 'combiner', D.dOne],
+    ],
+        upkeep = cost.map(([item, amount]) => D.times(tmp.a.upkeep[item] ?? 0, amount))
+            .reduce((sum, upkeep) => D.add(sum, upkeep), D.dZero),
+        /** @type {(list: ReturnType<square<['tile', tile]>>) => TabFormatEntries<'a'>} */
+        line = list => {
+            if (options.colCraft) return ['row', list.map(row => ['column', row])];
+            else return ['column', list.map(row => ['row', row])];
+        },
+        /** @type {TabFormatEntries<'a'>[]} */
+        fac = [
+            line(square(cost.map(([item, cost]) => {
+                const tile = item_tile(item, 60),
+                    text = `${format(player.items[item].amount)} / ${format(cost)}`;
+
+                tile.text = `${capitalize(tmp.items[item].name)}<br>${text}`;
+
+                return ['tile', tile];
+            }))),
+            'blank',
+            ['dynabar', {
+                direction: RIGHT,
+                height: 60,
+                width: 300,
+                progress() {
+                    if ('duration' in trecipe) return D.div(phain.time, D.times(trecipe.duration, thain?.time_multiplier ?? tmp.a.modifiers.chain.time_mult));
+                    return D.dZero;
+                },
+                display() {
+                    if ('duration' in trecipe) {
+                        return `${formatTime(phain.time)} / ${formatTime(D.times(trecipe.duration, thain?.time_multiplier ?? tmp.a.modifiers.chain.time_mult))}`;
+                    }
+                },
+                fillStyle: { 'backgroundColor': tmp.a.color },
+            }],
+            'blank',
+        ];
+
+    if (D.gt(trecipe.heat, 0)) {
+        fac.push(
+            ['dynabar', {
+                direction: UP,
+                height: 80,
+                width: 80,
+                progress() { return D.div(player.c.heat, trecipe.heat); },
+                display() { return `${formatWhole(player.c.heat)} / ${formatWhole(trecipe.heat)}`; },
+                fillStyle: {
+                    'backgroundColor': tmp.c.modifiers.heat.color,
+                },
+            }],
+            'blank',
+        );
+    }
+
+    fac.push(
+        line(square(trecipe.produces.map(([item, prod]) => {
+            const tile = item_tile(item),
+                text = format(prod);
+            tile.text = `${capitalize(tmp.items[item].name)}<br>${text}`;
+
+            return ['tile', tile];
+        }))),
+        'blank',
+        ['column', [
+            ['tile', {
+                text: '+1',
+                style: {
+                    width: '40px',
+                    height: '40px',
+                },
+                canClick() { return cost.every(([item, cost]) => D.gte(player.items[item].amount, cost)); },
+                onClick() {
+                    gain_items(cost.map(([item, cost]) => [item, cost.neg()]));
+                    phain.built = D.add(phain.built, 1);
+                },
+            }],
+            ['tile', {
+                text: '-1',
+                style: {
+                    width: '40px',
+                    height: '40px',
+                },
+                canClick() { return D.gte(phain.built, 1); },
+                onClick() {
+                    gain_items(cost);
+                    phain.built = D.minus(phain.built, 1);
+                },
+            }],
+        ]],
+        ['tile', {
+            text: `Running ${formatWhole(phain.built)}<br>${format(upkeep)} arca /s`,
+        }],
+    );
+
+    return ['row', fac];
+}
+/**
+ * Returns the subtabs for the factory
+ *
+ * @returns {Record<string, TabFormat<'a'>>}
+ */
+function arcane_subtabs_factory() {
+    return Object.fromEntries(CATEG_UTILS.list.map(/**@return {[categories, TabFormat<'a'>]}*/cat => {
+        return [cat, {
+            content: [
+                ['column', () => {
+                    const types = {
+                        /** @type {TabFormatEntries<'c'>[]} */
+                        materials: [],
+                        /** @type {TabFormatEntries<'c'>[]} */
+                        equipment: [],
+                    },
+                        /** @type {TabFormatEntries<'c'>[]} */
+                        lines = [];
+
+                    Object.values(tmp.c.recipes)
+                        .filter(data => (data.unlocked ?? true) && data.categories.includes(cat))
+                        .forEach(data => {
+                            const recipe = arcane_show_chain(data.id);
+                            if (!recipe.length) return;
+                            if (data.categories.includes('materials')) types.materials.push(recipe);
+                            else if (data.categories.includes('equipment')) types.equipment.push(recipe);
+                        });
+
+                    lines.push(...types.materials);
+                    lines.push(...types.equipment);
+
+                    return lines;
+                }],
+            ],
+            name: () => capitalize(CATEG_UTILS.names[cat]()),
+            buttonStyle: { 'border-color': CATEG_UTILS.color[cat], },
+            unlocked() {
+                return CATEG_UTILS.unlocked(cat) && Object.values(tmp.c.recipes)
+                    .some(data => (data.unlocked ?? true) && data.categories.includes(cat));
+            },
         }];
     }));
 }
@@ -1264,7 +1427,7 @@ const value_coin = (amount) => {
  * @returns {Record<string, TabFormat<'s'>>}
  */
 function shop_subtabs_buy() {
-    return Object.fromEntries(category_utils.list.map(/**@return {[categories, TabFormat<'s'>]}*/cat => {
+    return Object.fromEntries(CATEG_UTILS.list.map(/**@return {[categories, TabFormat<'s'>]}*/cat => {
         return [cat, {
             content: [
                 ['column', () => {
@@ -1313,10 +1476,10 @@ function shop_subtabs_buy() {
                     return square(tiles, 4).map(row => ['row', row]);
                 }],
             ],
-            name: () => capitalize(category_utils.names[cat]()),
-            buttonStyle: { 'border-color': category_utils.color[cat], },
+            name: () => capitalize(CATEG_UTILS.names[cat]()),
+            buttonStyle: { 'border-color': CATEG_UTILS.color[cat], },
             unlocked() {
-                return category_utils.unlocked(cat) &&
+                return CATEG_UTILS.unlocked(cat) &&
                     Object.entries(tmp.s.items).some(/**@param{[items,Layers['s']['items'][items]]}*/([item, trade]) => {
                         if (!('cost' in trade)) return false;
                         const itemp = tmp.items[item];
@@ -1335,7 +1498,7 @@ function shop_subtabs_buy() {
  * @returns {Record<string, TabFormat<'s'>>}
  */
 function shop_subtabs_sell() {
-    return Object.fromEntries(category_utils.list.map(/**@return {[categories, TabFormat<'s'>]}*/cat => {
+    return Object.fromEntries(CATEG_UTILS.list.map(/**@return {[categories, TabFormat<'s'>]}*/cat => {
         return [cat, {
             content: [
                 ['column', () => {
@@ -1380,10 +1543,10 @@ function shop_subtabs_sell() {
                     return square(tiles, 4).map(row => ['row', row]);
                 }],
             ],
-            name: () => capitalize(category_utils.names[cat]()),
-            buttonStyle: { 'border-color': category_utils.color[cat], },
+            name: () => capitalize(CATEG_UTILS.names[cat]()),
+            buttonStyle: { 'border-color': CATEG_UTILS.color[cat], },
             unlocked() {
-                return category_utils.unlocked(cat) &&
+                return CATEG_UTILS.unlocked(cat) &&
                     Object.entries(tmp.s.items).some(/**@param{[items,Layers['s']['items'][items]]}*/([item, trade]) => {
                         if (!('value' in trade)) return false;
                         const itemp = tmp.items[item];

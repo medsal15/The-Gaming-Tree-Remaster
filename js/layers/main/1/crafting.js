@@ -353,13 +353,13 @@ addLayer('c', {
             },
             canAfford() {
                 const cost = tmp[this.layer].buyables[this.id].cost;
-                return D.gte(player.items.bronze_blend.amount, cost);
+                return D.gte(player.items.bronze_ingot.amount, cost);
             },
             buy() {
                 if (!this.canAfford()) return;
 
                 const cost = tmp[this.layer].buyables[this.id].cost;
-                player.items.bronze_blend.amount = D.minus(player.items.bronze_blend.amount, cost);
+                player.items.bronze_ingot.amount = D.minus(player.items.bronze_ingot.amount, cost);
                 gain_items('bronze_mold', 1);
                 addBuyables(this.layer, this.id, 1);
             },
@@ -656,6 +656,7 @@ addLayer('c', {
             let speed = D.dOne;
 
             speed = speed.times(item_effect('copper_golem').speed_mult);
+            speed = speed.times(item_effect('bellow').speed_mult);
 
             return speed;
         },
@@ -974,7 +975,7 @@ addLayer('c', {
                 },
                 duration: '20 seconds',
             },
-            categories: ['materials', 'mining',],
+            categories: ['materials', 'deep_mining',],
             unlocked() { return hasUpgrade('m', 61); },
         },
         electrum_blend: {
@@ -1009,7 +1010,7 @@ addLayer('c', {
                     'electrum_blend': 'count',
                 }
             },
-            categories: ['materials', 'mining',],
+            categories: ['materials', 'deep_mining',],
             unlocked() { return hasUpgrade('m', 61); },
         },
         // Forge Materials
@@ -2357,6 +2358,7 @@ addLayer('c', {
                     'copper_ore': '24 * 1.5 ^ amount',
                     'bronze_blend': '8 * 1.1 ^ amount',
                     'copper_ingot'() { return `${this.copper_ore} / ${format(item_effect('copper_golem').cost_div)}`; },
+                    'bronze_ingot'() { return `${this.bronze_blend} / ${format(item_effect('bronze_mold').cost_div)}`; },
                 },
                 produces: {
                     'bronze_cart': 'amount',
@@ -2465,7 +2467,7 @@ addLayer('c', {
                 },
                 duration: '(crafting * 4 + crafted) * 5 + 10 seconds',
             },
-            categories: ['equipment', 'mining',],
+            categories: ['equipment', 'deep_mining',],
             static: true,
             unlocked() { return hasUpgrade('m', 61) || hasAchievement('ach', 94); },
         },
@@ -2517,7 +2519,7 @@ addLayer('c', {
                 },
                 duration: '(crafting * 2.5 + crafted) * 5 + 25 seconds',
             },
-            categories: ['equipment', 'mining',],
+            categories: ['equipment', 'deep_mining',],
             static: true,
             unlocked() { return hasUpgrade('m', 61) || hasAchievement('ach', 94); },
         },
@@ -2569,7 +2571,7 @@ addLayer('c', {
                 },
                 duration: '(crafting * 3.5 + crafted * 0.7) * 2 + 21 seconds',
             },
-            categories: ['equipment', 'mining',],
+            categories: ['equipment', 'deep_mining',],
             static: true,
             unlocked() { return hasUpgrade('m', 61) || hasAchievement('ach', 94); },
         },
@@ -2628,7 +2630,7 @@ addLayer('c', {
                 },
                 duration: '(crafting * 4 + crafted * 2) * 4 + 8 seconds',
             },
-            categories: ['equipment', 'mining',],
+            categories: ['equipment', 'deep_mining',],
             static: true,
             unlocked() { return hasUpgrade('m', 61) || hasAchievement('ach', 94); },
         },
@@ -2728,7 +2730,7 @@ addLayer('c', {
                 },
                 duration: '(crafting * 3 + crafted / 3) * 3 + 13 seconds',
             },
-            categories: ['equipment', 'mining', 'forge',],
+            categories: ['equipment', 'deep_mining', 'forge',],
             static: true,
             unlocked() { return tmp.c.forge.unlocked; },
         },
@@ -2919,6 +2921,219 @@ addLayer('c', {
             categories: ['equipment', 'densium', 'golem',],
             static: true,
             unlocked() { return tmp.items.densium_golem.unlocked; },
+        },
+        // Arcane
+        extractor: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let costs = [
+                    ['copper_ore', D.sumGeometricSeries(count, 50, 1.5, all)],
+                ];
+
+                if (D.gt(getBuyableAmount('c', 32), 0)) {
+                    const copper_row = costs.find(([item]) => item == 'copper_ore');
+                    copper_row[0] = 'copper_ingot';
+                    copper_row[1] = D.div(copper_row[1], item_effect('copper_golem').cost_div);
+                }
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['extractor', count],
+                ];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let duration = D.times(count, 2.5).add(all).times(5).add(10);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'copper_ore': '50 * 1.5 ^ amount',
+                    'copper_ingot'() { return `${this.copper_ore} / ${format(item_effect('copper_golem').cost_div)}`; },
+                },
+                produces: {
+                    'extractor': 'amount',
+                },
+                duration: '(crafting * 2.5 + crafted) * 5 + 10 seconds',
+            },
+            categories: ['equipment', 'arca',],
+            static: true,
+            unlocked() { return tmp.a.layerShown; },
+        },
+        inserter: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let costs = [
+                    ['tin_ore', D.sumGeometricSeries(count, 50, 1.25, all)],
+                ];
+
+                if (D.gt(getBuyableAmount('c', 33), 0)) {
+                    const tin_row = costs.find(([item]) => item == 'tin_ore');
+                    tin_row[0] = 'tin_ingot';
+                    tin_row[1] = D.div(tin_row[1], item_effect('tin_ring').cost_div);
+                }
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['inserter', count],
+                ];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let duration = D.times(count, 2.5).add(all).times(7.5).add(10);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'tin_ore': '50 * 1.25 ^ amount',
+                    'tin_ingot'() { return `${this.tin_ore} / ${format(item_effect('tin_ring').cost_div)}`; },
+                },
+                produces: {
+                    'inserter': 'amount',
+                },
+                duration: '(crafting * 2.5 + crafted) * 7.5 + 10 seconds',
+            },
+            categories: ['equipment', 'arca',],
+            static: true,
+            unlocked() { return tmp.a.layerShown; },
+        },
+        combiner: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let costs = [
+                    ['bronze_blend', D.sumGeometricSeries(count, 25, 1.1, all)],
+                    ['electrum_blend', D.sumGeometricSeries(count, 5, 1.1, all)],
+                ];
+
+                if (D.gt(getBuyableAmount('c', 34), 0)) {
+                    const bronze_row = costs.find(([item]) => item == 'bronze_blend');
+                    bronze_row[0] = 'bronze_ingot';
+                    bronze_row[1] = D.div(bronze_row[1], item_effect('bronze_mold').cost_div);
+                }
+                if (D.gt(getBuyableAmount('c', 42), 0)) {
+                    const electrum_row = costs.find(([item]) => item == 'electrum_blend');
+                    electrum_row[0] = 'electrum_ingot';
+                    electrum_row[1] = D.div(electrum_row[1], item_effect('electrum_package').cost_div);
+                }
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['combiner', count],
+                ];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let duration = D.times(count, 2.5).add(all).times(7.5).add(20);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'bronze_blend': '25 * 1.1 ^ amount',
+                    'bronze_ingot'() { return `${this.bronze_blend} / ${format(item_effect('bronze_mold').cost_div)}`; },
+                    'electrum_blend': '5 * 1.1 ^ amount',
+                    'electrum_ingot'() { return `${this.electrum_blend} / ${format(item_effect('electrum_package').cost_div)}`; },
+                },
+                produces: {
+                    'combiner': 'amount',
+                },
+                duration: '(crafting * 5 + crafted) * 2.5 + 20 seconds',
+            },
+            categories: ['equipment', 'arca',],
+            static: true,
+            unlocked() { return tmp.a.layerShown; },
+        },
+        smelter: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let costs = [
+                    ['furnace', D.sumGeometricSeries(count, 1, 1.05, all)],
+                    ['stone', D.sumGeometricSeries(count, 50, 2, all)],
+                    ['mud_brick', D.sumGeometricSeries(count, 15, 1.8, all)],
+                ];
+
+                if (D.gt(getBuyableAmount('c', 31), 0)) {
+                    const stone_row = costs.find(([item]) => item == 'stone');
+                    stone_row[0] = 'stone_brick';
+                    stone_row[1] = D.div(stone_row[1], item_effect('stone_wall').cost_div);
+                }
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['smelter', count],
+                ];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let duration = D.times(count, 2.5).add(all).times(7.5).add(20);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'furnace': '1.05 ^ amount',
+                    'stone': '50 * 2 ^ amount',
+                    'stone_brick'() { return `${this.stone} / ${format(item_effect('stone_wall').cost_div)}`; },
+                    'mud_brick': '15 * 1.8 ^ amount',
+                },
+                produces: {
+                    'smelter': 'amount',
+                },
+                duration: '(crafting * 5 + crafted) * 2.5 + 20 seconds',
+            },
+            categories: ['equipment', 'arca',],
+            static: true,
+            unlocked() { return tmp.a.layerShown; },
         },
     },
     modifiers: {

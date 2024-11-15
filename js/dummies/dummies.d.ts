@@ -1426,8 +1426,6 @@ declare class Item<I> {
     readonly id: I
     color: Computable<string>
     name: Computable<string>
-    /** Position in the grid, 0-based */
-    grid?: [number, number]
     /** Position of the icon, 0-based */
     icon?: Computable<[number, number]>
     /** Amount is reset when that row is */
@@ -1504,6 +1502,8 @@ type items = 'unknown' |
     'stone_wall' | 'copper_golem' | 'tin_ring' | 'bronze_mold' | 'gold_star' | 'iron_heataxe' | 'disco_ball' | 'electrum_package' |
     'coin_copper' | 'coin_bronze' | 'coin_silver' | 'coin_gold' | 'coin_platinum' |
     'densium_slime' | 'densium_rock' | 'magic_densium_ball' | 'densium_golem' |
+    // Arcane
+    'extractor' | 'inserter' | 'combiner' | 'smelter' |
     // Special
     'package_1' | 'package_2' | 'package_3' | 'package_4' |
     'cueball';
@@ -1515,8 +1515,9 @@ type ores = 'stone' | 'copper' | 'tin' |
 
 type drop_sources = `kill:${monsters}` | 'kill:any' | 'crafting' | 'forge' | `mining:${ores}` | 'mining:any' | 'mining:compactor' | 'shop';
 type drop_types = 'kill' | 'crafting' | 'forge' | 'mining' | 'shop';
-//todo split mining and deep mining
-type categories = 'materials' | 'equipment' | 'mining' | 'densium' | 'forge' | 'shop' | 'craftable' |
+type categories = 'materials' | 'equipment' | 'craftable' |
+    'mining' | 'densium' | 'deep_mining' |
+    'forge' | 'shop' | 'arca' |
     monsters;
 
 type death_resources = 'karma' | 'souls';
@@ -1874,10 +1875,48 @@ type Layers = {
          * spells for boosts
          * transmutation (slime goo -> bone, etc.)
          */
-        world: {
-            width(): number
-            height(): number
+        /**
+         * Overrides for chains
+         *
+         * Id must be the same as the recipe it overrides
+         */
+        chains: {
+            [id in string]?: {
+                /**
+                 * Items needed to build a production chain
+                 *
+                 * By default it uses:
+                 * - 1 extractor per input
+                 * - 1 inserter per output
+                 * - 1 combiner for non-forge recipes
+                 * - 1 smelter for forge recipes
+                 */
+                items?: [items, Decimal][]
+                /**
+                 * Multiplier to crafting time
+                 *
+                 * @default 10
+                 */
+                time_multiplier?: Decimal
+                /**
+                 * Arca cost per second to run
+                 *
+                 * By default it counts based on machines:
+                 * - extractor/inserter: .1/s
+                 * - combiner/smelter: 1/s
+                 */
+                arca_cost?: Computable<Decimal>
+                /**
+                 * If true, the recipe will consume a part of the amount needed and produce part of the output
+                 *
+                 * e.g. instead of consume 100 stone for 1 brick over 30 seconds, it will multiply by tick length and divide by 30 (seconds)
+                 *
+                 * Enabled by default for smelting and untimed recipes
+                 */
+                continuous?: Computable<boolean>
+            }
         }
+        upkeep: { [id in items]?: Computable<Decimal> }
         modifiers: {
             arca: {
                 gain: {
@@ -1894,6 +1933,10 @@ type Layers = {
                     total(): Decimal
                 }
                 total(): Decimal
+            }
+            chain: {
+                /** Multiplier to autocrafting time */
+                time_mult(): Decimal
             }
         }
     }
@@ -2081,7 +2124,13 @@ type Player = {
         //todo forge fuels
     }
     a: LayerData & {
-        //todo placed stuff
+        chains: {
+            [id: string]: {
+                built: Decimal
+                /** Time the chain has run */
+                time: Decimal
+            }
+        }
     }
     // Row 2
     b: LayerData & {

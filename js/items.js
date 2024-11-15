@@ -1,14 +1,3 @@
-const item_grid_rows = {
-    slime: 0,
-    skeleton: 1,
-    golem: 2,
-    ores_basic: 3,
-    ores_advanced: 4,
-    ores_advanced_equipment: 5,
-    densium: 6,
-    ingots: 7,
-    special: 8,
-};
 /**
  * @type {{[id in items]: Item<id>}}
  */
@@ -28,7 +17,6 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.slime.color; },
         name: 'slime goo',
-        grid: [item_grid_rows.slime, 0],
         icon() {
             let icon = [0, 0];
 
@@ -82,7 +70,6 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.slime.color; },
         name: 'slime core shard',
-        grid: [item_grid_rows.slime, 1],
         icon() {
             let icon = [0, 1];
 
@@ -136,7 +123,6 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.slime.color; },
         name: 'slime core',
-        grid: [item_grid_rows.slime, 2],
         icon() {
             let icon = [0, 2];
 
@@ -193,7 +179,6 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.slime.color; },
         name: 'dense slime core',
-        grid: [item_grid_rows.slime, 3],
         icon() {
             let icon = [0, 3];
 
@@ -235,7 +220,6 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.slime.color; },
         name: 'slime crystal',
-        grid: [item_grid_rows.slime, 4],
         icon() {
             let icon = [1, 0];
 
@@ -313,7 +297,6 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.slime.color; },
         name: 'slime knife',
-        grid: [item_grid_rows.slime, 5],
         icon() {
             let icon = [1, 1];
 
@@ -384,7 +367,6 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.slime.color; },
         name: 'slime injector',
-        grid: [item_grid_rows.slime, 6],
         icon() {
             let icon = [1, 2];
 
@@ -477,7 +459,6 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.slime.color; },
         name: 'slime die',
-        grid: [item_grid_rows.slime, 7],
         icon() {
             let icon = [1, 3];
 
@@ -554,7 +535,6 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.skeleton.color; },
         name: 'bone',
-        grid: [item_grid_rows.skeleton, 0],
         icon: [2, 0],
         row: 1,
         sources: {
@@ -592,7 +572,6 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.skeleton.color; },
         name: 'rib',
-        grid: [item_grid_rows.skeleton, 1],
         icon: [2, 1],
         row: 1,
         sources: {
@@ -630,7 +609,6 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.skeleton.color; },
         name: 'skull',
-        grid: [item_grid_rows.skeleton, 2],
         icon: [2, 2],
         row: 1,
         sources: {
@@ -670,7 +648,6 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.skeleton.color; },
         name: 'slimy skull',
-        grid: [item_grid_rows.skeleton, 3],
         icon() {
             let icon = [2, 3];
 
@@ -703,7 +680,6 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.skeleton.color; },
         name: 'bone pick',
-        grid: [item_grid_rows.skeleton, 4],
         icon: [3, 0],
         row: 1,
         sources: {
@@ -749,7 +725,6 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.skeleton.color; },
         name: 'crystal skull',
-        grid: [item_grid_rows.skeleton, 5],
         icon() {
             let icon = [3, 1];
 
@@ -810,7 +785,6 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.skeleton.color; },
         name: 'bone slate',
-        grid: [item_grid_rows.skeleton, 6],
         icon: [3, 2],
         row: 1,
         sources: {
@@ -855,7 +829,6 @@ const item_list = {
             else if (inChallenge('b', 21)) return 'Magic 10 Ball';
             return 'Magic 14 Ball';
         },
-        grid: [item_grid_rows.skeleton, 7],
         icon() {
             let icon = [3, 3];
 
@@ -927,7 +900,6 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.golem.color; },
         name: 'mud',
-        grid: [item_grid_rows.golem, 0],
         icon: [11, 0],
         row: 1,
         sources: {
@@ -988,7 +960,6 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.golem.color; },
         name: 'mud brick',
-        grid: [item_grid_rows.golem, 1],
         icon: [11, 1],
         row: 1,
         sources: {
@@ -1007,7 +978,6 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.golem.color; },
         name: 'golem eye',
-        grid: [item_grid_rows.golem, 2],
         icon: [11, 2],
         row: 1,
         sources: {
@@ -1045,7 +1015,6 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.golem.color; },
         name: 'golem core',
-        grid: [item_grid_rows.golem, 3],
         icon: [11, 3],
         row: 1,
         sources: {
@@ -1085,7 +1054,6 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.golem.color; },
         name: 'mud kiln',
-        grid: [item_grid_rows.golem, 4],
         icon: [11, 4],
         row: 1,
         sources: {
@@ -1129,7 +1097,6 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.golem.color; },
         name: 'weakness finder',
-        grid: [item_grid_rows.golem, 5],
         icon() {
             const icon = [11, 5];
 
@@ -1186,7 +1153,6 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.golem.color; },
         name: 'arcane generator',
-        grid: [item_grid_rows.golem, 6],
         icon: [11, 8],
         row: 1,
         sources: {
@@ -1227,7 +1193,6 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.golem.color; },
         name: 'record golem',
-        grid: [item_grid_rows.golem, 7],
         icon: [11, 9],
         row: 1,
         sources: {
@@ -1271,7 +1236,6 @@ const item_list = {
         id: null,
         color: '#BBBBDD',
         name: 'stone',
-        grid: [item_grid_rows.ores_basic, 0],
         icon: [4, 0],
         row: 0,
         sources: {
@@ -1303,7 +1267,6 @@ const item_list = {
         id: null,
         color: '#FFAA11',
         name: 'copper ore',
-        grid: [item_grid_rows.ores_basic, 1],
         icon: [4, 1],
         row: 0,
         sources: {
@@ -1337,7 +1300,6 @@ const item_list = {
         id: null,
         color: '#FFFFCC',
         name: 'tin ore',
-        grid: [item_grid_rows.ores_basic, 2],
         icon: [4, 2],
         row: 0,
         sources: {
@@ -1371,7 +1333,6 @@ const item_list = {
         id: null,
         color: '#BB7744',
         name: 'bronze blend',
-        grid: [item_grid_rows.ores_basic, 3],
         icon: [4, 3],
         row: 0,
         sources: {
@@ -1392,7 +1353,6 @@ const item_list = {
         id: null,
         color: '#FFFF44',
         name: 'gold nugget',
-        grid: [item_grid_rows.ores_advanced, 0],
         icon: [4, 4],
         row: 0,
         sources: {
@@ -1452,7 +1412,6 @@ const item_list = {
         id: null,
         color: '#333344',
         name: 'coal',
-        grid: [item_grid_rows.ores_advanced, 1],
         icon: [4, 6],
         row: 0,
         sources: {
@@ -1485,14 +1444,13 @@ const item_list = {
         lore: `A piece of flammable rock.<br>
             Of low value, but required for any fire.<br>
             Surely that's not the only use, right?`,
-        categories: ['materials', 'mining'],
+        categories: ['materials', 'deep_mining'],
         unlocked() { return hasUpgrade('m', 61); },
     },
     'iron_ore': {
         id: null,
         color: '#BB2222',
         name: 'iron ore',
-        grid: [item_grid_rows.ores_advanced, 2],
         icon: [4, 7],
         row: 0,
         sources: {
@@ -1519,14 +1477,13 @@ const item_list = {
         lore: `A piece of red metal.<br>
             Worthless without removing all this rust.<br>
             Careful when handling, as cuts may lead to infections.`,
-        categories: ['materials', 'mining'],
+        categories: ['materials', 'deep_mining'],
         unlocked() { return hasUpgrade('m', 61); },
     },
     'clear_iron_ore': {
         id: null,
         color: '#8899AA',
         name: 'rustless iron ore',
-        grid: [item_grid_rows.ores_advanced, 3],
         icon: [4, 8],
         row: 0,
         sources: {
@@ -1540,14 +1497,13 @@ const item_list = {
         lore: `A piece of gray metal.<br>
             Durable, tough, common. The perfect material?<br>
             Slowly turns red over time, lowering its usefulness.`,
-        categories: ['materials', 'mining'],
+        categories: ['materials', 'deep_mining'],
         unlocked() { return hasUpgrade('m', 61); },
     },
     'silver_ore': {
         id: null,
         color: '#DDEEEE',
         name: 'silver ore',
-        grid: [item_grid_rows.ores_advanced, 4],
         icon: [4, 9],
         row: 0,
         sources: {
@@ -1574,14 +1530,13 @@ const item_list = {
         lore: `A (mostly) white chunk of metal.<br>
             Useful for jewelry.<br>
             After a bit of treatment, it can reflect light like no other mineral.`,
-        categories: ['materials', 'mining'],
+        categories: ['materials', 'deep_mining'],
         unlocked() { return hasUpgrade('m', 61); },
     },
     'electrum_blend': {
         id: null,
         color: '#EEDDAA',
         name: 'electrum blend',
-        grid: [item_grid_rows.ores_advanced, 5],
         icon: [4, 10],
         row: 0,
         sources: {
@@ -1595,7 +1550,7 @@ const item_list = {
         lore: `A pretty light yellow alloy.<br>
             Useful for jewelry.<br>
             Also very valuable.`,
-        categories: ['materials', 'mining'],
+        categories: ['materials', 'deep_mining'],
         unlocked() { return hasUpgrade('m', 61); },
     },
     // Forge
@@ -1603,7 +1558,6 @@ const item_list = {
         id: null,
         color: '#BBBBDD',
         name: 'stone brick',
-        grid: [item_grid_rows.ingots, 0],
         icon: [8, 0],
         row: 1,
         sources: {
@@ -1624,7 +1578,6 @@ const item_list = {
         id: null,
         color: '#FFAA11',
         name: 'copper ingot',
-        grid: [item_grid_rows.ingots, 1],
         icon: [8, 1],
         row: 1,
         sources: {
@@ -1645,7 +1598,6 @@ const item_list = {
         id: null,
         color: '#FFFFCC',
         name: 'tin ingot',
-        grid: [item_grid_rows.ingots, 2],
         icon: [8, 2],
         row: 1,
         sources: {
@@ -1665,7 +1617,6 @@ const item_list = {
         id: null,
         color: '#BB7744',
         name: 'bronze ingot',
-        grid: [item_grid_rows.ingots, 3],
         icon: [8, 3],
         row: 1,
         sources: {
@@ -1686,7 +1637,6 @@ const item_list = {
         id: null,
         color: '#FFFF44',
         name: 'gold ingot',
-        grid: [item_grid_rows.ingots, 4],
         icon: [8, 4],
         row: 1,
         sources: {
@@ -1725,7 +1675,6 @@ const item_list = {
         id: null,
         color: '#8899AA',
         name: 'iron ingot',
-        grid: [item_grid_rows.ingots, 5],
         icon: [8, 5],
         row: 1,
         sources: {
@@ -1746,7 +1695,6 @@ const item_list = {
         id: null,
         color: '#DDEEEE',
         name: 'silver ingot',
-        grid: [item_grid_rows.ingots, 6],
         icon: [8, 6],
         row: 1,
         sources: {
@@ -1767,7 +1715,6 @@ const item_list = {
         id: null,
         color: '#113366',
         name: 'lead ingot',
-        grid: [item_grid_rows.ingots, 7],
         icon: [8, 7],
         row: 1,
         sources: {
@@ -1788,7 +1735,6 @@ const item_list = {
         id: null,
         color: '#EEDDAA',
         name: 'electrum ingot',
-        grid: [item_grid_rows.ingots, 8],
         icon: [8, 8],
         row: 1,
         sources: {
@@ -1810,7 +1756,6 @@ const item_list = {
         id: null,
         color: '#BBBBDD',
         name: 'stone mace',
-        grid: [item_grid_rows.ores_basic, 4],
         icon: [5, 0],
         row: 1,
         sources: {
@@ -1860,7 +1805,6 @@ const item_list = {
             return `#${color_between(low, high, progress).map(n => n.toString(16).padStart(2, '0')).join('')}`;
         },
         name: 'copper pick',
-        grid: [item_grid_rows.ores_basic, 5],
         icon: [5, 1],
         row: 1,
         sources: {
@@ -1913,7 +1857,6 @@ const item_list = {
         id: null,
         color: '#FFFFCC',
         name: 'tin cache',
-        grid: [item_grid_rows.ores_basic, 6],
         icon: [5, 2],
         row: 1,
         sources: {
@@ -1957,7 +1900,6 @@ const item_list = {
         id: null,
         color: '#BB7744',
         name: 'bronze cart',
-        grid: [item_grid_rows.ores_basic, 7],
         icon: [5, 3],
         row: 1,
         sources: {
@@ -2008,7 +1950,6 @@ const item_list = {
         id: null,
         color: '#FFFF44',
         name: 'doubloon',
-        grid: [item_grid_rows.ores_advanced_equipment, 0],
         icon: [5, 4],
         row: 1,
         sources: {
@@ -2049,7 +1990,6 @@ const item_list = {
         id: null,
         color: '#9999AA',
         name: 'furnace',
-        grid: [item_grid_rows.ores_advanced_equipment, 1],
         icon: [9, 0],
         row: 1,
         sources: {
@@ -2063,7 +2003,7 @@ const item_list = {
         lore: `A furnace made of stone and coal.<br>
             Even after usage, it still feels warm.<br>
             You can even stack them up!`,
-        categories: ['equipment', 'mining', 'forge'],
+        categories: ['equipment', 'deep_mining', 'forge'],
         effect(amount) {
             const x = D(amount ?? player.items[this.id].amount);
 
@@ -2095,7 +2035,6 @@ const item_list = {
         id: null,
         color: '#8899AA',
         name: 'iron rails',
-        grid: [item_grid_rows.ores_advanced_equipment, 2],
         icon: [9, 1],
         row: 1,
         sources: {
@@ -2109,7 +2048,7 @@ const item_list = {
         lore: `Solid bars of iron connected together with bones.<br>
             These are good for your carts.<br>
             The rails are also reinforcing ores.`,
-        categories: ['equipment', 'mining', 'forge'],
+        categories: ['equipment', 'deep_mining'],
         effect(amount) {
             const x = D(amount ?? player.items[this.id].amount);
 
@@ -2139,7 +2078,6 @@ const item_list = {
         id: null,
         color: '#DDEEEE',
         name: 'silver coating',
-        grid: [item_grid_rows.ores_advanced_equipment, 3],
         icon: [9, 2],
         row: 1,
         sources: {
@@ -2153,7 +2091,7 @@ const item_list = {
         lore: `Silver coating for a weapon.<br>
             It's great for fighting undeads.<br>
             Hopefully you'll find more than one type.`,
-        categories: ['equipment', 'mining', 'forge'],
+        categories: ['equipment', 'deep_mining'],
         effect(amount) {
             const x = D(amount ?? player.items[this.id].amount);
 
@@ -2180,7 +2118,6 @@ const item_list = {
         id: null,
         color: '#EEDDAA',
         name: 'electrum coin mold',
-        grid: [item_grid_rows.ores_advanced_equipment, 4],
         icon: [9, 3],
         row: 1,
         sources: {
@@ -2194,7 +2131,7 @@ const item_list = {
         lore: `A mold to allow making coins.<br>
             I'm not allowing you to use it for forging fake coins.<br>
             You're not a licensed coin maker.`,
-        categories: ['equipment', 'mining', 'forge'],
+        categories: ['equipment', 'deep_mining'],
         effect(amount) {
             const x = D(amount ?? player.items[this.id].amount);
 
@@ -2221,7 +2158,6 @@ const item_list = {
         id: null,
         color() { return tmp.c.modifiers.heat.color; },
         name: 'bellow',
-        grid: [item_grid_rows.ores_advanced_equipment, 5],
         icon() {
             let icon = [9, 4];
 
@@ -2272,7 +2208,6 @@ const item_list = {
         id: null,
         color: '#113366',
         name: 'lead coating',
-        grid: [item_grid_rows.ores_advanced_equipment, 6],
         icon: [9, 5],
         row: 1,
         sources: {
@@ -2286,7 +2221,7 @@ const item_list = {
         lore: `Lead coating for a weapon.<br>
             It's great for fighting living beings.<br>
             It's also bad for fighting undeads.`,
-        categories: ['equipment', 'mining', 'forge'],
+        categories: ['equipment', 'deep_mining', 'forge'],
         effect(amount) {
             const x = D(amount ?? player.items[this.id].amount);
 
@@ -2317,7 +2252,6 @@ const item_list = {
         id: null,
         color: '#445566',
         name: 'densium',
-        grid: [item_grid_rows.densium, 0],
         icon: [4, 5],
         row: 0,
         sources: {
@@ -2338,7 +2272,6 @@ const item_list = {
         id: null,
         color: '#445566',
         name: 'densium slime',
-        grid: [item_grid_rows.densium, 1],
         icon: [7, 0],
         row: 1,
         sources: {
@@ -2379,7 +2312,6 @@ const item_list = {
         id: null,
         color: '#445566',
         name: 'densium rock',
-        grid: [item_grid_rows.densium, 2],
         icon: [7, 1],
         row: 1,
         sources: {
@@ -2420,7 +2352,6 @@ const item_list = {
         id: null,
         color: '#445566',
         name: 'magic densium ball',
-        grid: [item_grid_rows.densium, 3],
         icon: [7, 2],
         row: 1,
         sources: {
@@ -2464,7 +2395,6 @@ const item_list = {
         id: null,
         color: '#445566',
         name: 'densium golem',
-        grid: [item_grid_rows.densium, 4],
         icon: [7, 3],
         row: 1,
         sources: {
@@ -2519,7 +2449,7 @@ const item_list = {
             const x = D(amount ?? player.items[this.id].amount);
 
             let health_div = D.div(x, 20).add(1),
-                cost_div = D.root(x, 3).pow10();
+                cost_div = D.root(x, 3).pow(100);
 
             return { health_div, cost_div, };
         },
@@ -2527,7 +2457,7 @@ const item_list = {
             let health_div, cost_div;
             if (shiftDown) {
                 health_div = '[amount / 20 + 1]';
-                cost_div = '[10 ^ 3√(amount)]';
+                cost_div = '[100 ^ 3√(amount)]';
             } else {
                 const x = D(amount ?? player.items[this.id].amount),
                     effect = item_list[this.id].effect(x);
@@ -2557,7 +2487,7 @@ const item_list = {
             const x = D(amount ?? player.items[this.id].amount);
 
             let speed_mult = D.pow(1.05, x),
-                cost_div = D.root(x, 3).pow_base(15);
+                cost_div = D.root(x, 3).pow_base(150);
 
             return { speed_mult, cost_div, };
         },
@@ -2565,7 +2495,7 @@ const item_list = {
             let speed_mult, cost_div;
             if (shiftDown) {
                 speed_mult = '[1.05 ^ amount]';
-                cost_div = '[15 ^ 3√(amount)]';
+                cost_div = '[150 ^ 3√(amount)]';
             } else {
                 const x = D(amount ?? player.items[this.id].amount),
                     effect = item_list[this.id].effect(x);
@@ -2595,7 +2525,7 @@ const item_list = {
             const x = D(amount ?? player.items[this.id].amount);
 
             let xp_damage = D.div(x, 20),
-                cost_div = D.root(x, 3).pow_base(20);
+                cost_div = D.root(x, 3).pow_base(200);
 
             return { xp_damage, cost_div, };
         },
@@ -2603,7 +2533,7 @@ const item_list = {
             let xp_damage, cost_div;
             if (shiftDown) {
                 xp_damage = '[amount / 20]';
-                cost_div = '[20 ^ 3√(amount)]';
+                cost_div = '[200 ^ 3√(amount)]';
             } else {
                 const x = D(amount ?? player.items[this.id].amount),
                     effect = item_list[this.id].effect(x);
@@ -2633,7 +2563,7 @@ const item_list = {
             const x = D(amount ?? player.items[this.id].amount);
 
             let forge_cost = D.div(x, 10).add(1),
-                cost_div = D.root(x, 4).pow_base(10);
+                cost_div = D.root(x, 4).pow_base(100);
 
             return { forge_cost, cost_div, };
         },
@@ -2641,7 +2571,7 @@ const item_list = {
             let forge_cost, cost_div;
             if (shiftDown) {
                 forge_cost = '[amount / 10 + 1]';
-                cost_div = '[10 ^ 4√(amount)]';
+                cost_div = '[100 ^ 4√(amount)]';
             } else {
                 const x = D(amount ?? player.items[this.id].amount),
                     effect = item_list[this.id].effect(x);
@@ -2671,7 +2601,7 @@ const item_list = {
             const x = D(amount ?? player.items[this.id].amount);
 
             let level_delay = D(x),
-                cost_div = D.root(x, 2).pow_base(25);
+                cost_div = D.root(x, 2).pow_base(75);
 
             return { level_delay, cost_div, };
         },
@@ -2679,7 +2609,7 @@ const item_list = {
             let level_delay, cost_div;
             if (shiftDown) {
                 level_delay = '[amount]';
-                cost_div = '[25 ^ 2√(amount)]';
+                cost_div = '[75 ^ 2√(amount)]';
             } else {
                 const x = D(amount ?? player.items[this.id].amount),
                     effect = item_list[this.id].effect(x);
@@ -2709,7 +2639,7 @@ const item_list = {
             const x = D(amount ?? player.items[this.id].amount);
 
             let damage = D.add(player.c.heat, 1).log10().times(x),
-                cost_div = D.root(x, 4).pow_base(10);
+                cost_div = D.root(x, 4).pow_base(100);
 
             return { damage, cost_div, };
         },
@@ -2717,7 +2647,7 @@ const item_list = {
             let damage, cost_div;
             if (shiftDown) {
                 damage = '[log10(heat + 1) * amount]';
-                cost_div = '[10 ^ 4√(amount)]';
+                cost_div = '[100 ^ 4√(amount)]';
             } else {
                 const x = D(amount ?? player.items[this.id].amount),
                     effect = item_list[this.id].effect(x);
@@ -2747,7 +2677,7 @@ const item_list = {
             const x = D(amount ?? player.items[this.id].amount);
 
             let speed = D.root(x, 2).div(10),
-                cost_div = D.root(x, 4).pow_base(25);
+                cost_div = D.root(x, 4).pow_base(175);
 
             return { speed, cost_div, };
         },
@@ -2755,7 +2685,7 @@ const item_list = {
             let speed, cost_div;
             if (shiftDown) {
                 speed = '[2√(amount) / 10]';
-                cost_div = '[25 ^ 4√(amount)]';
+                cost_div = '[175 ^ 4√(amount)]';
             } else {
                 const x = D(amount ?? player.items[this.id].amount),
                     effect = item_list[this.id].effect(x);
@@ -2785,7 +2715,7 @@ const item_list = {
             const x = D(amount ?? player.items[this.id].amount);
 
             let limit = D.times(x, 10),
-                cost_div = D.root(x, 4).pow_base(20);
+                cost_div = D.root(x, 4).pow_base(200);
 
             return { limit, cost_div, };
         },
@@ -2793,7 +2723,7 @@ const item_list = {
             let limit, cost_div;
             if (shiftDown) {
                 limit = '[amount * 10]';
-                cost_div = '[20 ^ 4√(amount)]';
+                cost_div = '[200 ^ 4√(amount)]';
             } else {
                 const x = D(amount ?? player.items[this.id].amount),
                     effect = item_list[this.id].effect(x);
@@ -2805,6 +2735,67 @@ const item_list = {
             return `Increases maximum crafting by ${limit}, and divides electrum ingot use costs by ${cost_div}`;
         },
         unlocked() { return tmp.c.forge.unlocked; },
+    },
+    // Arcane
+    'extractor': {
+        id: null,
+        color: '#FFAA11',
+        name: 'extractor',
+        icon: [13, 0],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        lore: `A copper hopper that automatically grabs items from your inventory.<br>
+            You would have started using them earlier, but without energy, you can't automate much.<br>
+            You already use rails for long-distance transportation.`,
+        categories: ['arca', 'equipment'],
+        unlocked() { return tmp.a.layerShown; },
+    },
+    'inserter': {
+        id: null,
+        color: '#FFFFCC',
+        name: 'inserter',
+        icon: [13, 1],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        lore: `A tin chute that automatically puts items in your inventory.<br>
+            It also allows easier falling transportation.<br>
+            But so does dropping things...`,
+        categories: ['arca', 'equipment'],
+        unlocked() { return tmp.a.layerShown; },
+    },
+    'combiner': {
+        id: null,
+        color: '#BB7744',
+        name: 'combiner',
+        icon: [13, 2],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        lore: `A complex bronze mechanism with multiple electrum gears.<br>
+            It can assemble anything, from basic blends to complex tools!<br>
+            You may need more than one to ensure a stable supply.`,
+        categories: ['arca', 'equipment'],
+        unlocked() { return tmp.a.layerShown; },
+    },
+    'smelter': {
+        id: null,
+        color: '#BBBBDD',
+        name: 'smelter',
+        icon: [13, 3],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        lore: `A large stone furnace that can be used for mass smelting.<br>
+            Somehow, it uses arca instead for fire.<br>
+            You're more surprised it has no impact on your existing furnaces...`,
+        categories: ['arca', 'equipment'],
+        unlocked() { return tmp.a.layerShown; },
     },
     // Shop
     'coin_copper': {
@@ -2898,7 +2889,6 @@ const item_list = {
         color: '#FFFFFF',
         name: 'cueball',
         icon: [12, 0],
-        grid: [item_grid_rows.special, 0],
         row: 'side',
         lore: `A spherical white ball.<br>
             Where did it come from? You don't remember picking it up...<br>
@@ -2911,7 +2901,6 @@ const item_list = {
         color: '#DDAA66',
         name: 'strange package',
         icon: [12, 1],
-        grid: [item_grid_rows.special, 1],
         row: 'side',
         sources: {
             other: ['shop'],
@@ -2933,7 +2922,6 @@ const item_list = {
         color: '#DDAA66',
         name: 'bizarre package',
         icon: [12, 2],
-        grid: [item_grid_rows.special, 2],
         row: 'side',
         sources: {
             other: ['shop'],
@@ -2955,7 +2943,6 @@ const item_list = {
         color: '#DDAA66',
         name: 'curious package',
         icon: [12, 3],
-        grid: [item_grid_rows.special, 3],
         row: 'side',
         sources: {
             other: ['shop'],
@@ -2977,7 +2964,6 @@ const item_list = {
         color: '#DDAA66',
         name: 'unusual package',
         icon: [12, 4],
-        grid: [item_grid_rows.special, 4],
         row: 'side',
         sources: {
             other: ['shop'],
@@ -2998,7 +2984,7 @@ const item_list = {
 
 const ITEM_SIZES = {
     width: 12,
-    height: 13,
+    height: 14,
 };
 /**
  * @type {{[row in Layer['row']]: items[]}}

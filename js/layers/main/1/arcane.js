@@ -6,6 +6,10 @@ addLayer('a', {
         return {
             points: D.dZero,
             unlocked: true,
+            chains: Object.fromEntries(Object.keys(layers.c.recipes).map(id => [id, {
+                built: D.dZero,
+                time: D.dZero,
+            }])),
         };
     },
     row: 1,
@@ -46,21 +50,7 @@ addLayer('a', {
                     return `<span class="warning">Your arca is dividing its own gain by ${resourceColor(rgb_negative(tmp.a.color), div)}</span>`;
                 }],
                 'blank',
-                //todo display factory (canvas)
-            ],
-        },
-        'Construction': {
-            content: [
-                ['display-text', () => {
-                    let gain = '';
-                    if (D.neq_tolerance(tmp.a.modifiers.arca.total, 0, 1e-3)) {
-                        gain = ` (+${resourceColor(tmp.a.color, format(tmp.a.modifiers.arca.total))} /s)`
-                    }
-
-                    return `You have ${resourceColor(tmp.a.color, formatWhole(player.a.points), 'font-size:1.5em;')} ${tmp.a.resource}${gain}`;
-                }],
-                'blank',
-                //todo display buildings & costs
+                ['microtabs', 'factory'],
             ],
         },
         'Spells': {
@@ -93,9 +83,23 @@ addLayer('a', {
         },
     },
     branches: ['c'],
-    world: {
-        width() { return 5; },
-        height() { return 5; },
+    microtabs: {
+        factory: { ...arcane_subtabs_factory(), },
+    },
+    chains: {
+        electrum_coin_mold: {
+            items: [
+                ['extractor', D.dTwo],
+                ['inserter', D.dOne],
+                ['combiner', D.dOne],
+            ]
+        },
+    },
+    upkeep: {
+        'extractor': D(.1),
+        'inserter': D(.1),
+        'combiner': D.dOne,
+        'smelter': D.dOne,
     },
     modifiers: {
         arca: {
@@ -123,6 +127,8 @@ addLayer('a', {
                 base() {
                     let base = D.dZero;
 
+                    //todo
+
                     return base;
                 },
                 mult() {
@@ -137,11 +143,67 @@ addLayer('a', {
             },
             total() { return D.minus(tmp.a.modifiers.arca.gain.total, tmp.a.modifiers.arca.loss.total); },
         },
+        chain: {
+            time_mult() { return D(2.5); },
+        },
     },
     update(diff) {
-        if (D.gt(tmp.a.modifiers.arca.total, 0)) {
+        if (D.gt(tmp.a.modifiers.arca.gain.total, 0)) {
             const gain = D.times(tmp.a.modifiers.arca.total, diff);
             addPoints('a', gain);
         }
+
+        Object.entries(player.a.chains).forEach(([chain, phain]) => {
+            if (D.lte(phain.built, 0)) return;
+
+            const trecipe = tmp.c.recipes[chain],
+                thain = tmp.a.chains[chain],
+                /** @type {[items, Decimal][]} */
+                cost = thain?.items ?? [
+                    ['extractor', D(trecipe.consumes.length)],
+                    ['inserter', D(trecipe.produces.length)],
+                    [D.gt(trecipe.heat, 0) ? 'smelter' : 'combiner', D.dOne],
+                ],
+                /** Actual elapsed time, including the amount of chains built */
+                mult = D.times(diff, phain.built),
+                upkeep = cost.map(([item, amount]) => D.times(tmp.a.upkeep[item] ?? 0, amount))
+                    .reduce((sum, upkeep) => D.add(sum, upkeep), D.dZero).times(mult);
+
+            // Not enough arca to work
+            if (D.gt(upkeep, player.a.points)) return;
+
+            addPoints('a', upkeep.neg());
+
+            const continuous = thain?.continuous ?? (D.gt(trecipe.heat, 0) || D.lte(trecipe.duration, 0));
+            if (continuous && crafting_can(chain, mult)) {
+                // Give a little, take a little
+                gain_items(trecipe.produces.map(([item, cost]) => [item, cost.times(mult)]));
+                gain_items(trecipe.consumes.map(([item, cost]) => [item, cost.neg().times(mult)]));
+                player.c.recipes[chain].crafted = D.add(player.c.recipes[chain].crafted, mult);
+            } else if (D.gte(phain.time, D.times(trecipe.duration, thain?.time_multiplier ?? tmp.a.modifiers.chain.time_mult))) {
+                // We've worked long enough, time to give something
+                gain_items(trecipe.produces);
+                player.c.recipes[chain].crafted = D.add(player.c.recipes[chain].crafted, 1);
+                phain.time = D.dZero;
+            } else if (D.gt(phain.time, 0)) {
+                // We've already consumed items, just work the time
+                phain.time = D.add(phain.time, mult);
+            } else if (D.lte(phain.time, 0) && crafting_can(chain, 1)) {
+                // We can craft one of the item
+                phain.time = mult;
+                gain_items(trecipe.consumes.map(([item, cost]) => [item, cost.neg()]));
+            }
+        });
+    },
+    doReset(layer) {
+        if (tmp[layer].row <= this.row) return;
+
+        /** @type {(keyof Player['c'])[]} */
+        const keep = [],
+            /** @type {[string, {built:Decimal}][]} */
+            built = Object.entries(player.a.chains).map(([id, data]) => [id, { built: data.built }]);
+
+        layerDataReset(this.layer, keep);
+        built.forEach(([id, data]) => player.a.chains[id].built = data.built);
     },
 });
