@@ -979,7 +979,7 @@ addLayer('m', {
             },
             currencyLocation() { return player.items[this.item]; },
             currencyInternalName: 'amount',
-            unlocked() { return tmp.m.compactor.unlocked; },
+            unlocked() { return tmp.m.compactor.unlocked || hasAchievement('ach', 94); },
         },
         52: {
             title: 'Iron Drill',
@@ -1179,7 +1179,7 @@ addLayer('m', {
             },
             currencyLocation() { return player.items[this.item]; },
             currencyInternalName: 'amount',
-            unlocked() { return tmp.m.compactor.unlocked; },
+            unlocked() { return tmp.m.compactor.unlocked || hasAchievement('ach', 94); },
         },
         62: {
             title: 'Iron Forge',
@@ -1928,7 +1928,7 @@ addLayer('m', {
 
             return time;
         },
-        unlocked() { return hasUpgrade('s', 22) || hasAchievement('b', 65); },
+        unlocked() { return hasUpgrade('s', 22) || hasAchievement('ach', 75); },
     },
     list() {
         let list = Object.keys(layers.m.ores).filter(/**@param{ores}ore*/ore => tmp.m.ores[ore].unlocked ?? true);

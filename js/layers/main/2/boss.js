@@ -426,7 +426,7 @@ addLayer('b', {
             player.b.visible_challenges.push('12');
             doPopup('none', `${tmp.b.challenges[12].name}`, 'Boss unlocked', 5, tmp.b.color);
         }
-        //todo unlock 13 with magic core
+        //todo unlock 41 with magic core
     },
     prestigeNotify() { return !activeChallenge('b') && [11].some(id => tmp.b.challenges[id].unlocked && !hasChallenge('b', id)); },
     shouldNotify() {

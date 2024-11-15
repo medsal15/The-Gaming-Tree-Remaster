@@ -511,7 +511,21 @@ addLayer('ach', {
             },
             unlocked() { return tmp.m.compactor.unlocked; },
         },
-        //todo forge achievements (12X)
+        121: {
+            name: 'Real Magic',
+            tooltip: 'Unlock Arcane',
+            done() { return D.gte(player.items.arcane_generator.amount, 1); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.a.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.a.color;
+
+                return style;
+            },
+            unlocked() { return tmp.a.layerShown; },
+        },
+        //todo arcane achievements (12X)
         //#endregion Normal
         //#region Bonus
         81: {
@@ -752,7 +766,7 @@ addLayer('ach', {
     achievementPopups: false, // This is done manually
     categories: {
         normal: {
-            rows: [1, 3, 4, 5, 7, 9],
+            rows: [1, 3, 4, 5, 7, 9, 12],
             color() { return tmp.ach.color; },
             visible() {
                 return Object.values(tmp.ach.achievements)

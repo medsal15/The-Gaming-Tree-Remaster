@@ -101,6 +101,13 @@ addLayer('xp', {
                         </div>`;
                 }],
                 ['bar', 'health'],
+                () => {
+                    const selected = player.xp.selected;
+                    if (!selected) return;
+                    const def = tmp.xp.monsters[selected].defense;
+                    if (D.lte(def, 0)) return;
+                    return ['display-text', `Defense: ${format(def)}`];
+                },
                 'blank',
                 ['bar', 'attack_selected'],
                 ['bar', 'attack_all'],

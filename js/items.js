@@ -942,17 +942,21 @@ const item_list = {
                 return { 'kill:golem': chance };
             },
             range() {
-                let min = D(1),
-                    max = D(3);
+                const range = {};
 
-                let mult = tmp.m.modifiers.range.mult;
+                if (hasChallenge('b', 32)) {
+                    let min = D(1),
+                        max = D(3);
 
-                min = D.times(min, mult);
-                max = D.times(max, mult);
+                    let mult = tmp.m.modifiers.range.mult;
 
-                return {
-                    'mining:stone': { min, max },
-                };
+                    min = D.times(min, mult);
+                    max = D.times(max, mult);
+
+                    range['mining:stone'] = { min, max };
+                }
+
+                return range;
             },
             other() {
                 /** @type {drop_sources[]} */
@@ -983,7 +987,7 @@ const item_list = {
     'mud_brick': {
         id: null,
         color() { return tmp.xp.monsters.golem.color; },
-        name: 'mudbrick',
+        name: 'mud brick',
         grid: [item_grid_rows.golem, 1],
         icon: [11, 1],
         row: 1,
@@ -1045,6 +1049,18 @@ const item_list = {
         icon: [11, 3],
         row: 1,
         sources: {
+            chance() {
+                if (D.eq(tmp.c.chance_multiplier, 0) || inChallenge('b', 12)) return {};
+
+                let chance = D(1 / 42);
+
+                chance = chance.times(tmp.c.chance_multiplier);
+                chance = chance.times(tmp.xp.modifiers.drops.mult);
+
+                chance = chance.times(item_effect('record_golem').core_chance);
+
+                return { 'kill:golem': chance };
+            },
             other() {
                 /** @type {drop_sources[]} */
                 const other = ['crafting'];
@@ -1064,6 +1080,191 @@ const item_list = {
             Extremely solid, whoever made this is clearly proficient at crafting.`,
         categories: ['materials', 'golem'],
         unlocked() { return tmp.xp.monsters.golem.unlocked; },
+    },
+    'mud_kiln': {
+        id: null,
+        color() { return tmp.xp.monsters.golem.color; },
+        name: 'mud kiln',
+        grid: [item_grid_rows.golem, 4],
+        icon: [11, 4],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        value: {
+            value: D(1600),
+        },
+        lore: `A furnace made of stone, coal, and mud.<br>\
+            Even after usage it still feels warm.<br>\
+            The mud is too fragile for stacking...`,
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let mud_speed = D.pow(1.1, x),
+                heat_mult = D.div(x, 20).add(1);
+
+            return { mud_speed, heat_mult, };
+        },
+        effectDescription(amount) {
+            let mud_speed, heat_mult;
+            if (shiftDown) {
+                mud_speed = '[1.1 ^ amount]';
+                heat_mult = '[amount / 20 + 1]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                mud_speed = format(effect.mud_speed);
+                heat_mult = format(effect.heat_mult);
+            }
+
+            let text = `Divides mud crafting speed by ${mud_speed}`;
+            if (tmp.c.forge.unlocked) text += `, and multiplies heat gain by ${heat_mult}`;
+            return text;
+        },
+        categories: ['equipment', 'golem'],
+        unlocked() { return tmp.items.mud_brick.unlocked; },
+    },
+    'weakness_finder': {
+        id: null,
+        color() { return tmp.xp.monsters.golem.color; },
+        name: 'weakness finder',
+        grid: [item_grid_rows.golem, 5],
+        icon() {
+            const icon = [11, 5];
+
+            if (inChallenge('b', 11)) icon[1] = 6;
+            if (inChallenge('b', 21)) icon[1] = 7;
+
+            return icon;
+        },
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        value: {
+            value: D(1555),
+        },
+        lore() {
+            if (inChallenge('b', 11)) return `A skull containing some golem eyes.<br>
+                Combined together, it can detect the perfect spots to hit for more damage.<br>
+                Looking at it makes you feel... Guilty?`;
+
+            if (inChallenge('b', 21)) return `A skull containing some golem eyes.<br>
+                Combined together, it can detect the perfect spots to hit for more damage.<br>
+                Looking at it makes you feel... Judged.`;
+
+            return `A skull containing some golem eyes.<br>
+                Combined together, it can detect the perfect spots to hit for more damage.<br>
+                Looking at it makes you feel... Nostalgic?`;
+        },
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let damage = D.div(x, 10).add(1);
+
+            return { damage, };
+        },
+        effectDescription(amount) {
+            let damage;
+            if (shiftDown) {
+                damage = '[amount / 10 + 1]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                damage = format(effect.damage);
+            }
+
+            let text = `Multiplies enemy and mining damage by ${damage}`;
+            return text;
+        },
+        categories: ['equipment', 'golem'],
+        unlocked() { return tmp.items.golem_eye.unlocked; },
+    },
+    'arcane_generator': {
+        id: null,
+        color() { return tmp.xp.monsters.golem.color; },
+        name: 'arcane generator',
+        grid: [item_grid_rows.golem, 6],
+        icon: [11, 8],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        value: {
+            value: D(20_000),
+        },
+        lore: `A repurposed golem core to serve as a power source.<br>\
+            Dangerous to handle without the electrum frame.<br>\
+            The energy emanating from it does not feel safe.`,
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let arcane = D.pow(x, 2).div(10);
+
+            return { arcane, };
+        },
+        effectDescription(amount) {
+            let arcane;
+            if (shiftDown) {
+                arcane = '[amount ^ 2 / 10]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                arcane = format(effect.arcane);
+            }
+
+            if (!tmp.a.layerShown) return 'Produces ???';
+            let text = `Produces ${arcane} arca`;
+            return text;
+        },
+        categories: ['equipment', 'golem'],
+        unlocked() { return tmp.items.golem_core.unlocked; },
+    },
+    'record_golem': {
+        id: null,
+        color() { return tmp.xp.monsters.golem.color; },
+        name: 'record golem',
+        grid: [item_grid_rows.golem, 7],
+        icon: [11, 9],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        value: {
+            value: D(150),
+        },
+        lore: `A small golem whose new purpose is to take pictures.<br>\
+            On the back, a small screen can be found to review them.<br>\
+            If you find a way to put these pictures on solid media, you might just become rich!`,
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let luck = D.div(x, 20).add(1),
+                core_chance = D.root(x, 2.2).floor();
+
+            return { luck, core_chance, };
+        },
+        effectDescription(amount) {
+            let luck, core_chance;
+            if (shiftDown) {
+                luck = '[amount / 20 + 1]';
+                core_chance = '[floor(2.2√(amount))]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                luck = format(effect.luck);
+                core_chance = format(effect.core_chance);
+            }
+
+            let text = `Multiplies luck by ${luck}, and golem core drop chance by ${core_chance}`;
+            return text;
+        },
+        categories: ['equipment', 'golem'],
+        unlocked() { return tmp.items.golem_core.unlocked; },
     },
     // Mining
     'stone': {
@@ -1228,7 +1429,7 @@ const item_list = {
             Some people would kill for one of these.`,
         categories: ['materials', 'mining'],
         effect(amount) {
-            const x = D(amount ?? player.items[this.id].total);
+            const x = D(amount ?? player.items[this.id].amount);
 
             return D.div(x, 2).add(1);
         },
@@ -1237,7 +1438,7 @@ const item_list = {
             if (shiftDown) {
                 div = '[amount / 2 + 1]';
             } else {
-                const x = D(amount ?? player.items[this.id].total),
+                const x = D(amount ?? player.items[this.id].amount),
                     effect = item_list[this.id].effect(x);
 
                 div = format(effect);
@@ -1246,27 +1447,6 @@ const item_list = {
             return `Divides gold nugget chance by ${div}`;
         },
         unlocked() { return D.gte(player.items.gold_nugget.amount, 1) || player.b.visible_challenges.includes('12'); },
-    },
-    'densium': {
-        id: null,
-        color: '#445566',
-        name: 'densium',
-        grid: [item_grid_rows.densium, 0],
-        icon: [4, 5],
-        row: 0,
-        sources: {
-            other: ['mining:compactor'],
-        },
-        value: {
-            value() {
-                if (inChallenge('b', 12)) return D(500);
-            },
-        },
-        lore: `An extremely dense piece of stone.<br>
-            Perfectly circular and smooth.<br>
-            Rarely used, except in expensive industries.`,
-        categories: ['materials', 'mining'],
-        unlocked() { return tmp.m.compactor.unlocked; },
     },
     'coal': {
         id: null,
@@ -2132,6 +2312,28 @@ const item_list = {
         },
         unlocked() { return tmp.c.forge.unlocked; },
     },
+    // Densium
+    'densium': {
+        id: null,
+        color: '#445566',
+        name: 'densium',
+        grid: [item_grid_rows.densium, 0],
+        icon: [4, 5],
+        row: 0,
+        sources: {
+            other: ['mining:compactor'],
+        },
+        value: {
+            value() {
+                if (inChallenge('b', 12)) return D(500);
+            },
+        },
+        lore: `An extremely dense piece of stone.<br>
+            Perfectly circular and smooth.<br>
+            Rarely used, except in expensive industries.`,
+        categories: ['materials', 'densium'],
+        unlocked() { return tmp.m.compactor.unlocked; },
+    },
     'densium_slime': {
         id: null,
         color: '#445566',
@@ -2150,7 +2352,7 @@ const item_list = {
         lore: `An extremely dense slime.<br>
             Its smaller size hides an extreme weight.<br>
             Did you know it cannot move on its own?`,
-        categories: ['equipment', 'mining', 'slime',],
+        categories: ['equipment', 'densium', 'slime',],
         effect(amount) {
             const x = D(amount ?? player.items[this.id].amount);
 
@@ -2191,7 +2393,7 @@ const item_list = {
         lore: `An extremely dense piece of rock.<br>
             It's also very hard!<br>
             Just... Break... Already!`,
-        categories: ['equipment', 'mining'],
+        categories: ['equipment', 'densium', 'mining'],
         effect(amount) {
             const x = D(amount ?? player.items[this.id].amount);
 
@@ -2232,7 +2434,7 @@ const item_list = {
         lore: `A very heavy magic 8 ball that can predict the past!<br>
             Just ask a simple yes or no question to get an answer.<br>
             Despite its weight, you still have to hold <b>and</b> shake it. Good luck.`,
-        categories: ['equipment', 'mining'],
+        categories: ['equipment', 'densium'],
         effect(amount) {
             const x = D(amount ?? player.items[this.id].amount);
 
@@ -2258,12 +2460,53 @@ const item_list = {
         },
         unlocked() { return tmp.m.compactor.unlocked || D.gt(player.items[this.id].amount, 0); },
     },
+    'densium_golem': {
+        id: null,
+        color: '#445566',
+        name: 'densium golem',
+        grid: [item_grid_rows.densium, 4],
+        icon: [7, 3],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        value: {
+            value() {
+                return D(750); //todo
+            },
+        },
+        lore: `An automobile being made of densium.<br>
+            Attracts golems with its high mass/volume ratio.<br>
+            Its extreme weight can be heard through its walking.`,
+        categories: ['equipment', 'densium', 'golem'],
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let golem_mult = D.add(x, 1);
+
+            return { golem_mult, };
+        },
+        effectDescription(amount) {
+            let golem_mult;
+            if (shiftDown) {
+                golem_mult = '[amount + 1]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                golem_mult = format(effect.golem_mult);
+            }
+
+            return `Multiplies golem health, experience, kills, and drops by ${golem_mult}`;
+        },
+        unlocked() { return (tmp.m.compactor.unlocked && tmp.xp.monsters.golem.unlocked) || D.gt(player.items[this.id].amount, 0); },
+    },
     // Forge Equipment
     'stone_wall': {
         id: null,
         color: '#BBBBDD',
         name: 'stone wall',
-        icon: [9, 0],
+        icon: [10, 0],
         row: 1,
         sources: {
             other: ['forge',],
@@ -2301,7 +2544,7 @@ const item_list = {
         id: null,
         color: '#FFAA11',
         name: 'copper golem',
-        icon: [9, 1],
+        icon: [10, 1],
         row: 1,
         sources: {
             other: ['forge',],
@@ -2339,7 +2582,7 @@ const item_list = {
         id: null,
         color: '#FFFFCC',
         name: 'tin ring',
-        icon: [9, 2],
+        icon: [10, 2],
         row: 1,
         sources: {
             other: ['forge',],
@@ -2377,7 +2620,7 @@ const item_list = {
         id: null,
         color: '#BB7744',
         name: 'bronze mold',
-        icon: [9, 3],
+        icon: [10, 3],
         row: 1,
         sources: {
             other: ['forge',],
@@ -2415,7 +2658,7 @@ const item_list = {
         id: null,
         color: '#FFFF44',
         name: 'gold star',
-        icon: [9, 4],
+        icon: [10, 4],
         row: 1,
         sources: {
             other: ['forge',],
@@ -2453,7 +2696,7 @@ const item_list = {
         id: null,
         color: '#8899AA',
         name: 'iron heataxe',
-        icon: [9, 5],
+        icon: [10, 5],
         row: 1,
         sources: {
             other: ['forge',],
@@ -2491,7 +2734,7 @@ const item_list = {
         id: null,
         color: '#DDEEEE',
         name: 'disco ball',
-        icon: [8, 6],
+        icon: [10, 6],
         row: 1,
         sources: {
             other: ['forge',],
@@ -2499,7 +2742,7 @@ const item_list = {
         lore: `A shiny ball covered in small silver mirrors.<br>
             The flashing lights hurt your eyes.<br>
             Move to the rhythm!`,
-        categories: ['materials', 'forge'],
+        categories: ['equipment', 'forge'],
         effect(amount) {
             const x = D(amount ?? player.items[this.id].amount);
 
@@ -2529,7 +2772,7 @@ const item_list = {
         id: null,
         color: '#EEDDAA',
         name: 'electrum package',
-        icon: [8, 7],
+        icon: [10, 7],
         row: 1,
         sources: {
             other: ['forge',],
@@ -2537,7 +2780,7 @@ const item_list = {
         lore: `A light yellow box that helps in crafting.<br>
             Its weight makes it clunky to use.<br>
             Wait, why didn't you just make a box out of something easier to find?`,
-        categories: ['materials', 'forge'],
+        categories: ['equipment', 'forge'],
         effect(amount) {
             const x = D(amount ?? player.items[this.id].amount);
 
@@ -2559,7 +2802,7 @@ const item_list = {
                 cost_div = format(effect.cost_div);
             }
 
-            return `Maximum crafting by ${limit}, and divides electrum ingot use costs by ${cost_div}`;
+            return `Increases maximum crafting by ${limit}, and divides electrum ingot use costs by ${cost_div}`;
         },
         unlocked() { return tmp.c.forge.unlocked; },
     },

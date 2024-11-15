@@ -323,6 +323,70 @@ function square(list, size) {
 
     return sq;
 }
+const category_utils = {
+    /** @type {categories[]} List of categories */
+    list: ['slime', 'skeleton', 'golem', 'mining', 'densium', 'forge'],
+    /** @type {categories[]} Extra categories */
+    ext: ['materials', 'equipment'],
+    /**
+     * Returns whether a category is unlocked
+     * @param {categories} category
+     * @returns {boolean}
+     */
+    unlocked(category) {
+        switch (category) {
+            case 'slime':
+                return tmp.xp.monsters.slime.unlocked ?? true;
+            case 'skeleton':
+                return tmp.xp.monsters.skeleton.unlocked ?? true;
+            case 'golem':
+                return tmp.xp.monsters.golem.unlocked ?? true;
+            case 'mining':
+                return tmp.m.layerShown;
+            case 'forge':
+                return tmp.c.forge.unlocked;
+            case 'densium':
+                return tmp.m.compactor.unlocked;
+            case 'shop':
+                return tmp.s.layerShown;
+            case 'materials':
+            case 'equipment':
+                return tmp.c.layerShown;
+        }
+    },
+    /**
+     * Category name, lowercase
+     *
+     * @type {Record<categories, () => string>}
+     */
+    names: {
+        'slime': () => tmp.xp.monsters.slime.name,
+        'skeleton': () => tmp.xp.monsters.skeleton.name,
+        'golem': () => tmp.xp.monsters.golem.name,
+        'mining': () => tmp.m.name,
+        'forge': () => 'forge',
+        'densium': () => tmp.items.densium.name,
+        'shop': () => tmp.s.name,
+        'materials': () => 'materials',
+        'equipment': () => 'equipment',
+    },
+    /**
+     * Category color
+     *
+     * @type {Record<categories, () => string>}
+     */
+    color: {
+        'slime': () => tmp.xp.monsters.slime.color,
+        'skeleton': () => tmp.xp.monsters.skeleton.color,
+        'golem': () => tmp.xp.monsters.golem.color,
+        'mining': () => tmp.m.color,
+        'forge': () => tmp.c.modifiers.heat.color,
+        'densium': () => tmp.items.densium.color,
+        'shop': () => tmp.s.color,
+        'materials': () => tmp.c.color,
+        'equipment': () => tmp.c.color,
+    },
+};
 
 // Layer methods
 // experience
@@ -687,242 +751,6 @@ function strike_ore(damage) {
 
 // crafting
 /**
- * Returns a map of toggles for the crafting layer
- *
- * @returns {{[key: `${'inventory'|'crafting'}_${categories}`]: Clickable<'c'>}}
- */
-function crafting_toggles() {
-    /** @type {categories[]} */
-    const list = ['materials', 'equipment', 'slime', 'skeleton', 'mining', 'forge', 'golem'],
-        /** @type {(cat: categories) => boolean} */
-        unlocked = cat => {
-            switch (cat) {
-                case 'materials':
-                case 'equipment':
-                    return true;
-                case 'slime':
-                    return tmp.xp.monsters.slime.unlocked ?? true;
-                case 'skeleton':
-                    return tmp.xp.monsters.skeleton.unlocked ?? true;
-                case 'golem':
-                    return tmp.xp.monsters.golem.unlocked ?? true;
-                case 'mining':
-                    return tmp.m.layerShown;
-                case 'forge':
-                    return tmp.c.forge.unlocked;
-            }
-        },
-        /** @type {{[cat in categories]: string}} */
-        names = {
-            'materials': 'Materials',
-            'equipment': 'Equipment',
-            'slime': 'Slime',
-            'skeleton': 'Skeleton',
-            'golem': 'Golem',
-            'mining': 'Mining',
-            'forge': 'Forge',
-        },
-        /** @type {{[cat in categories]: () => string}} */
-        colors = {
-            'materials': () => tmp.c.color,
-            'equipment': () => tmp.c.color,
-            'slime': () => tmp.xp.monsters.slime.color,
-            'skeleton': () => tmp.xp.monsters.skeleton.color,
-            'golem': () => tmp.xp.monsters.golem.color,
-            'mining': () => tmp.m.color,
-            'forge': () => tmp.c.modifiers.heat.color,
-        };
-
-    return Object.fromEntries(list.map(/**@returns{[string, Clickable<'c'>][]}*/cat => {
-        return [
-            [`inventory_${cat}`, {
-                canClick() { return true; },
-                onClick() {
-                    const vis = player.c.visiblity;
-
-                    vis.inventory[cat] = {
-                        'show': 'hide',
-                        'hide': 'ignore',
-                        'ignore': 'show',
-                    }[vis.inventory[cat] ??= 'ignore'];
-                },
-                display() {
-                    const vis = player.c.visiblity,
-                        name = names[cat];
-
-                    let visibility = {
-                        'show': 'Shown',
-                        'hide': 'Hidden',
-                        'ignore': 'Ignored',
-                    }[vis.inventory[cat] ??= 'ignore'];
-
-                    return `<span style="font-size:1.5em;">${name}</span><br>${visibility}`;
-                },
-                style: {
-                    'backgroundColor'() {
-                        const vis = player.c.visiblity,
-                            color = colors[cat]();
-
-                        switch (vis.inventory[cat]) {
-                            case 'show':
-                                return color;
-                            case 'hide':
-                                return rgb_negative(color);
-                            case 'ignore':
-                                return rgb_grayscale(color);
-                        }
-                    },
-                },
-                unlocked: () => unlocked(cat),
-            }],
-            [`crafting_${cat}`, {
-                canClick() { return true; },
-                onClick() {
-                    const vis = player.c.visiblity;
-
-                    vis.crafting[cat] = {
-                        'show': 'hide',
-                        'hide': 'ignore',
-                        'ignore': 'show',
-                    }[vis.crafting[cat] ??= 'ignore'];
-                },
-                display() {
-                    const vis = player.c.visiblity,
-                        name = names[cat];
-
-                    let visibility = {
-                        'show': 'Shown',
-                        'hide': 'Hidden',
-                        'ignore': 'Ignored',
-                    }[vis.crafting[cat] ??= 'ignore'];
-
-                    return `<span style="font-size:1.5em;">${name}</span><br>${visibility}`;
-                },
-                style: {
-                    'backgroundColor'() {
-                        const vis = player.c.visiblity,
-                            color = colors[cat]();
-
-                        switch (vis.crafting[cat]) {
-                            case 'show':
-                                return color;
-                            case 'hide':
-                                return rgb_negative(color);
-                            case 'ignore':
-                                return rgb_grayscale(color);
-                        }
-                    },
-                },
-                unlocked: () => unlocked(cat),
-            }],
-            [`forge_${cat}`, {
-                canClick() { return true; },
-                onClick() {
-                    const vis = player.c.visiblity;
-
-                    vis.forge[cat] = {
-                        'show': 'hide',
-                        'hide': 'ignore',
-                        'ignore': 'show',
-                    }[vis.forge[cat] ??= 'ignore'];
-                },
-                display() {
-                    const vis = player.c.visiblity,
-                        name = names[cat];
-
-                    let visibility = {
-                        'show': 'Shown',
-                        'hide': 'Hidden',
-                        'ignore': 'Ignored',
-                    }[vis.forge[cat] ??= 'ignore'];
-
-                    return `<span style="font-size:1.5em;">${name}</span><br>${visibility}`;
-                },
-                style: {
-                    'backgroundColor'() {
-                        const vis = player.c.visiblity,
-                            color = colors[cat]();
-
-                        switch (vis.forge[cat]) {
-                            case 'show':
-                                return color;
-                            case 'hide':
-                                return rgb_negative(color);
-                            case 'ignore':
-                                return rgb_grayscale(color);
-                        }
-                    },
-                },
-                unlocked: () => unlocked(cat),
-            }],
-        ];
-    }).flat());
-}
-/**
- * Returns the display for the inventory
- *
- * @returns {TabFormatEntries<'c'>[]}
- */
-function inventory() {
-    const vis = player.c.visiblity.inventory,
-        /** @type {{[row: number]: items[]}} */
-        grid = {};
-
-    Object.values(tmp.items)
-        .filter(item => (item.unlocked ?? true) &&
-            ('grid' in item) &&
-            (
-                item.categories.some(cat => vis[cat] == 'show') ||
-                !item.categories.some(cat => vis[cat] == 'hide')
-            ))
-        .forEach(item => {
-            const [row, col] = item.grid;
-
-            (grid[row] ??= [])[col] = item.id;
-        });
-
-    return Object.values(grid).map(items => ['row', items.map(item => {
-        const tile = item_tile(item),
-            itemp = tmp.items[item];
-        let tooltip = '';
-
-        if ('effectDescription' in itemp) tooltip += itemp.effectDescription() + '<hr style="margin: 5px 0;">';
-        if ('sources' in itemp) {
-            const {
-                chance = {},
-                per_second = {},
-                range = {},
-                other = [],
-            } = itemp.sources,
-                tooltip_lines = [];
-
-            if (Object.entries(chance).filter(([, c]) => D.gt(c, 0)).length) tooltip_lines.push(...Object.entries(chance)
-                .filter(([, c]) => D.gt(c, 0))
-                .map(/**@param{[string,Decimal]}*/([source, chance]) =>
-                    `${capitalize(source_name(source))}: ${format_chance(chance)}`));
-            if (Object.entries(range).filter(([, r]) => D.gt(r.max, 0)).length) tooltip_lines.push(...Object.entries(range)
-                .map(/**@param{[items,{min:Decimal,max:Decimal}]}*/([source, range]) => `${capitalize(source_name(source))}: ${format_range(range)}`));
-            if (Object.entries(per_second).filter(([, ps]) => D.neq(ps, 0)).length) tooltip_lines.push(...Object.entries(per_second)
-                .map(/**@param{[string,Decimal]}*/([source, amount]) =>
-                    `${capitalize(source_name(source))}: ${D.gt(amount, 0) ? '+' : ''}${format(amount)} /s`));
-            if (other.length) tooltip_lines.push(...other.map(source => capitalize(source_name(source))));
-
-            tooltip += tooltip_lines.join('<br>');
-        }
-
-        if (!tooltip.length) tooltip = 'No sources';
-
-        tile.text += `<br>${formatWhole(player.items[item].amount)}`;
-        tile.tooltip = tooltip;
-        tile.onClick = () => {
-            if (player.c.compendium == item) player.c.compendium = false;
-            player.c.compendium = item;
-        };
-
-        return ['tile', tile];
-    })]);
-}
-/**
  * Returns the display for a crafting recipe
  *
  * @param {string} recipe
@@ -1080,7 +908,7 @@ function crafting_can(recipe, amount) {
     let items = [];
     if (!amount) items = tmp.c.recipes[recipe].consumes;
     else items = layers.c.recipes[recipe].consumes(amount);
-    return items.every(([item, amount]) => D.gte(player.items[item].amount, amount));
+    return Array.isArray(items) && items.every(([item, amount]) => D.gte(player.items[item].amount, amount));
 }
 /**
  * Returns the content for lore in the crafting tabFormat
@@ -1137,6 +965,194 @@ function compendium_content(item) {
     lines.push(['display-text', '<u>Notes:</u>'], ['display-text', itemp.lore], 'blank');
 
     return lines;
+}
+/**
+ * Returns the subtabs for crafting
+ *
+ * @returns {Record<string, TabFormat<'c'>>}
+ */
+function crafting_subtabs_craft() {
+    return Object.fromEntries(category_utils.list.map(/**@return {[categories, TabFormat<'c'>]}*/cat => {
+        return [cat, {
+            content: [
+                ['column', () => {
+                    const types = {
+                        /** @type {TabFormatEntries<'c'>[]} */
+                        materials: [],
+                        /** @type {TabFormatEntries<'c'>[]} */
+                        equipment: [],
+                    },
+                        /** @type {TabFormatEntries<'c'>[]} */
+                        lines = [];
+
+                    Object.values(tmp.c.recipes)
+                        .filter(data => D.eq(data.heat, 0) && (data.unlocked ?? true) && data.categories.includes(cat))
+                        .forEach(data => {
+                            const recipe = crafting_show_recipe(data.id);
+                            if (!recipe.length) return;
+                            if (data.categories.includes('materials')) types.materials.push(recipe);
+                            else if (data.categories.includes('equipment')) types.equipment.push(recipe);
+                        });
+
+                    if (types.materials.length) {
+                        const cost_mult = tmp.c.modifiers.materials.cost_mult;
+                        if (D.neq_tolerance(cost_mult, 1, 1e-3)) {
+                            lines.push(['display-text', `Material cost divider: /${resourceColor(colors[options.theme].points, format(D.pow(cost_mult, -1)))}`],);
+                        }
+                        lines.push(...types.materials);
+                    }
+                    if (types.equipment.length) {
+                        if (lines.length) lines.push('blank', 'h-line', 'blank');
+                        const cost_mult = tmp.c.modifiers.equipment.cost_mult;
+                        if (D.neq_tolerance(cost_mult, 1, 1e-3)) {
+                            lines.push(['display-text', `Equipment cost divider: /${resourceColor(colors[options.theme].points, format(D.pow(cost_mult, -1)))}`],);
+                        }
+                        lines.push(...types.equipment);
+                    }
+
+                    return lines;
+                }],
+            ],
+            name: () => capitalize(category_utils.names[cat]()),
+            buttonStyle: {
+                'border-color': category_utils.color[cat],
+            },
+            unlocked() {
+                return category_utils.unlocked(cat) && Object.values(tmp.c.recipes)
+                    .some(data => D.eq(data.heat, 0) && (data.unlocked ?? true) && data.categories.includes(cat));
+            },
+            shouldNotify() {
+                return Object.values(tmp.c.recipes)
+                    .some(data => D.eq(data.heat, 0) && (data.unlocked ?? true) && data.categories.includes(cat) && crafting_can(data.id));
+            },
+        }];
+    }));
+}
+/**
+ * Returns the subtabs for the inventory
+ *
+ * @returns {Record<string, TabFormat<'c'>>}
+ */
+function crafting_subtabs_inventory() {
+    /** @type {categories[]} */
+    const list = [...category_utils.list, ...category_utils.ext];
+
+    return Object.fromEntries(list.map(/**@return {[categories, TabFormat<'c'>]}*/cat => {
+        return [cat, {
+            content: [
+                ['column', () => {
+                    const tiles = Object.values(tmp.items)
+                        .filter(item => (item.unlocked ?? true) && item.categories.includes(cat))
+                        .map(/**@return {['tile', tile]}*/itemp => {
+                            const tile = item_tile(itemp.id);
+                            let tooltip = '';
+
+                            if ('effectDescription' in itemp) tooltip += itemp.effectDescription() + '<hr style="margin: 5px 0;">';
+                            if ('sources' in itemp) {
+                                const {
+                                    chance = {},
+                                    per_second = {},
+                                    range = {},
+                                    other = [],
+                                } = itemp.sources,
+                                    tooltip_lines = [];
+
+                                if (Object.entries(chance).filter(([, c]) => D.gt(c, 0)).length) tooltip_lines.push(...Object.entries(chance)
+                                    .filter(([, c]) => D.gt(c, 0))
+                                    .map(/**@param{[string,Decimal]}*/([source, chance]) =>
+                                        `${capitalize(source_name(source))}: ${format_chance(chance)}`));
+                                if (Object.entries(range).filter(([, r]) => D.gt(r.max, 0)).length) tooltip_lines.push(...Object.entries(range)
+                                    .map(/**@param{[items,{min:Decimal,max:Decimal}]}*/([source, range]) => `${capitalize(source_name(source))}: ${format_range(range)}`));
+                                if (Object.entries(per_second).filter(([, ps]) => D.neq(ps, 0)).length) tooltip_lines.push(...Object.entries(per_second)
+                                    .map(/**@param{[string,Decimal]}*/([source, amount]) =>
+                                        `${capitalize(source_name(source))}: ${D.gt(amount, 0) ? '+' : ''}${format(amount)} /s`));
+                                if (other.length) tooltip_lines.push(...other.map(source => capitalize(source_name(source))));
+
+                                tooltip += tooltip_lines.join('<br>');
+                            }
+
+                            tile.text += `<br>${formatWhole(player.items[itemp.id].amount)}`;
+                            tile.tooltip = tooltip;
+                            tile.onClick = () => {
+                                if (player.c.compendium == itemp.id) player.c.compendium = false;
+                                player.c.compendium = itemp.id;
+                            };
+
+                            return ['tile', tile];
+                        });
+
+                    return square(tiles, 8).map(row => ['row', row]);
+                }],
+            ],
+            name: () => capitalize(category_utils.names[cat]()),
+            buttonStyle: {
+                'border-color': category_utils.color[cat],
+            },
+            unlocked() { return category_utils.unlocked(cat); },
+        }];
+    }));
+}
+/**
+ * Returns the subtabs for forging
+ *
+ * @returns {Record<string, TabFormat<'c'>>}
+ */
+function crafting_subtabs_forge() {
+    return Object.fromEntries(category_utils.list.map(/**@return {[categories, TabFormat<'c'>]}*/cat => {
+        return [cat, {
+            content: [
+                ['column', () => {
+                    const types = {
+                        /** @type {TabFormatEntries<'c'>[]} */
+                        materials: [],
+                        /** @type {TabFormatEntries<'c'>[]} */
+                        equipment: [],
+                    },
+                        /** @type {TabFormatEntries<'c'>[]} */
+                        lines = [];
+
+                    Object.values(tmp.c.recipes)
+                        .filter(data => D.gt(data.heat, 0) && (data.unlocked ?? true) && data.categories.includes(cat))
+                        .forEach(data => {
+                            const recipe = crafting_show_recipe(data.id);
+                            if (!recipe.length) return;
+                            if (data.categories.includes('materials')) types.materials.push(recipe);
+                            else if (data.categories.includes('equipment')) types.equipment.push(recipe);
+                        });
+
+                    if (types.materials.length) {
+                        const cost_mult = tmp.c.modifiers.materials.cost_mult;
+                        if (D.neq_tolerance(cost_mult, 1, 1e-3)) {
+                            lines.push(['display-text', `Material cost divider: /${resourceColor(colors[options.theme].points, format(D.pow(cost_mult, -1)))}`],);
+                        }
+                        lines.push(...types.materials);
+                    }
+                    if (types.equipment.length) {
+                        if (lines.length) lines.push('blank', 'h-line', 'blank');
+                        const cost_mult = tmp.c.modifiers.equipment.cost_mult;
+                        if (D.neq_tolerance(cost_mult, 1, 1e-3)) {
+                            lines.push(['display-text', `Equipment cost divider: /${resourceColor(colors[options.theme].points, format(D.pow(cost_mult, -1)))}`],);
+                        }
+                        lines.push(...types.equipment);
+                    }
+
+                    return lines;
+                }],
+            ],
+            name: () => capitalize(category_utils.names[cat]()),
+            buttonStyle: {
+                'border-color': category_utils.color[cat],
+            },
+            unlocked() {
+                return category_utils.unlocked(cat) && Object.values(tmp.c.recipes)
+                    .some(data => D.gt(data.heat, 0) && (data.unlocked ?? true) && data.categories.includes(cat));
+            },
+            shouldNotify() {
+                return Object.values(tmp.c.recipes)
+                    .some(data => D.gt(data.heat, 0) && (data.unlocked ?? true) && data.categories.includes(cat) && crafting_can(data.id));
+            }
+        }];
+    }));
 }
 
 // boss
@@ -1243,116 +1259,140 @@ const value_coin = (amount) => {
     return Object.entries(items).filter(([, val]) => D.gt(val, 0));
 }
 /**
- * Returns the full display for item purchases in the shop
+ * Returns the subtabs for buying items in the shop
  *
- * @returns {TabFormatEntries<'s'>[]}
+ * @returns {Record<string, TabFormat<'s'>>}
  */
-function shop_display_buy() {
-    if (!tmp.s.layerShown) return [];
+function shop_subtabs_buy() {
+    return Object.fromEntries(category_utils.list.map(/**@return {[categories, TabFormat<'s'>]}*/cat => {
+        return [cat, {
+            content: [
+                ['column', () => {
+                    const tiles = Object.entries(tmp.s.items)
+                        .filter(/**@param{[items,Layers['s']['items'][items]]}*/([item, trade]) => {
+                            if (!('cost' in trade)) return false;
+                            const itemp = tmp.items[item];
+                            if (!(itemp.unlocked ?? true) || !itemp.categories.includes(cat)) return false;
+                            const val = itemp.value;
+                            if (!('cost' in val) || D.lte(val.cost, 0)) return false;
+                            return true;
+                        })
+                        .map(/**@param{[items,Layers['s']['items'][items]]} @return {['tile', tile]}*/([item, trademp]) => {
+                            let buy_amount = player.s.buy_amount;
+                            if (tmp.items[item].value.limit instanceof Decimal) {
+                                buy_amount = D.min(buy_amount, tmp.items[item].value.limit);
+                            }
 
-    /** @type {{[row: number]: items[]}} */
-    const grid = {};
+                            const tile = item_tile(item, 120),
+                                cost = D.times(trademp.cost, buy_amount),
+                                list = value_coin(cost);
 
-    Object.entries(tmp.s.items)
-        .filter(/**@param{[items,Layers['s']['items'][items]]}*/([item, trade]) => {
-            if (!('cost' in trade)) return false;
-            const itemp = tmp.items[item];
-            if (!('grid' in itemp) || !(itemp.unlocked ?? true)) return false;
-            const val = itemp.value;
-            if (!('cost' in val) || D.lte(val.cost, 0)) return false;
-            return true;
-        })
-        .forEach(/**@param {[items,]}*/([item]) => {
-            const [row, col] = tmp.items[item].grid;
-            (grid[row] ??= [])[col] = item;
-        });
+                            let cost_txt = 'free';
+                            if (list.length > 2) list.length = 2;
+                            if (list.length > 0) cost_txt = listFormat.format(list.map(([item, amount]) => `${formatWhole(amount)} ${tmp.items[item].name}`));
 
-    return Object.values(grid).map(items => ['row', items.map(item => {
-        let buy_amount = player.s.buy_amount;
-        if (tmp.items[item].value.limit instanceof Decimal) {
-            buy_amount = D.min(buy_amount, tmp.items[item].value.limit);
-        }
+                            tile.text = `${formatWhole(buy_amount)} ${capitalize(tmp.items[item].name)}<br>
+                                You have ${formatWhole(player.items[item].amount)}<br><br>
+                                Cost: ${cost_txt}`;
+                            tile.canClick = () => {
+                                if (inChallenge('b', 32) && !tmp.wor.overrides.s.can_buy) return false;
 
-        const trademp = tmp.s.items[item],
-            tile = item_tile(item, 90),
-            cost = D.times(trademp.cost, buy_amount),
-            list = value_coin(cost);
+                                return D.gte(buy_amount, 1) && D.gte(tmp.s.coins.total, cost)
+                            };
+                            tile.onClick = () => {
+                                const cost = buy_amount.times(trademp.cost);
+                                gain_items(item, buy_amount);
+                                spend_coins(cost);
+                                player.s.spent = D.add(player.s.spent, cost);
+                                player.s.trades[item].bought = D.add(player.s.trades[item].bought, 1);
+                            };
 
-        let cost_txt = 'free';
-        if (list.length > 2) list.length = 2;
-        if (list.length > 0) cost_txt = listFormat.format(list.map(([item, amount]) => `${formatWhole(amount)} ${tmp.items[item].name}`));
+                            return ['tile', tile];
+                        });
 
-        tile.text = `${formatWhole(buy_amount)} ${capitalize(tmp.items[item].name)}<br>
-            You have ${formatWhole(player.items[item].amount)}<br><br>
-            Cost: ${cost_txt}`;
-        tile.canClick = () => {
-            if (inChallenge('b', 32) && !tmp.wor.overrides.s.can_buy) return false;
-
-            return D.gte(buy_amount, 1) && D.gte(tmp.s.coins.total, cost)
-        };
-        tile.onClick = () => {
-            const cost = buy_amount.times(trademp.cost);
-            gain_items(item, buy_amount);
-            spend_coins(cost);
-            player.s.spent = D.add(player.s.spent, cost);
-            player.s.trades[item].bought = D.add(player.s.trades[item].bought, 1);
-        };
-
-        return ['tile', tile];
-    })]);
+                    return square(tiles, 4).map(row => ['row', row]);
+                }],
+            ],
+            name: () => capitalize(category_utils.names[cat]()),
+            buttonStyle: { 'border-color': category_utils.color[cat], },
+            unlocked() {
+                return category_utils.unlocked(cat) &&
+                    Object.entries(tmp.s.items).some(/**@param{[items,Layers['s']['items'][items]]}*/([item, trade]) => {
+                        if (!('cost' in trade)) return false;
+                        const itemp = tmp.items[item];
+                        if (!(itemp.unlocked ?? true) || !itemp.categories.includes(cat)) return false;
+                        const val = itemp.value;
+                        if (!('cost' in val) || D.lte(val.cost, 0)) return false;
+                        return true;
+                    });
+            },
+        }];
+    }));
 }
 /**
- * Returns the full display for item sales in the shop
+ * Returns the subtabs for selling items in the shop
  *
- * @returns {TabFormatEntries<'s'>[]}
+ * @returns {Record<string, TabFormat<'s'>>}
  */
-function shop_display_sell() {
-    if (!tmp.s.layerShown) return [];
+function shop_subtabs_sell() {
+    return Object.fromEntries(category_utils.list.map(/**@return {[categories, TabFormat<'s'>]}*/cat => {
+        return [cat, {
+            content: [
+                ['column', () => {
+                    const tiles = Object.entries(tmp.s.items)
+                        .filter(/**@param{[items,Layers['s']['items'][items]]}*/([item, trade]) => {
+                            if (!('value' in trade)) return false;
+                            const itemp = tmp.items[item];
+                            if (!(itemp.unlocked ?? true) || !itemp.categories.includes(cat)) return false;
+                            const val = itemp.value;
+                            if (!('value' in val) || D.lte(val.value, 0)) return false;
+                            return true;
+                        })
+                        .map(/**@param{[items,Layers['s']['items'][items]]} @return {['tile', tile]}*/([item, trademp]) => {
+                            const tile = item_tile(item, 120),
+                                value = D.times(trademp.value, player.s.sell_amount)
+                                    .times(tmp.s.modifiers.coin.mult),
+                                list = value_coin(value);
 
-    /** @type {{[row: number]: items[]}} */
-    const grid = {};
+                            let value_txt = 'free';
+                            if (list.length > 2) list.length = 2;
+                            if (list.length > 0) value_txt = listFormat.format(list.map(([item, amount]) => `${formatWhole(amount)} ${tmp.items[item].name}`));
 
-    Object.entries(tmp.s.items)
-        .filter(/**@param{[items,Layers['s']['items'][items]]}*/([item, trade]) => {
-            if (!('value' in trade)) return false;
-            const itemp = tmp.items[item];
-            if (!('grid' in itemp) || !(itemp.unlocked ?? true)) return false;
-            const val = itemp.value;
-            if (!('value' in val) || D.lte(val.value, 0)) return false;
-            return true;
-        })
-        .forEach(/**@param {[items,]}*/([item]) => {
-            const [row, col] = tmp.items[item].grid;
-            (grid[row] ??= [])[col] = item;
-        });
+                            tile.text = `${formatWhole(player.s.sell_amount)} ${capitalize(tmp.items[item].name)}<br>
+                                You have ${formatWhole(player.items[item].amount)}<br><br>
+                                Value: ${value_txt}`;
+                            tile.canClick = () => {
+                                if (inChallenge('b', 32) && !tmp.wor.overrides.s.can_sell) return false;
 
-    return Object.values(grid).map(items => ['row', items.map(item => {
-        const trademp = tmp.s.items[item],
-            tile = item_tile(item, 90),
-            value = D.times(trademp.value, player.s.sell_amount)
-                .times(tmp.s.modifiers.coin.mult),
-            list = value_coin(value);
+                                return D.gte(player.s.sell_amount, 1) && D.gte(player.items[item].amount, player.s.sell_amount)
+                            };
+                            tile.onClick = () => {
+                                const sell_amount = D.floor(player.s.sell_amount),
+                                    value = D.times(trademp.value, sell_amount).times(tmp.s.modifiers.trade.sell_mult).times(tmp.s.modifiers.coin.mult);
+                                gain_items(item, sell_amount.neg());
+                                gain_items(value_coin(value));
+                                player.s.trades[item].sold = D.add(player.s.trades[item].sold, 1);
+                            };
 
-        let value_txt = 'free';
-        if (list.length > 2) list.length = 2;
-        if (list.length > 0) value_txt = listFormat.format(list.map(([item, amount]) => `${formatWhole(amount)} ${tmp.items[item].name}`));
+                            return ['tile', tile];
+                        });
 
-        tile.text = `${formatWhole(player.s.sell_amount)} ${capitalize(tmp.items[item].name)}<br>
-            You have ${formatWhole(player.items[item].amount)}<br><br>
-            Value: ${value_txt}`;
-        tile.canClick = () => {
-            if (inChallenge('b', 32) && !tmp.wor.overrides.s.can_sell) return false;
-
-            return D.gte(player.s.sell_amount, 1) && D.gte(player.items[item].amount, player.s.sell_amount)
-        };
-        tile.onClick = () => {
-            const sell_amount = D.floor(player.s.sell_amount),
-                value = D.times(trademp.value, sell_amount).times(tmp.s.modifiers.trade.sell_mult).times(tmp.s.modifiers.coin.mult);
-            gain_items(item, sell_amount.neg());
-            gain_items(value_coin(value));
-            player.s.trades[item].sold = D.add(player.s.trades[item].sold, 1);
-        };
-
-        return ['tile', tile];
-    })]);
+                    return square(tiles, 4).map(row => ['row', row]);
+                }],
+            ],
+            name: () => capitalize(category_utils.names[cat]()),
+            buttonStyle: { 'border-color': category_utils.color[cat], },
+            unlocked() {
+                return category_utils.unlocked(cat) &&
+                    Object.entries(tmp.s.items).some(/**@param{[items,Layers['s']['items'][items]]}*/([item, trade]) => {
+                        if (!('value' in trade)) return false;
+                        const itemp = tmp.items[item];
+                        if (!(itemp.unlocked ?? true) || !itemp.categories.includes(cat)) return false;
+                        const val = itemp.value;
+                        if (!('value' in val) || D.lte(val.value, 0)) return false;
+                        return true;
+                    });
+            },
+        }];
+    }));
 }

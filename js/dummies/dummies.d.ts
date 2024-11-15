@@ -124,50 +124,7 @@ declare class Layer<L extends string> {
      * See the docs about it.
      */
     tabFormat?: {
-        [id: string]: {
-            /**
-             * The tab layout code for the subtab, in the tab layout format.
-             */
-            content: Computable<TabFormatEntries<L>[]>
-            /**
-             * Applies CSS to the whole subtab when switched to, in the form of an "CSS Object", where the keys are CSS attributes,
-             * and the values are the values for those attributes (both as strings).
-             */
-            style?: Computable<CSSStyles>
-            /**
-             * A CSS object, which affects the appearance of the button for that subtab.
-             */
-            buttonStyle?: Computable<CSSStyles>,
-            /**
-             * A function to determine if the button for this subtab should be visible.
-             * By default, a subtab is always unlocked. You can't use the "this" keyword in this function.
-             */
-            unlocked?: Computable<boolean>,
-            /**
-             * If true, the tab button will be highlighted to notify the player that there is something there.
-             */
-            shouldNotify?(): boolean,
-            /**
-             * If true, the tab button will be highlighted to notify the player that there is something there.
-             */
-            prestigeNotify?(): boolean,
-            /**
-             * specifies the color that the subtab glows. If this subtab is causing the main layer to node glow
-             * (and it would't otherwise) the node also glows this color. Is NOT overridden by embedding a layer.
-             */
-            glowColor?: Computable<string>,
-            /**
-             * **SIGNIFICANT**
-             *
-             * The id of another layer. If you have this, it will override "content", "style" and "shouldNotify",
-             * instead displaying the entire layer in the subtab.
-             */
-            embedLayer?: string,
-            /**
-             * Specifies the shown name of the subtab
-             */
-            name?: Computable<string>,
-        }
+        [id: string]: TabFormat<L>
     }
     /**
      * An alternative to `tabFormat`, which is inserted in between Milestones and Buyables in the standard tab layout. (cannot do subtabs)
@@ -242,46 +199,7 @@ declare class Layer<L extends string> {
      */
     microtabs?: {
         [id: string]: {
-            [id: string]: {
-                /**
-                 * The tab layout code for the subtab, in the tab layout format.
-                 */
-                content: (string | [string, any])[],
-                /**
-                 * Applies CSS to the whole subtab when switched to, in the form of an "CSS Object", where the keys are CSS attributes,
-                 * and the values are the values for those attributes (both as strings).
-                 */
-                style?: Computable<CSSStyles>
-                /**
-                 * A CSS object, which affects the appearance of the button for that subtab.
-                 */
-                buttonStyle?: Computable<CSSStyles>,
-                /**
-                 * A function to determine if the button for this subtab should be visible.
-                 * By default, a subtab is always unlocked. You can't use the "this" keyword in this function.
-                 */
-                unlocked?: Computable<boolean>,
-                /**
-                 * If true, the tab button will be highlighted to notify the player that there is something there.
-                 */
-                shouldNotify?(): boolean,
-                /**
-                 * If true, the tab button will be highlighted to notify the player that there is something there.
-                 */
-                prestigeNotify?(): boolean,
-                /**
-                 * specifies the color that the subtab glows. If this subtab is causing the main layer to node glow
-                 * (and it would't otherwise) the node also glows this color. Is NOT overridden by embedding a layer.
-                 */
-                glowColor?: Computable<string>,
-                /**
-                 * **SIGNIFICANT**
-                 *
-                 * The id of another layer. If you have this, it will override "content", "style" and "shouldNotify",
-                 * instead displaying the entire layer in the subtab.
-                 */
-                embedLayer?: string,
-            }
+            [id: string]: TabFormat<L>
         }
     }
     /**
@@ -556,12 +474,6 @@ declare class Layer<L extends string> {
      */
     resetsNothing?: Computable<boolean>
     /**
-     * An array of layer ids. When this layer is unlocked for the first time,
-     * the `unlockOrder` value for any not-yet-unlocked layers in this list increases.
-     * This can be used to make them harder to unlock.
-     */
-    //increaseUnlockOrder?: string[]
-    /**
      * A function to return true if this layer should be highlighted in the tree.
      * The layer will automatically be highlighted if you can buy an upgrade whether you have this or not.
      */
@@ -623,6 +535,51 @@ declare class Layer<L extends string> {
      * can prestige for a meaningful gain.
      */
     prestigeNotify?(): boolean
+}
+
+declare class TabFormat<L extends string> {
+    /**
+     * The tab layout code for the subtab, in the tab layout format.
+     */
+    content: Computable<TabFormatEntries<L>[]>
+    /**
+     * Applies CSS to the whole subtab when switched to, in the form of an "CSS Object", where the keys are CSS attributes,
+     * and the values are the values for those attributes (both as strings).
+     */
+    style?: Computable<CSSStyles>
+    /**
+     * A CSS object, which affects the appearance of the button for that subtab.
+     */
+    buttonStyle?: Computable<CSSStyles>
+    /**
+     * A function to determine if the button for this subtab should be visible.
+     * By default, a subtab is always unlocked. You can't use the "this" keyword in this function.
+     */
+    unlocked?: Computable<boolean>
+    /**
+     * If true, the tab button will be highlighted to notify the player that there is something there.
+     */
+    shouldNotify?(): boolean
+    /**
+     * If true, the tab button will be highlighted to notify the player that there is something there.
+     */
+    prestigeNotify?(): boolean
+    /**
+     * specifies the color that the subtab glows. If this subtab is causing the main layer to node glow
+     * (and it would't otherwise) the node also glows this color. Is NOT overridden by embedding a layer.
+     */
+    glowColor?: Computable<string>
+    /**
+     * **SIGNIFICANT**
+     *
+     * The id of another layer. If you have this, it will override "content", "style" and "shouldNotify",
+     * instead displaying the entire layer in the subtab.
+     */
+    embedLayer?: string
+    /**
+     * Specifies the shown name of the subtab
+     */
+    name?: Computable<string>
 }
 
 declare class Achievement<L extends string> {
@@ -1536,6 +1493,7 @@ type items = 'unknown' |
     'bone_pick' | 'crystal_skull' | 'bone_slate' | 'magic_slime_ball' |
     // Golem
     'mud' | 'mud_brick' | 'golem_eye' | 'golem_core' |
+    'mud_kiln' | 'weakness_finder' | 'arcane_generator' | 'record_golem' |
     // Mining
     'stone' | 'copper_ore' | 'tin_ore' | 'bronze_blend' | 'gold_nugget' | 'densium' |
     'coal' | 'iron_ore' | 'clear_iron_ore' | 'silver_ore' | 'electrum_blend' |
@@ -1545,19 +1503,10 @@ type items = 'unknown' |
     'furnace' | 'iron_rails' | 'silver_coating' | 'electrum_coin_mold' | 'bellow' | 'lead_coating' |
     'stone_wall' | 'copper_golem' | 'tin_ring' | 'bronze_mold' | 'gold_star' | 'iron_heataxe' | 'disco_ball' | 'electrum_package' |
     'coin_copper' | 'coin_bronze' | 'coin_silver' | 'coin_gold' | 'coin_platinum' |
-    'densium_slime' | 'densium_rock' | 'magic_densium_ball' |
+    'densium_slime' | 'densium_rock' | 'magic_densium_ball' | 'densium_golem' |
     // Special
     'package_1' | 'package_2' | 'package_3' | 'package_4' |
     'cueball';
-/**
- * TODO 4 golem items
- * mud kiln (mud bricks + stone; +forge speed, ???)
- * weakness finder (eye + ???; +mining/xp damage)
- * arcane generator (core + electrum + ???; unlock Arcanism)
- * record golem (eye + core + stone?; +chance, chance drop core)
- *
- * densium golem (+1 golem/golem)
- */
 
 type monsters = 'slime' | 'skeleton' | 'golem';
 
@@ -1566,7 +1515,8 @@ type ores = 'stone' | 'copper' | 'tin' |
 
 type drop_sources = `kill:${monsters}` | 'kill:any' | 'crafting' | 'forge' | `mining:${ores}` | 'mining:any' | 'mining:compactor' | 'shop';
 type drop_types = 'kill' | 'crafting' | 'forge' | 'mining' | 'shop';
-type categories = 'materials' | 'equipment' | 'mining' | 'shop' | 'forge' | 'craftable' |
+//todo split mining and deep mining
+type categories = 'materials' | 'equipment' | 'mining' | 'densium' | 'forge' | 'shop' | 'craftable' |
     monsters;
 
 type death_resources = 'karma' | 'souls';
@@ -1915,14 +1865,38 @@ type Layers = {
             }
         }
     }
-    /**
-     * TODO: Arcanism
-     * connected to crafting
-     * automation for crafting/forging
-     *  factorio like
-     * spells for boosts
-     * transmutation (slime goo -> bone, etc.)
-     */
+    a: Layer<'a'> & {
+        /**
+         * TODO: Arcanism
+         * connected to crafting
+         * automation for crafting/forging
+         *  factorio like
+         * spells for boosts
+         * transmutation (slime goo -> bone, etc.)
+         */
+        world: {
+            width(): number
+            height(): number
+        }
+        modifiers: {
+            arca: {
+                gain: {
+                    base(): Decimal
+                    mult(): Decimal
+                    /** Divider from arca amount */
+                    div(): Decimal
+                    div_formula: Computable<string>
+                    total(): Decimal
+                }
+                loss: {
+                    base(): Decimal
+                    mult(): Decimal
+                    total(): Decimal
+                }
+                total(): Decimal
+            }
+        }
+    }
     // Row 2
     b: Layer<'b'> & {
         challenges?: {
@@ -2105,6 +2079,9 @@ type Player = {
         visited_forge: boolean
         heat: Decimal
         //todo forge fuels
+    }
+    a: LayerData & {
+        //todo placed stuff
     }
     // Row 2
     b: LayerData & {

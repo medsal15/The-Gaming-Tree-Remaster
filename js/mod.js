@@ -9,7 +9,7 @@ let modInfo = {
 		// main
 		'layers/main/side/achievement.js', 'layers/main/side/death.js', 'layers/main/side/world.js',
 		'layers/main/0/experience.js', 'layers/main/0/mining.js',
-		'layers/main/1/level.js', 'layers/main/1/crafting.js',
+		'layers/main/1/level.js', 'layers/main/1/crafting.js', 'layers/main/1/arcane.js',
 		'layers/main/2/boss.js', 'layers/main/2/shop.js',
 	],
 
@@ -34,8 +34,9 @@ let VERSION = {
 
 let changelog = `<h1>Changelog:</h1><br>
 	<h3>v0.3: ???</h3>
-		- Add 2 new layers.<br>
+		- 2 new layers.<br>
 		- Add a new enemy.<br>
+		- Improve Crafting and Shop displays.<br>
 		- Update endgame: Enter the third boss fight<br>
 	<h3>v0.2: Bones and Stones</h3><br>
 		- Update vue to 2.7.16 and TMT to 2.7<br>

@@ -65,49 +65,42 @@ addLayer('s', {
             shouldNotify() { return canAffordLayerUpgrade('s'); },
         },
         'Trading': {
-            content: () => {
-                let list = tmp.s.coins.list
-                    .filter(([item]) => D.gt(player.items[item].amount, 0))
-                    .map(([item]) => item)
-                    .reverse();
+            content: [
+                ['display-text', () => {
+                    let list = tmp.s.coins.list
+                        .filter(([item]) => D.gt(player.items[item].amount, 0))
+                        .map(([item]) => item)
+                        .reverse();
 
-                if (!list.length) list.push('coin_copper');
+                    if (!list.length) list.push('coin_copper');
 
-                list = list.map((item) => `${resourceColor(tmp.items[item].color, formatWhole(player.items[item].amount), 'font-size:1.5em;')} ${tmp.items[item].name}`);
+                    list = list.map((item) => `${resourceColor(tmp.items[item].color, formatWhole(player.items[item].amount), 'font-size:1.5em;')} ${tmp.items[item].name}`);
 
-                /** @type {TabFormatEntries<'s'>[]} */
-                const content = [
-                    ['display-text', `You have ${listFormat.format(list)}`],
+                    return `You have ${listFormat.format(list)}`;
+                }],
+                'blank',
+                ['row', [
+                    ['display-text', 'Selling'],
                     'blank',
-                    ['row', [
-                        ['display-text', 'Selling'],
-                        'blank',
-                        ['text-input', 'sell_amount'],
-                        'blank',
-                        ['display-text', 'items'],
-                    ]],
-                ];
-
-                if (D.neq_tolerance(tmp.s.modifiers.trade.sell_mult, 1, 1e-3)) content.push(['display-text', `Value multiplier: ${format(tmp.s.modifiers.trade.sell_mult)}`]);
-                content.push(
-                    ...shop_display_sell(),
+                    ['text-input', 'sell_amount'],
                     'blank',
-                    ['row', [
-                        ['display-text', 'Buying'],
-                        'blank',
-                        ['text-input', 'buy_amount'],
-                        'blank',
-                        ['display-text', 'items'],
-                    ]],
-                );
-
-                if (D.neq_tolerance(tmp.s.modifiers.trade.buy_mult, 1, 1e-3)) content.push(['display-text', `Cost multiplier: ${format(tmp.s.modifiers.trade.buy_mult)}`]);
-                content.push(
-                    ...shop_display_buy(),
-                );
-
-                return content;
-            },
+                    ['display-text', 'items'],
+                ]],
+                'blank',
+                ['microtabs', 'sell'],
+                'blank',
+                'h-line',
+                'blank',
+                ['row', [
+                    ['display-text', 'Buying'],
+                    'blank',
+                    ['text-input', 'buy_amount'],
+                    'blank',
+                    ['display-text', 'items'],
+                ]],
+                'blank',
+                ['microtabs', 'buy'],
+            ],
         },
     },
     upgrades: {
@@ -314,6 +307,10 @@ addLayer('s', {
             currencyInternalName: 'total',
             canAfford() { return hasChallenge('b', 12) && D.gte(tmp.s.coins.total, tmp[this.layer].upgrades[this.id].cost); },
         },
+    },
+    microtabs: {
+        sell: { ...shop_subtabs_sell(), },
+        buy: { ...shop_subtabs_buy(), },
     },
     modifiers: {
         coin: {
