@@ -796,8 +796,9 @@ addLayer('ach', {
     automate() {
         if (D.gte(player.items.magic_slime_ball.amount, 1)) {
             let num = 14;
-            if (inChallenge('b', 11)) num = 11;
+            if (inChallenge('b', 41)) num = 6;
             else if (inChallenge('b', 21)) num = 21;
+            else if (inChallenge('b', 11)) num = 11;
 
             if (!player.ach.pool_balls.includes(num)) player.ach.pool_balls.push(num);
         }

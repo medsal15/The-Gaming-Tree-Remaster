@@ -98,8 +98,8 @@ addLayer('a', {
     upkeep: {
         'extractor': D(.1),
         'inserter': D(.1),
-        'combiner': D.dOne,
-        'smelter': D.dOne,
+        'combiner': D(.5),
+        'smelter': D(.5),
     },
     modifiers: {
         arca: {
@@ -127,7 +127,23 @@ addLayer('a', {
                 base() {
                     let base = D.dZero;
 
-                    //todo
+                    Object.entries(player.a.chains).forEach(([chain, phain]) => {
+                        if (D.lte(phain.built, 0)) return;
+
+
+                        const trecipe = tmp.c.recipes[chain],
+                            thain = tmp.a.chains[chain],
+                            /** @type {[items, Decimal][]} */
+                            cost = thain?.items ?? [
+                                ['extractor', D(trecipe.consumes.length)],
+                                ['inserter', D(trecipe.produces.length)],
+                                [D.gt(trecipe.heat, 0) ? 'smelter' : 'combiner', D.dOne],
+                            ],
+                            upkeep = cost.map(([item, amount]) => D.times(tmp.a.upkeep[item] ?? 0, amount))
+                                .reduce((sum, upkeep) => D.add(sum, upkeep), D.dZero).times(mult);
+
+                        base = base.times(upkeep);
+                    });
 
                     return base;
                 },
@@ -146,6 +162,14 @@ addLayer('a', {
         chain: {
             time_mult() { return D(2.5); },
         },
+    },
+    spells: {
+        /**
+         * TODO
+         *
+         * acid: /defense
+         * convertion: XP -> arca
+         */
     },
     update(diff) {
         if (D.gt(tmp.a.modifiers.arca.gain.total, 0)) {
@@ -167,7 +191,7 @@ addLayer('a', {
                 /** Actual elapsed time, including the amount of chains built */
                 mult = D.times(diff, phain.built),
                 upkeep = cost.map(([item, amount]) => D.times(tmp.a.upkeep[item] ?? 0, amount))
-                    .reduce((sum, upkeep) => D.add(sum, upkeep), D.dZero).times(mult);
+                    .reduce((sum, upkeep) => D.add(sum, upkeep), D.dZero).times(mult).times(tmp.a.modifiers.arca.loss.mult);
 
             // Not enough arca to work
             if (D.gt(upkeep, player.a.points)) return;

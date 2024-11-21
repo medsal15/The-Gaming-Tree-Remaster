@@ -2,7 +2,7 @@
 
 const MONSTER_SIZES = {
     width: 3,
-    height: 3,
+    height: 4,
 };
 addLayer('xp', {
     row: 0,
@@ -969,17 +969,22 @@ addLayer('xp', {
             _id: null,
             get id() { return this._id ??= Object.keys(layers.xp.monsters).find(mon => layers.xp.monsters[mon] == this); },
             color() {
-                if (inChallenge('b', 11)) return '#FF6600';
+                if (inChallenge('b', 41)) return '#55AA88';
                 if (inChallenge('b', 21)) return '#AAFFDD';
+                if (inChallenge('b', 11)) return '#FF6600';
 
                 return '#55CC11';
             },
-            name: 'slime',
+            name() {
+                if (inChallenge('b', 41)) return 'slime golem';
+                return 'slime';
+            },
             position() {
                 let i = 0;
 
                 if (inChallenge('b', 11)) i = 1;
                 if (inChallenge('b', 21)) i = 2;
+                if (inChallenge('b', 41)) i = 3;
 
                 return [0, i];
             },
@@ -999,10 +1004,18 @@ addLayer('xp', {
 
                 if (inChallenge('b', 11)) health = health.times(2);
                 if (inChallenge('b', 21)) health = health.times(2);
+                if (inChallenge('b', 41)) health = health.times(5);
 
                 health = D.times(health, item_effect('densium_slime')?.slime_mult);
 
                 return health;
+            },
+            defense(level) {
+                if (inChallenge('b', 41)) {
+                    let l = D(level ?? tmp?.xp?.monsters[this.id].level);
+
+                    return D.pow(1.25, l).minus(1);
+                }
             },
             experience(level) {
                 const l = D(level ?? tmp.xp.monsters[this.id].level);
@@ -1046,17 +1059,23 @@ addLayer('xp', {
                 return D.times(mult, tmp.xp.monsters[this.id].damage);
             },
             lore() {
-                if (inChallenge('b', 11)) {
-                    return `An orange ball of jelly.<br>\
-                        Soft, pricky, and warm.<br>\
-                        Diet consists of grass, cattle, and water.<br>
-                        Tastes very spicy. Might also be poisonous.`;
+                if (inChallenge('b', 41)) {
+                    return `A crude ball made of water and leaves.<br>\
+                        Hard, harmless, and cold; almost like a chunk of ice.<br>
+                        Physically unable to consume food, it relies on photosynthesis for energy.<br>
+                        You shouldn't eat this.`;
                 }
                 if (inChallenge('b', 21)) {
                     return `A light blue ball of jelly.<br>\
                         Hard and freezing. Brrr!<br>
                         Diet consists mostly of water.<br>
                         Tastes like mint. Your tongue is stuck to it.`;
+                }
+                if (inChallenge('b', 11)) {
+                    return `An orange ball of jelly.<br>\
+                        Soft, pricky, and warm.<br>\
+                        Diet consists of grass, cattle, and water.<br>
+                        Tastes very spicy. Might also be poisonous.`;
                 }
                 return `A green ball of jelly.<br>\
                     Soft, harmless, and cold; the perfect pillow.<br>\
@@ -1068,11 +1087,15 @@ addLayer('xp', {
             _id: null,
             get id() { return this._id ??= Object.keys(layers.xp.monsters).find(mon => layers.xp.monsters[mon] == this); },
             color() { return '#DDEEEE'; },
-            name: 'skeleton',
+            name() {
+                if (inChallenge('b', 41)) return 'bone golem';
+                return 'skeleton';
+            },
             position() {
                 let i = 0;
 
                 if (hasChallenge('b', 12)) i = 1;
+                if (inChallenge('b', 41)) i = 2;
 
                 return [1, i];
             },
@@ -1090,7 +1113,16 @@ addLayer('xp', {
 
                 let health = D.times(level_mult, 10).times(tmp.xp?.modifiers.health.mult ?? 1);
 
+                if (inChallenge('b', 41)) health = health.times(4);
+
                 return health;
+            },
+            defense(level) {
+                if (inChallenge('b', 41)) {
+                    let l = D(level ?? tmp?.xp?.monsters[this.id].level);
+
+                    return D.pow(1.5, l).minus(1);
+                }
             },
             experience(level) {
                 const l = D(level ?? tmp.xp.monsters[this.id].level);
@@ -1129,6 +1161,14 @@ addLayer('xp', {
                 return D.times(mult, tmp.xp.monsters[this.id].damage);
             },
             lore() {
+                if (inChallenge('b', 41)) return `A bastardized dead body. Or dead bodies?<br>
+                    Whoever did that deserves no respect in life or in death.<br>
+                    You feel sick.`;
+
+                if (hasChallenge('b', 12)) return `A dead sailor that has come back to life.<br>
+                    Brought back after washing up on the shore.<br>
+                    Tough in a fight, but will lose to guards.`;
+
                 return `A dead body that has come back to life.<br>
                     Brought to life near the ocean.<br>
                     Tough in a fight, but not on the level of a guard.`;
@@ -1138,10 +1178,15 @@ addLayer('xp', {
         golem: {
             _id: null,
             get id() { return this._id ??= Object.keys(layers.xp.monsters).find(mon => layers.xp.monsters[mon] == this); },
-            color() { return '#BB7766'; },
-            name: 'golem',
+            color() { return '#BB7744'; },
+            name() {
+                if (inChallenge('b', 41)) return 'bronze golem';
+                return 'golem';
+            },
             position() {
                 let i = 0;
+
+                if (inChallenge('b', 41)) i = 1;
 
                 return [2, i];
             },
@@ -1159,12 +1204,18 @@ addLayer('xp', {
 
                 let health = D.times(level_mult, 10).times(tmp.xp?.modifiers.health.mult ?? 1);
 
+                if (inChallenge('b', 41)) health = health.times(3);
+
                 return health;
             },
             defense(level) {
                 let l = D(level ?? tmp?.xp?.monsters[this.id].level);
 
-                return D.pow(2, l).minus(1);
+                if (inChallenge('b', 41)) l = l.times(2);
+
+                let defense = D.pow(2, l).minus(1);
+
+                return defense;
             },
             experience(level) {
                 const l = D(level ?? tmp.xp.monsters[this.id].level);
@@ -1198,6 +1249,10 @@ addLayer('xp', {
                 return D.times(mult, tmp.xp.monsters[this.id].damage);
             },
             lore() {
+                if (inChallenge('b', 41)) return `A humanoid made of bronze.<br>
+                    It's high defense makes it incredibly tough.<br>
+                    It almost looks like a person. Creepy.`;
+
                 return `A crude humanoid made of mud.<br>
                     Its defense seem to increase with its level.<br>
                     Its core is pretty and shiny.`;

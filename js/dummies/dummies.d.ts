@@ -1869,9 +1869,6 @@ type Layers = {
     a: Layer<'a'> & {
         /**
          * TODO: Arcanism
-         * connected to crafting
-         * automation for crafting/forging
-         *  factorio like
          * spells for boosts
          * transmutation (slime goo -> bone, etc.)
          */
@@ -1937,6 +1934,24 @@ type Layers = {
             chain: {
                 /** Multiplier to autocrafting time */
                 time_mult(): Decimal
+            }
+        }
+        spells: {
+            [id: string]: {
+                private _id: string | null
+                readonly id: string
+                unlocked?: Computable<boolean>
+
+                /** Cost in arca */
+                cost(): Decimal
+                /** Duration in seconds */
+                duration(): Decimal
+                /**
+                 * Current effect
+                 *
+                 * @param {boolean} [active] If true, returns the active effect
+                 */
+                effect(active?: boolean): any
             }
         }
     }
@@ -2128,6 +2143,14 @@ type Player = {
             [id: string]: {
                 built: Decimal
                 /** Time the chain has run */
+                time: Decimal
+            }
+        }
+        spells: {
+            [id: string]: {
+                /** Amount of times the spell was cast */
+                cast: Decimal
+                /** Time left for the spell */
                 time: Decimal
             }
         }

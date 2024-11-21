@@ -1,7 +1,7 @@
 'use strict';
 
 const BOSS_SIZES = {
-    width: 2,
+    width: 3,
     height: 3,
 };
 
@@ -214,7 +214,8 @@ addLayer('b', {
             challengeDescription: `Enter the Golem Factory to find the golem's secrets.<br>
                 All monsters are replaced with golems variants.`,
             goalDescription: '???',
-            rewardDescription: '???',
+            rewardDescription: 'Multiply levels of looting bought by amount of monsters unlocked,\
+                gain +1.5 base arca /s, ???',
             canComplete() { return false; },
             progress() { return 0; },
             display() { return `???`; },
@@ -225,13 +226,6 @@ addLayer('b', {
                 return { 'backgroundColor': tmp.b.groups[group].color, };
             },
         },
-        /**
-         * TODO 41: Enter the Golem Factory
-         *
-         * slime -> slime golems (+defense, ↑health, +mud, ↓slime goo, ↑slime core shards, ↑slime core)
-         * skeleton -> bone golems (+defense, ↑health, +mud, ↓skull, ↑rib, ↑bone)
-         * golem -> bronze golem (↑↑defense, ↑health, +bronze blend, ↓mud)
-         */
         // Mini
         21: {
             name: 'Slime Monarch',
@@ -481,6 +475,17 @@ addLayer('b', {
                 Banks refuse to let go of a debtor's debts, even in death...<br>
                 Continues stealing and getting fined while trying to clear her account.`,
             challenge: 12,
+        },
+        'golem_factory': {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.b.bosses).find(([, r]) => r == this)[0]; },
+            unlocked() { return tmp.b.challenges[41].unlocked; },
+            name: 'golem factory',
+            position: [2, 0],
+            lore: `A large building that continuously produces golems.<br>
+                As expected, it's full of golems and surrounded by them.<br>
+                The deeper you go, the stranger the golems get... What is their purpose?`,
+            challenge: 41,
         },
         // Mini
         'slime_monarch': {

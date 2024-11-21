@@ -449,6 +449,10 @@ function bestiary_content(monster) {
             kill_per_time = kill_per_time.times(60);
             time_unit = 'minute';
         }
+        if (kill_per_time.lt(1)) {
+            kill_per_time = kill_per_time.times(60);
+            time_unit = 'hour';
+        }
 
         lines.push(
             ['display-text', `Damage per second: ~${format(tmonst.damage_per_second)}`],
@@ -483,6 +487,12 @@ function bestiary_content(monster) {
                     *${formatWhole(2)} health, /${format(2)} experience`;
                 specific_lines.push(text);
             }
+            if (inChallenge('b', 41)) {
+                const group = tmp.b.challenges[41].group,
+                    text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[41].name)} active effect:\
+                    *${formatWhole(5)} health`;
+                specific_lines.push(text);
+            }
             if (hasChallenge('b', 11)) {
                 const group = tmp.b.challenges[11].group,
                     text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[11].name)} reward effect:\
@@ -497,6 +507,12 @@ function bestiary_content(monster) {
             }
         }; break;
         case 'skeleton': {
+            if (inChallenge('b', 41)) {
+                const group = tmp.b.challenges[41].group,
+                    text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[41].name)} active effect:\
+                    *${formatWhole(4)} health`;
+                specific_lines.push(text);
+            }
             if (hasUpgrade('m', 53)) {
                 const text = `${resourceColor(tmp.items.silver_ore, tmp.m.upgrades[53].title)}:\
                     *${formatWhole(upgradeEffect('m', 53))} damage`;
@@ -506,6 +522,14 @@ function bestiary_content(monster) {
                 const itemp = tmp.items.lead_coating,
                     text = `${resourceColor(itemp.color, capitalize(itemp.name))} effect:\
                     /${format(itemp.effect.skeleton_damage_div)} damage`;
+                specific_lines.push(text);
+            }
+        }; break;
+        case 'golem': {
+            if (inChallenge('b', 41)) {
+                const group = tmp.b.challenges[41].group,
+                    text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[41].name)} active effect:\
+                    *${formatWhole(3)} health`;
                 specific_lines.push(text);
             }
         }; break;
