@@ -1412,6 +1412,8 @@ const item_list = {
         row: 0,
         sources: {
             chance() {
+                const chances = {};
+
                 if (inChallenge('b', 41)) {
                     if (D.eq(tmp.c.chance_multiplier, 0) || inChallenge('b', 12)) return {};
 
@@ -1420,8 +1422,9 @@ const item_list = {
                     chance = chance.times(tmp.c.chance_multiplier);
                     chance = chance.times(tmp.xp.modifiers.drops.mult);
 
-                    return { 'kill:golem': chance };
+                    chances['kill:golem'] = chance;
                 }
+                return chances;
             },
             other: ['crafting'],
         },
@@ -2537,7 +2540,7 @@ const item_list = {
             const x = D(amount ?? player.items[this.id].amount);
 
             let health_div = D.div(x, 20).add(1),
-                cost_div = D.root(x, 3).pow(100);
+                cost_div = D.add(x, 1).root(3).pow_base(100);
 
             return { health_div, cost_div, };
         },
@@ -2545,7 +2548,7 @@ const item_list = {
             let health_div, cost_div;
             if (shiftDown) {
                 health_div = '[amount / 20 + 1]';
-                cost_div = '[100 ^ 3√(amount)]';
+                cost_div = '[100 ^ 3√(amount + 1)]';
             } else {
                 const x = D(amount ?? player.items[this.id].amount),
                     effect = item_list[this.id].effect(x);
@@ -2575,7 +2578,7 @@ const item_list = {
             const x = D(amount ?? player.items[this.id].amount);
 
             let speed_mult = D.pow(1.05, x),
-                cost_div = D.root(x, 3).pow_base(150);
+                cost_div = D.add(x, 1).root(3).pow_base(150);
 
             return { speed_mult, cost_div, };
         },
@@ -2583,7 +2586,7 @@ const item_list = {
             let speed_mult, cost_div;
             if (shiftDown) {
                 speed_mult = '[1.05 ^ amount]';
-                cost_div = '[150 ^ 3√(amount)]';
+                cost_div = '[150 ^ 3√(amount + 1)]';
             } else {
                 const x = D(amount ?? player.items[this.id].amount),
                     effect = item_list[this.id].effect(x);
@@ -2613,7 +2616,7 @@ const item_list = {
             const x = D(amount ?? player.items[this.id].amount);
 
             let xp_damage = D.div(x, 20),
-                cost_div = D.root(x, 3).pow_base(200);
+                cost_div = D.add(x, 1).root(3).pow_base(200);
 
             return { xp_damage, cost_div, };
         },
@@ -2621,7 +2624,7 @@ const item_list = {
             let xp_damage, cost_div;
             if (shiftDown) {
                 xp_damage = '[amount / 20]';
-                cost_div = '[200 ^ 3√(amount)]';
+                cost_div = '[200 ^ 3√(amount + 1)]';
             } else {
                 const x = D(amount ?? player.items[this.id].amount),
                     effect = item_list[this.id].effect(x);
@@ -2651,7 +2654,7 @@ const item_list = {
             const x = D(amount ?? player.items[this.id].amount);
 
             let forge_cost = D.div(x, 10).add(1),
-                cost_div = D.root(x, 4).pow_base(100);
+                cost_div = D.add(x, 1).root(4).pow_base(100);
 
             return { forge_cost, cost_div, };
         },
@@ -2659,7 +2662,7 @@ const item_list = {
             let forge_cost, cost_div;
             if (shiftDown) {
                 forge_cost = '[amount / 10 + 1]';
-                cost_div = '[100 ^ 4√(amount)]';
+                cost_div = '[100 ^ 4√(amount + 1)]';
             } else {
                 const x = D(amount ?? player.items[this.id].amount),
                     effect = item_list[this.id].effect(x);
@@ -2689,7 +2692,7 @@ const item_list = {
             const x = D(amount ?? player.items[this.id].amount);
 
             let level_delay = D(x),
-                cost_div = D.root(x, 2).pow_base(75);
+                cost_div = D.add(x, 1).root(2).pow_base(75);
 
             return { level_delay, cost_div, };
         },
@@ -2697,7 +2700,7 @@ const item_list = {
             let level_delay, cost_div;
             if (shiftDown) {
                 level_delay = '[amount]';
-                cost_div = '[75 ^ 2√(amount)]';
+                cost_div = '[75 ^ 2√(amount + 1)]';
             } else {
                 const x = D(amount ?? player.items[this.id].amount),
                     effect = item_list[this.id].effect(x);
@@ -2727,7 +2730,7 @@ const item_list = {
             const x = D(amount ?? player.items[this.id].amount);
 
             let damage = D.add(player.c.heat, 1).log10().times(x),
-                cost_div = D.root(x, 4).pow_base(100);
+                cost_div = D.add(x, 1).root(4).pow_base(100);
 
             return { damage, cost_div, };
         },
@@ -2735,7 +2738,7 @@ const item_list = {
             let damage, cost_div;
             if (shiftDown) {
                 damage = '[log10(heat + 1) * amount]';
-                cost_div = '[100 ^ 4√(amount)]';
+                cost_div = '[100 ^ 4√(amount + 1)]';
             } else {
                 const x = D(amount ?? player.items[this.id].amount),
                     effect = item_list[this.id].effect(x);
@@ -2765,7 +2768,7 @@ const item_list = {
             const x = D(amount ?? player.items[this.id].amount);
 
             let speed = D.root(x, 2).div(10),
-                cost_div = D.root(x, 4).pow_base(175);
+                cost_div = D.add(x, 1).root(4).pow_base(175);
 
             return { speed, cost_div, };
         },
@@ -2773,7 +2776,7 @@ const item_list = {
             let speed, cost_div;
             if (shiftDown) {
                 speed = '[2√(amount) / 10]';
-                cost_div = '[175 ^ 4√(amount)]';
+                cost_div = '[175 ^ 4√(amount + 1)]';
             } else {
                 const x = D(amount ?? player.items[this.id].amount),
                     effect = item_list[this.id].effect(x);
@@ -2803,7 +2806,7 @@ const item_list = {
             const x = D(amount ?? player.items[this.id].amount);
 
             let limit = D.times(x, 10),
-                cost_div = D.root(x, 4).pow_base(200);
+                cost_div = D.add(x, 1).root(4).pow_base(200);
 
             return { limit, cost_div, };
         },
@@ -2811,7 +2814,7 @@ const item_list = {
             let limit, cost_div;
             if (shiftDown) {
                 limit = '[amount * 10]';
-                cost_div = '[200 ^ 4√(amount)]';
+                cost_div = '[200 ^ 4√(amount + 1)]';
             } else {
                 const x = D(amount ?? player.items[this.id].amount),
                     effect = item_list[this.id].effect(x);
@@ -3002,7 +3005,7 @@ const item_list = {
         lore: `A box containing something. It's marked with a red square.<br>\
             You're not allowed to open it.<br>\
             It faintly smells like cocoa.`,
-        categories: [],
+        categories: ['boss'],
         unlocked() { return inChallenge('b', 32); },
     },
     'package_2': {
@@ -3023,7 +3026,7 @@ const item_list = {
         lore: `A box containing something. It's marked with a blue triangle.<br>\
             You're not allowed to open it.<br>\
             It faintly smells like cocoa.`,
-        categories: [],
+        categories: ['boss'],
         unlocked() { return inChallenge('b', 32); },
     },
     'package_3': {
@@ -3044,7 +3047,7 @@ const item_list = {
         lore: `A box containing something. It's marked with a yellow circle.<br>\
             You're not allowed to open it.<br>\
             It faintly smells like cocoa.`,
-        categories: [],
+        categories: ['boss'],
         unlocked() { return inChallenge('b', 32); },
     },
     'package_4': {
@@ -3065,8 +3068,78 @@ const item_list = {
         lore: `A box containing something. It's marked with a green diamond.<br>\
             You're not allowed to open it.<br>\
             It faintly smells like cocoa.`,
-        categories: [],
+        categories: ['boss'],
         unlocked() { return inChallenge('b', 32); },
+    },
+    'factory_core_casing': {
+        color() { return tmp.b.groups.boss.color; },
+        name: 'factory core casing',
+        icon: [12, 5],
+        row: 2,
+        sources: {},
+        lore: `A solid cube in the walls of the golem factory.<br>\
+            The cube is mostly made of bronze, with electrum squares on the sides.<br>
+            You're not thinking of stealing it, are you? Right?`,
+        categories: ['boss'],
+        unlocked() { return inChallenge('b', 41) && (D.gte(player.items[this.id].amount, 1) || D.gt(player.c.recipes.factory_core_frame.time, 0)); },
+    },
+    'factory_core_frame': {
+        color() { return tmp.b.groups.boss.color; },
+        name: 'factory core frame',
+        icon: [12, 6],
+        row: 2,
+        sources: {},
+        lore: `A cube in the walls of the golem factory.<br>\
+            You can see a core swirling behind the electrum you removed.<br>\
+            You know this is a crime right? Just because nobody knows the owner of the factory doesn't change that.`,
+        categories: ['boss'],
+        unlocked() { return inChallenge('b', 41) && (D.gte(player.items[this.id].amount, 1) || D.gt(player.c.recipes.factory_core_scaffolding.time, 0)); },
+    },
+    'factory_core_scaffolding': {
+        color() { return tmp.b.groups.boss.color; },
+        name: 'factory core scaffolding',
+        icon: [12, 7],
+        row: 2,
+        sources: {},
+        lore: `A hollow cube within the walls of the golem factory.<br>\
+            Contains what appears to be a swirling golem core inside.<br>\
+            You just need to cut it open, and it's yours...`,
+        categories: ['boss'],
+        unlocked() { return inChallenge('b', 41) && (D.gte(player.items[this.id].amount, 1) || D.gt(player.c.recipes.factory_core.time, 0)); },
+    },
+    'factory_core': {
+        color() { return tmp.b.groups.boss.color; },
+        name: 'factory core scaffolding',
+        icon: [12, 8],
+        row: 2,
+        sources: {},
+        lore: `A powerful golem core found in the factory.<br>\
+            Dense energy swirls within it...<br>
+            Going back in the factory seems to shove it back in the wall! Oh no!`,
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let arcane = D.dZero;
+
+            if (D.gte(x, 1)) arcane = D.dTen;
+
+            return { arcane, };
+        },
+        effectDescription(amount) {
+            let arcane;
+            if (shiftDown) {
+                arcane = '[10]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                arcane = formatWhole(effect.arcane);
+            }
+
+            return `Produces ${arcane} arca`;
+        },
+        categories: ['boss', 'arca'],
+        unlocked() { return D.gte(player.items[this.id].amount, 1); },
     },
 };
 
@@ -3235,7 +3308,7 @@ function source_name(source) {
             const ore = sub[0];
             if (ore == 'any') return 'mine anything';
             if (ore == 'compactor') return 'mining compactor'
-            return tmp.m.ores[ore].name;
+            return `mine ${tmp.m.ores[ore].name}`;
         };
         case 'shop':
             return 'shop';

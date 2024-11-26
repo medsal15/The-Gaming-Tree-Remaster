@@ -1506,6 +1506,7 @@ type items = 'unknown' |
     'extractor' | 'inserter' | 'combiner' | 'smelter' |
     // Special
     'package_1' | 'package_2' | 'package_3' | 'package_4' |
+    'factory_core_casing' | 'factory_core_frame' | 'factory_core_scaffolding' | 'factory_core' |
     'cueball';
 
 type monsters = 'slime' | 'skeleton' | 'golem';
@@ -1517,7 +1518,7 @@ type drop_sources = `kill:${monsters}` | 'kill:any' | 'crafting' | 'forge' | `mi
 type drop_types = 'kill' | 'crafting' | 'forge' | 'mining' | 'shop';
 type categories = 'materials' | 'equipment' | 'craftable' |
     'mining' | 'densium' | 'deep_mining' |
-    'forge' | 'shop' | 'arca' |
+    'forge' | 'shop' | 'arca' | 'boss' |
     monsters;
 
 type death_resources = 'karma' | 'souls';
@@ -1687,6 +1688,9 @@ type Layers = {
                 mult(): Decimal
                 exp(): Decimal
             }
+            defense: {
+                mult(): Decimal
+            }
         }
     }
     m: Layer<'m'> & {
@@ -1835,6 +1839,8 @@ type Layers = {
                  */
                 static?: boolean
                 categories: categories[]
+                /** If true, the recipe cannot be automated with arca */
+                manual?: boolean
             }
         }
         modifiers: {
@@ -1891,8 +1897,6 @@ type Layers = {
                 items?: [items, Decimal][]
                 /**
                  * Multiplier to crafting time
-                 *
-                 * @default 10
                  */
                 time_multiplier?: Decimal
                 /**
@@ -1919,9 +1923,6 @@ type Layers = {
                 gain: {
                     base(): Decimal
                     mult(): Decimal
-                    /** Divider from arca amount */
-                    div(): Decimal
-                    div_formula: Computable<string>
                     total(): Decimal
                 }
                 loss: {
@@ -1931,9 +1932,15 @@ type Layers = {
                 }
                 total(): Decimal
             }
-            chain: {
-                /** Multiplier to autocrafting time */
-                time_mult(): Decimal
+            cycle: {
+                /** Time in seconds a cycle takes */
+                duration(): Decimal
+                /** Time in seconds a cycle progresses */
+                time(): Decimal
+            }
+            spell: {
+                cost_mult(): Decimal
+                duration_mult(): Decimal
             }
         }
         spells: {
@@ -1941,6 +1948,7 @@ type Layers = {
                 private _id: string | null
                 readonly id: string
                 unlocked?: Computable<boolean>
+                name: string
 
                 /** Cost in arca */
                 cost(): Decimal
@@ -1952,6 +1960,12 @@ type Layers = {
                  * @param {boolean} [active] If true, returns the active effect
                  */
                 effect(active?: boolean): any
+                /**
+                 * Current effect description
+                 *
+                 * @param {boolean} [active] If true, returns the active effect
+                 */
+                effectDescription(active?: boolean): string
             }
         }
     }
@@ -2154,6 +2168,8 @@ type Player = {
                 time: Decimal
             }
         }
+        /** Time since the last cycle */
+        cycle_time: Decimal
     }
     // Row 2
     b: LayerData & {

@@ -325,7 +325,7 @@ function square(list, size) {
 }
 const CATEG_UTILS = {
     /** @type {categories[]} List of categories */
-    list: ['slime', 'skeleton', 'golem', 'mining', 'deep_mining', 'densium', 'forge', 'arca'],
+    list: ['slime', 'skeleton', 'golem', 'mining', 'deep_mining', 'densium', 'forge', 'arca', 'boss'],
     /** @type {categories[]} Extra categories */
     ext: ['materials', 'equipment'],
     /**
@@ -343,19 +343,21 @@ const CATEG_UTILS = {
                 return tmp.xp.monsters.golem.unlocked ?? true;
             case 'mining':
                 return tmp.m.layerShown;
-            case 'forge':
-                return tmp.c.forge.unlocked;
             case 'densium':
                 return tmp.m.compactor.unlocked;
             case 'deep_mining':
                 return hasUpgrade('m', 61);
-            case 'shop':
-                return tmp.s.layerShown;
+            case 'forge':
+                return tmp.c.forge.unlocked;
             case 'materials':
             case 'equipment':
                 return tmp.c.layerShown;
             case 'arca':
                 return tmp.a.layerShown;
+            case 'boss':
+                return tmp.b.layerShown;
+            case 'shop':
+                return tmp.s.layerShown;
         }
     },
     /**
@@ -369,12 +371,13 @@ const CATEG_UTILS = {
         'golem': () => tmp.xp.monsters.golem.name,
         'mining': () => tmp.m.name,
         'deep_mining': () => 'deep ' + tmp.m.name,
-        'forge': () => 'forge',
         'densium': () => tmp.items.densium.name,
-        'shop': () => tmp.s.name,
-        'arca': () => tmp.a.name,
         'materials': () => 'materials',
         'equipment': () => 'equipment',
+        'forge': () => 'forge',
+        'arca': () => tmp.a.name,
+        'boss': () => tmp.b.name,
+        'shop': () => tmp.s.name,
     },
     /**
      * Category color
@@ -387,12 +390,13 @@ const CATEG_UTILS = {
         'golem': () => tmp.xp.monsters.golem.color,
         'mining': () => tmp.items.copper_ore.color,
         'deep_mining': () => tmp.items.clear_iron_ore.color,
-        'forge': () => tmp.c.modifiers.heat.color,
         'densium': () => tmp.items.densium.color,
-        'shop': () => tmp.s.color,
-        'arca': () => tmp.a.color,
         'materials': () => tmp.c.color,
         'equipment': () => tmp.c.color,
+        'forge': () => tmp.c.modifiers.heat.color,
+        'arca': () => tmp.a.color,
+        'boss': () => tmp.b.color,
+        'shop': () => tmp.s.color,
     },
 };
 
@@ -858,9 +862,19 @@ function crafting_show_recipe(recipe) {
 
     rec.push(
         line(square(trecipe.produces.map(([item, prod]) => {
-            const tile = item_tile(item),
-                text = shiftDown ? `[${trecipe.formulas.produces[item]}]` : format(prod);
-            tile.text = `${capitalize(tmp.items[item].name)}<br>${text}`;
+            const unlocked = tmp.items[item].unlocked ?? true,
+                tile = unlocked ? item_tile(item) : item_tile_unknown();
+
+            let text = '';
+            if (unlocked) text = capitalize(tmp.items[item].name);
+            else text = capitalize(tmp.items.unknown.name);
+
+            text += '<br>';
+
+            if (shiftDown) text += `[${trecipe.formulas.produces[item]}]`;
+            else text += format(prod);
+
+            tile.text = text;
 
             return ['tile', tile];
         }))),
@@ -1057,7 +1071,20 @@ function crafting_subtabs_craft() {
             },
             prestigeNotify() {
                 return Object.values(tmp.c.recipes)
-                    .some(data => D.eq(data.heat, 0) && (data.unlocked ?? true) && data.categories.includes(cat) && crafting_can(data.id));
+                    .some(data => D.eq(data.heat, 0) &&
+                        (data.unlocked ?? true) &&
+                        data.categories.includes(cat) &&
+                        crafting_can(data.id) &&
+                        D.lte(player.c.recipes[data.id].time, 0));
+            },
+            shouldNotify() {
+                return Object.values(tmp.c.recipes)
+                    .some(data => D.eq(data.heat, 0) &&
+                        (data.unlocked ?? true) &&
+                        data.categories.includes(cat) &&
+                        data.categories.includes('equipment') &&
+                        crafting_can(data.id) &&
+                        D.lte(player.c.recipes[data.id].time, 0));
             },
         }];
     }));
@@ -1120,7 +1147,7 @@ function crafting_subtabs_inventory() {
             ],
             name: () => capitalize(CATEG_UTILS.names[cat]()),
             buttonStyle: { 'border-color': CATEG_UTILS.color[cat], },
-            unlocked() { return CATEG_UTILS.unlocked(cat); },
+            unlocked() { return CATEG_UTILS.unlocked(cat) && Object.values(tmp.items).some(item => (item.unlocked ?? true) && item.categories.includes(cat)); },
         }];
     }));
 }
@@ -1179,8 +1206,23 @@ function crafting_subtabs_forge() {
             },
             prestigeNotify() {
                 return Object.values(tmp.c.recipes)
-                    .some(data => D.gt(data.heat, 0) && (data.unlocked ?? true) && data.categories.includes(cat) && crafting_can(data.id));
-            }
+                    .some(data => D.gt(data.heat, 0) &&
+                        D.lte(data.heat, player.c.heat) &&
+                        (data.unlocked ?? true) &&
+                        data.categories.includes(cat) &&
+                        crafting_can(data.id) &&
+                        D.lte(player.c.recipes[data.id].time, 0));
+            },
+            shouldNotify() {
+                return Object.values(tmp.c.recipes)
+                    .some(data => D.gt(data.heat, 0) &&
+                        D.lte(data.heat, player.c.heat) &&
+                        (data.unlocked ?? true) &&
+                        data.categories.includes(cat) &&
+                        data.categories.includes('equipment') &&
+                        crafting_can(data.id) &&
+                        D.lte(player.c.recipes[data.id].time, 0));
+            },
         }];
     }));
 }
@@ -1196,7 +1238,7 @@ function arcane_show_chain(chain) {
         trecipe = tmp.c.recipes[chain],
         thain = tmp.a.chains[chain];
 
-    if (!(trecipe.unlocked ?? true)) return [];
+    if (!(trecipe.unlocked ?? true) || (trecipe.manual ?? false)) return [];
 
     /** @type {[items, Decimal][]} */
     const cost = thain?.items ?? [
@@ -1227,12 +1269,12 @@ function arcane_show_chain(chain) {
                 height: 60,
                 width: 300,
                 progress() {
-                    if ('duration' in trecipe) return D.div(phain.time, D.times(trecipe.duration, thain?.time_multiplier ?? tmp.a.modifiers.chain.time_mult));
+                    if ('duration' in trecipe) return D.div(phain.time, D.times(trecipe.duration, thain?.time_multiplier ?? 1));
                     return D.dZero;
                 },
                 display() {
                     if ('duration' in trecipe) {
-                        return `${formatTime(phain.time)} / ${formatTime(D.times(trecipe.duration, thain?.time_multiplier ?? tmp.a.modifiers.chain.time_mult))}`;
+                        return `${formatTime(phain.time)} / ${formatTime(D.times(trecipe.duration, thain?.time_multiplier ?? 1))}`;
                     }
                 },
                 fillStyle: { 'backgroundColor': tmp.a.color },
@@ -1292,7 +1334,7 @@ function arcane_show_chain(chain) {
             }],
         ]],
         ['tile', {
-            text: `Running ${formatWhole(phain.built)}<br>${format(upkeep)} arca /s`,
+            text: `Running ${formatWhole(phain.built)}<br>${format(upkeep)} arca /s each`,
         }],
     );
 
@@ -1318,7 +1360,7 @@ function arcane_subtabs_factory() {
                         lines = [];
 
                     Object.values(tmp.c.recipes)
-                        .filter(data => (data.unlocked ?? true) && data.categories.includes(cat))
+                        .filter(data => (data.unlocked ?? true) && data.categories.includes(cat) && !(data.manual ?? false))
                         .forEach(data => {
                             const recipe = arcane_show_chain(data.id);
                             if (!recipe.length) return;
@@ -1336,10 +1378,54 @@ function arcane_subtabs_factory() {
             buttonStyle: { 'border-color': CATEG_UTILS.color[cat], },
             unlocked() {
                 return CATEG_UTILS.unlocked(cat) && Object.values(tmp.c.recipes)
-                    .some(data => (data.unlocked ?? true) && data.categories.includes(cat));
+                    .some(data => (data.unlocked ?? true) && data.categories.includes(cat) && !(data.manual ?? false));
             },
         }];
     }));
+}
+/**
+ * Displays all arcane spells
+ *
+ * @returns {TabFormatEntries<'a'>[]}
+ */
+function arcane_show_spells() {
+    const cards = Object.values(layers.a.spells)
+        .filter(spell => spell.unlocked ?? true)
+        .map(/**@return {TabFormatEntries<'a'>}*/spell => {
+            const pell = player.a.spells[spell.id],
+                cost = run(spell.cost, spell),
+                duration = run(spell.duration, spell);
+
+            return ['column', [
+                ['tile', {
+                    text: `${capitalize(spell.name)}<br><br>\
+                            ${spell.effectDescription(true)}<br><br>\
+                            Cost: ${format(cost)} arca`,
+                    canClick() { return D.lte(pell.time, 0) && D.gte(tmp.a.modifiers.arca.total, cost); },
+                    onClick() { pell.time = duration; },
+                    style: {
+                        'width': '160px',
+                        'height': '120px',
+                        'borderBottomLeftRadius': 0,
+                        'borderBottomRightRadius': 0,
+                    },
+                }],
+                ['dynabar', {
+                    direction: RIGHT,
+                    width: 160,
+                    height: 40,
+                    progress() { return D.div(pell.time, duration); },
+                    display() { return `${formatTime(pell.time)} / ${formatTime(duration)}`; },
+                    fillStyle: { backgroundColor: tmp.a.color, },
+                    borderStyle: {
+                        'borderTopLeftRadius': 0,
+                        'borderTopRightRadius': 0,
+                    },
+                }],
+            ]];
+        });
+
+    return square(cards, 3).map(row => ['row', row]);
 }
 
 // boss

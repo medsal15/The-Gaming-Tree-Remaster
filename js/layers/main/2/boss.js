@@ -213,12 +213,27 @@ addLayer('b', {
             name: 'The Golem Factory',
             challengeDescription: `Enter the Golem Factory to find the golem's secrets.<br>
                 All monsters are replaced with golems variants.`,
-            goalDescription: '???',
+            goalDescription: '<span style="text-decoration:line-through;">Steal</span> Legally obtain the factory core',
             rewardDescription: 'Multiply levels of looting bought by amount of monsters unlocked,\
-                gain +1.5 base arca /s, ???',
-            canComplete() { return false; },
-            progress() { return 0; },
-            display() { return `???`; },
+                keep the factory core, unlock a new enemy and... is that a key?',
+            onEnter() {
+                if (D.gte(player.items.factory_core.amount, 1)) player.items.factory_core.amount = D.dZero;
+                player.items.factory_core_casing.amount = D.dOne;
+            },
+            onExit() {
+                player.items.factory_core_casing.amount = D.dZero;
+                player.items.factory_core_frame.amount = D.dZero;
+                player.items.factory_core_scaffolding.amount = D.dZero;
+                player.items.factory_core.amount = hasChallenge(this.layer, this.id) ? D.dOne : D.dZero;
+            },
+            canComplete() { return D.gte(player.items.factory_core.amount, 1); },
+            progress() {
+                if (D.gte(player.items.factory_core.amount, 1)) return 3 / 3;
+                if (D.gte(player.items.factory_core_scaffolding.amount, 1)) return 2 / 3;
+                if (D.gte(player.items.factory_core_frame.amount, 1)) return 1 / 3;
+                return 0 / 3;
+            },
+            display() { return `Get ${formatWhole(player.items.factory_core.amount)} / 1 ${tmp.items.factory_core.name}`; },
             unlocked() { return player.b.shown && player.b.visible_challenges.includes(this.id); },
             group: 'boss',
             buttonStyle() {
@@ -336,6 +351,8 @@ addLayer('b', {
             },
             onEnter() { player.wor.position = [12, 12]; },
         },
+        // Dungeon
+        //todo
     },
     clickables: {
         // Bosstiary
@@ -482,9 +499,15 @@ addLayer('b', {
             unlocked() { return tmp.b.challenges[41].unlocked; },
             name: 'golem factory',
             position: [2, 0],
-            lore: `A large building that continuously produces golems.<br>
-                As expected, it's full of golems and surrounded by them.<br>
-                The deeper you go, the stranger the golems get... What is their purpose?`,
+            lore() {
+                if (hasChallenge('b', 41)) return `A large building that continuously produces golems.<br>
+                    Even without the core, the golems keep coming...<br>
+                    And you can't put it back anymore with the damage you dealt.`;
+
+                return `A large building that continuously produces golems.<br>
+                    As expected, it's full of golems and surrounded by them.<br>
+                    The deeper you go, the stranger the golems get... What is their purpose?`;
+            },
             challenge: 41,
         },
         // Mini

@@ -72,6 +72,7 @@ addLayer('l', {
                     [11, 12, 13, 14],
                     [21, 22, 23, 24],
                     [31, 32, 33, 34],
+                    [41, 42, 43, 44],
                 ]],
             ],
         },
@@ -386,6 +387,110 @@ addLayer('l', {
             branches: [23, 24],
             unlocked() { return tmp.m.layerShown; },
         },
+        41: {
+            title: 'Wizardry',
+            description() {
+                let text = 'Levels give extra arca';
+
+                if (shiftDown) text += '<br>Formula: levels';
+
+                return text;
+            },
+            effect() { return player.l.points; },
+            effectDisplay() { return `+${formatWhole(upgradeEffect(this.layer, this.id))}`; },
+            style() {
+                let style = {};
+
+                if (!hasUpgrade(this.layer, this.id) && canAffordUpgrade(this.layer, this.id)) style['backgroundColor'] = tmp.l.skill_points.color;
+
+                return style;
+            },
+            cost: D(2),
+            currencyDisplayName: 'skill points',
+            canAfford() { return this.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
+            pay() { },
+            branches: [31, 32],
+            unlocked() { return tmp.a.layerShown; },
+        },
+        42: {
+            title: 'Denser Levels',
+            description() {
+                let text = 'Compressor runs lower level costs';
+
+                if (shiftDown) text += '<br>Formula: log2(runs + 2)';
+
+                return text;
+            },
+            effect() { return D.add(player.m.compactor.runs, 2).log2(); },
+            effectDisplay() { return `/${format(upgradeEffect(this.layer, this.id))}`; },
+            style() {
+                let style = {};
+
+                if (!hasUpgrade(this.layer, this.id) && canAffordUpgrade(this.layer, this.id)) style['backgroundColor'] = tmp.l.skill_points.color;
+
+                return style;
+            },
+            cost: D(2),
+            currencyDisplayName: 'skill points',
+            canAfford() { return this.branches().every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
+            pay() { },
+            branches() {
+                let branches = [32];
+                if (!tmp.a.layerShown) branches.push(31);
+                return branches;
+            },
+            unlocked() { return tmp.a.layerShown; },
+        },
+        43: {
+            title: 'Electrum Level',
+            description() {
+                let text = 'Electrum blend boost skill point amount';
+
+                if (shiftDown) text += '<br>Formula: log2(electrum blend + 2)';
+
+                return text;
+            },
+            effect() { return D.add(player.items.electrum_blend.amount, 2).log2(); },
+            effectDisplay() { return `*${format(upgradeEffect(this.layer, this.id))}`; },
+            style() {
+                let style = {};
+
+                if (!hasUpgrade(this.layer, this.id) && canAffordUpgrade(this.layer, this.id)) style['backgroundColor'] = tmp.l.skill_points.color;
+
+                return style;
+            },
+            cost: D(2),
+            currencyDisplayName: 'skill points',
+            canAfford() { return this.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
+            pay() { },
+            branches: [33, 34],
+            unlocked() { return hasUpgrade('m', 61); },
+        },
+        44: {
+            title: 'Level Efficiency',
+            description() {
+                let text = 'Levels divide arca consumption';
+
+                if (shiftDown) text += '<br>Formula: levels / 10 + 1';
+
+                return text;
+            },
+            effect() { return D.div(player.l.points, 10).add(1); },
+            effectDisplay() { return `/${format(upgradeEffect(this.layer, this.id))}`; },
+            style() {
+                let style = {};
+
+                if (!hasUpgrade(this.layer, this.id) && canAffordUpgrade(this.layer, this.id)) style['backgroundColor'] = tmp.l.skill_points.color;
+
+                return style;
+            },
+            cost: D(2),
+            currencyDisplayName: 'skill points',
+            canAfford() { return this.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
+            pay() { },
+            branches: [34],
+            unlocked() { return tmp.a.layerShown; },
+        },
     },
     type: 'static',
     baseResource: 'experience',
@@ -410,6 +515,8 @@ addLayer('l', {
             let points = player.l.points;
 
             if (hasAchievement('ach', 34)) points = points.add(achievementEffect('ach', 34));
+
+            if (hasUpgrade('l', 43)) points = points.times(upgradeEffect('l', 43));
 
             return points.floor();
         },
@@ -438,6 +545,7 @@ addLayer('l', {
         if (hasUpgrade('l', 22)) mult = mult.times(upgradeEffect('l', 22));
         if (hasUpgrade('l', 32)) mult = mult.div(upgradeEffect('l', 32));
         if (hasUpgrade('l', 34)) mult = mult.div(upgradeEffect('l', 34));
+        if (hasUpgrade('l', 42)) mult = mult.div(upgradeEffect('l', 42));
 
         if (hasUpgrade('xp', 42)) mult = mult.div(upgradeEffect('xp', 42));
         if (hasUpgrade('xp', 61)) mult = mult.div(upgradeEffect('xp', 61));

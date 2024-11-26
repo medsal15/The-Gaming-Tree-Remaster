@@ -32,7 +32,7 @@ addLayer('m', {
                 D.dZero);
         let text = `${formatWhole(player.items.stone.amount)} stone<br>${formatWhole(sum)} ores`;
 
-        if (D.gt(tmp.m.modifiers.xp.gain, 0)) {
+        if (D.gt(tmp.m.modifiers.xp.base, 0)) {
             text += `<br>${formatWhole(player.m.experience)} experience`;
             if (D.gte(player.m.experience, tmp.m.modifiers.xp.cap)) text += ' (capped)';
         }
@@ -90,7 +90,7 @@ addLayer('m', {
                     return `You have ${listFormat.format(list)}.`;
                 }],
                 ['display-text', () => {
-                    if (D.lte(tmp.m.modifiers.xp.gain, 0)) return '';
+                    if (D.lte(tmp.m.modifiers.xp.base, 0)) return '';
 
                     const color = tmp.m.modifiers.xp.color,
                         gain = tmp.m.modifiers.xp.gain,
@@ -1737,7 +1737,10 @@ addLayer('m', {
         mine: {
             direction: RIGHT,
             progress() { return player.m.mine_time; },
-            height: 10,
+            height() {
+                if (D.lte(player.items.disco_ball.amount, 0)) return 10;
+                return 20;
+            },
             width: 320,
             fillStyle: {
                 backgroundColor() { return tmp.m.nodeStyle.backgroundColor; },

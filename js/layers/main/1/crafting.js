@@ -148,7 +148,10 @@ addLayer('c', {
             buy() {
                 if (!this.canAfford()) return;
 
-                addBuyables(this.layer, this.id, 1);
+                let gain = 1;
+                if (hasChallenge('b', 41)) gain = Object.values(tmp.xp.monsters).filter(mon => (mon.unlocked ?? true)).length;
+
+                addBuyables(this.layer, this.id, gain);
                 doReset('c', true);
                 player.c.shown = true;
             },
@@ -254,7 +257,7 @@ addLayer('c', {
             title() { return `${formatWhole(player.items.copper_golem.amount)} ${capitalize_words(tmp.items.copper_golem.name)}`; },
             display() {
                 const cost = tmp[this.layer].buyables[this.id].cost;
-                let copper_cost = shiftDown ? '[amount * 5 + 10]' : format(cost);
+                let copper_cost = shiftDown ? '[amount * 5 + 5]' : format(cost);
 
                 return item_list.copper_golem.effectDescription() + `<br>
                     First purchase replaces copper ore costs with copper ingots<br><br>
@@ -263,7 +266,7 @@ addLayer('c', {
             cost(x) {
                 if (tmp[this.layer].deactivated) x = D.dZero;
 
-                let cost = D.times(x, 5).add(10);
+                let cost = D.times(x, 5).add(5);
 
                 return cost;
             },
@@ -296,7 +299,7 @@ addLayer('c', {
             title() { return `${formatWhole(player.items.tin_ring.amount)} ${capitalize_words(tmp.items.tin_ring.name)}`; },
             display() {
                 const cost = tmp[this.layer].buyables[this.id].cost;
-                let tin_cost = shiftDown ? '[amount * 5 + 10]' : format(cost);
+                let tin_cost = shiftDown ? '[amount * 5 + 5]' : format(cost);
 
                 return item_list.tin_ring.effectDescription() + `<br>
                     First purchase replaces tin ore costs with tin ingots<br><br>
@@ -305,7 +308,7 @@ addLayer('c', {
             cost(x) {
                 if (tmp[this.layer].deactivated) x = D.dZero;
 
-                let cost = D.times(x, 5).add(10);
+                let cost = D.times(x, 5).add(5);
 
                 return cost;
             },
@@ -338,7 +341,7 @@ addLayer('c', {
             title() { return `${formatWhole(player.items.bronze_mold.amount)} ${capitalize_words(tmp.items.bronze_mold.name)}`; },
             display() {
                 const cost = tmp[this.layer].buyables[this.id].cost;
-                let bronze_cost = shiftDown ? '[amount * 5 + 10]' : format(cost);
+                let bronze_cost = shiftDown ? '[amount * 5 + 5]' : format(cost);
 
                 return item_list.bronze_mold.effectDescription() + `<br>
                     First purchase replaces bronze blend costs with bronze ingots<br><br>
@@ -347,7 +350,7 @@ addLayer('c', {
             cost(x) {
                 if (tmp[this.layer].deactivated) x = D.dZero;
 
-                let cost = D.times(x, 5).add(10);
+                let cost = D.times(x, 5).add(5);
 
                 return cost;
             },
@@ -422,7 +425,7 @@ addLayer('c', {
             title() { return `${formatWhole(player.items.iron_heataxe.amount)} ${capitalize_words(tmp.items.iron_heataxe.name)}`; },
             display() {
                 const cost = tmp[this.layer].buyables[this.id].cost;
-                let iron_cost = shiftDown ? '[amount * 5 + 10]' : format(cost);
+                let iron_cost = shiftDown ? '[amount * 5 + 5]' : format(cost);
 
                 return item_list.iron_heataxe.effectDescription() + `<br>
                     First purchase replaces iron ore costs with iron ingots<br><br>
@@ -431,7 +434,7 @@ addLayer('c', {
             cost(x) {
                 if (tmp[this.layer].deactivated) x = D.dZero;
 
-                let cost = D.times(x, 5).add(10);
+                let cost = D.times(x, 5).add(5);
 
                 return cost;
             },
@@ -464,7 +467,7 @@ addLayer('c', {
             title() { return `${formatWhole(player.items.disco_ball.amount)} ${capitalize_words(tmp.items.disco_ball.name)}`; },
             display() {
                 const cost = tmp[this.layer].buyables[this.id].cost;
-                let silver_cost = shiftDown ? '[amount * 5 + 10]' : format(cost);
+                let silver_cost = shiftDown ? '[amount * 5 + 5]' : format(cost);
 
                 return item_list.disco_ball.effectDescription() + `<br>
                     First purchase replaces silver ore costs with silver ingots<br><br>
@@ -473,7 +476,7 @@ addLayer('c', {
             cost(x) {
                 if (tmp[this.layer].deactivated) x = D.dZero;
 
-                let cost = D.times(x, 5).add(10);
+                let cost = D.times(x, 5).add(5);
 
                 return cost;
             },
@@ -506,7 +509,7 @@ addLayer('c', {
             title() { return `${formatWhole(player.items.electrum_package.amount)} ${capitalize_words(tmp.items.electrum_package.name)}`; },
             display() {
                 const cost = tmp[this.layer].buyables[this.id].cost;
-                let electrum_cost = shiftDown ? '[amount * 5 + 10]' : format(cost);
+                let electrum_cost = shiftDown ? '[amount * 5 + 5]' : format(cost);
 
                 return item_list.electrum_package.effectDescription() + `<br>
                     First purchase replaces electrum blend costs with electrum ingots<br><br>
@@ -515,7 +518,7 @@ addLayer('c', {
             cost(x) {
                 if (tmp[this.layer].deactivated) x = D.dZero;
 
-                let cost = D.times(x, 5).add(10);
+                let cost = D.times(x, 5).add(5);
 
                 return cost;
             },
@@ -945,7 +948,7 @@ addLayer('c', {
                 let costs = [
                     ['iron_ore', D.times(8, count)],
                     ['coal', D.times(16, count)],
-                    ['slime_goo', D.times(15, count)],
+                    ['slime_goo', D.times(5, count)],
                 ];
 
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
@@ -968,7 +971,7 @@ addLayer('c', {
                 consumes: {
                     'iron_ore': '8 * count',
                     'coal': '16 * count',
-                    'slime_goo': '15 * count',
+                    'slime_goo': '5 * count',
                 },
                 produces: {
                     'clear_iron_ore': 'count * 2',
@@ -1065,7 +1068,7 @@ addLayer('c', {
                     all = crafting_default_all_time(this.id, all_time);
 
                 let costs = [
-                    ['stone', D.sumGeometricSeries(count, 100, 2, all)],
+                    ['stone', D.sumGeometricSeries(count, 100, 1.2, all)],
                 ];
 
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
@@ -1090,7 +1093,7 @@ addLayer('c', {
             heat: D.dTen,
             formulas: {
                 consumes: {
-                    'stone': '100 * 2 ^ amount',
+                    'stone': '100 * 1.2 ^ amount',
                 },
                 produces: {
                     'stone_brick': 'amount',
@@ -1110,7 +1113,7 @@ addLayer('c', {
                     all = crafting_default_all_time(this.id, all_time);
 
                 let costs = [
-                    ['copper_ore', D.sumGeometricSeries(count, 100, 1.5, all)],
+                    ['copper_ore', D.sumGeometricSeries(count, 100, 1.15, all)],
                 ];
 
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
@@ -1135,7 +1138,7 @@ addLayer('c', {
             heat: D(25),
             formulas: {
                 consumes: {
-                    'copper_ore': '100 * 1.5 ^ amount',
+                    'copper_ore': '100 * 1.15 ^ amount',
                 },
                 produces: {
                     'copper_ingot': 'amount',
@@ -1155,7 +1158,7 @@ addLayer('c', {
                     all = crafting_default_all_time(this.id, all_time);
 
                 let costs = [
-                    ['tin_ore', D.sumGeometricSeries(count, 100, 1.25, all)],
+                    ['tin_ore', D.sumGeometricSeries(count, 100, 1.125, all)],
                 ];
 
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
@@ -1180,7 +1183,7 @@ addLayer('c', {
             heat: D(25),
             formulas: {
                 consumes: {
-                    'tin_ore': '100 * 1.25 ^ amount',
+                    'tin_ore': '100 * 1.125 ^ amount',
                 },
                 produces: {
                     'tin_ingot': 'amount',
@@ -1200,7 +1203,7 @@ addLayer('c', {
                     all = crafting_default_all_time(this.id, all_time);
 
                 let costs = [
-                    ['bronze_blend', D.sumGeometricSeries(count, 25, 1.1, all)],
+                    ['bronze_blend', D.sumGeometricSeries(count, 25, 1.11, all)],
                 ];
 
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
@@ -1225,7 +1228,7 @@ addLayer('c', {
             heat: D(75),
             formulas: {
                 consumes: {
-                    'bronze_blend': '25 * 1.1 ^ amount',
+                    'bronze_blend': '25 * 1.11 ^ amount',
                 },
                 produces: {
                     'bronze_ingot': 'amount',
@@ -1245,8 +1248,8 @@ addLayer('c', {
                     all = crafting_default_all_time(this.id, all_time);
 
                 let costs = [
-                    ['copper_ingot', D.sumGeometricSeries(count, 75, 1.25, all)],
-                    ['tin_ingot', D.sumGeometricSeries(count, 25, 1.125, all)],
+                    ['copper_ingot', D.sumGeometricSeries(count, 75, 1.125, all)],
+                    ['tin_ingot', D.sumGeometricSeries(count, 25, 1.1125, all)],
                 ];
 
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
@@ -1271,8 +1274,8 @@ addLayer('c', {
             heat: D(75),
             formulas: {
                 consumes: {
-                    'copper_ingot': '75 * 1.25 ^ amount',
-                    'tin_ingot': '25 * 1.125 ^ amount',
+                    'copper_ingot': '75 * 1.125 ^ amount',
+                    'tin_ingot': '25 * 1.1125 ^ amount',
                 },
                 produces: {
                     'bronze_ingot': 'amount',
@@ -1292,7 +1295,7 @@ addLayer('c', {
                     all = crafting_default_all_time(this.id, all_time);
 
                 let costs = [
-                    ['gold_nugget', D.sumGeometricSeries(count, 5, 1.125, all)],
+                    ['gold_nugget', D.sumGeometricSeries(count, 5, 1.1125, all)],
                 ];
 
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
@@ -1317,7 +1320,7 @@ addLayer('c', {
             heat: D(50),
             formulas: {
                 consumes: {
-                    'gold_nugget': '5 * 1.125 ^ amount',
+                    'gold_nugget': '5 * 1.1125 ^ amount',
                 },
                 produces: {
                     'gold_ingot': 'amount',
@@ -1337,8 +1340,8 @@ addLayer('c', {
                     all = crafting_default_all_time(this.id, all_time);
 
                 let costs = [
-                    ['iron_ore', D.sumGeometricSeries(count, 400, 1.4, all)],
-                    ['coal', D.sumGeometricSeries(count, 100, 1.8, all)],
+                    ['iron_ore', D.sumGeometricSeries(count, 200, 1.14, all)],
+                    ['coal', D.sumGeometricSeries(count, 100, 1.18, all)],
                 ];
 
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
@@ -1363,8 +1366,8 @@ addLayer('c', {
             heat: D(110),
             formulas: {
                 consumes: {
-                    'coal': '100 * 1.8 ^ amount',
-                    'iron_ore': '400 * 1.4 ^ amount',
+                    'coal': '100 * 1.18 ^ amount',
+                    'iron_ore': '200 * 1.14 ^ amount',
                 },
                 produces: {
                     'iron_ingot': 'amount',
@@ -1384,7 +1387,7 @@ addLayer('c', {
                     all = crafting_default_all_time(this.id, all_time);
 
                 let costs = [
-                    ['clear_iron_ore', D.sumGeometricSeries(count, 100, 1.4, all)],
+                    ['clear_iron_ore', D.sumGeometricSeries(count, 50, 1.14, all)],
                 ];
 
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
@@ -1409,7 +1412,7 @@ addLayer('c', {
             heat: D(100),
             formulas: {
                 consumes: {
-                    'clear_iron_ore': '400 * 1.4 ^ amount',
+                    'clear_iron_ore': '50 * 1.14 ^ amount',
                 },
                 produces: {
                     'iron_ingot': 'amount',
@@ -1429,8 +1432,8 @@ addLayer('c', {
                     all = crafting_default_all_time(this.id, all_time);
 
                 let costs = [
-                    ['silver_ore', D.sumGeometricSeries(count, 110, 1.2, all)],
-                    ['coal', D.sumGeometricSeries(count, 100, 1.8, all)],
+                    ['silver_ore', D.sumGeometricSeries(count, 110, 1.12, all)],
+                    ['coal', D.sumGeometricSeries(count, 100, 1.18, all)],
                 ];
 
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
@@ -1456,8 +1459,8 @@ addLayer('c', {
             heat: D(150),
             formulas: {
                 consumes: {
-                    'coal': '100 * 1.8 ^ amount',
-                    'silver_ore': '110 * 1.2 ^ amount',
+                    'coal': '100 * 1.18 ^ amount',
+                    'silver_ore': '110 * 1.12 ^ amount',
                 },
                 produces: {
                     'silver_ingot': 'amount',
@@ -1478,7 +1481,7 @@ addLayer('c', {
                     all = crafting_default_all_time(this.id, all_time);
 
                 let costs = [
-                    ['electrum_blend', D.sumGeometricSeries(count, 25, 1.1, all)],
+                    ['electrum_blend', D.sumGeometricSeries(count, 25, 1.11, all)],
                 ];
 
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
@@ -1503,7 +1506,7 @@ addLayer('c', {
             heat: D(225),
             formulas: {
                 consumes: {
-                    'electrum_blend': '25 * 1.1 ^ amount',
+                    'electrum_blend': '25 * 1.11 ^ amount',
                 },
                 produces: {
                     'electrum_ingot': 'amount',
@@ -3135,6 +3138,114 @@ addLayer('c', {
             static: true,
             unlocked() { return tmp.a.layerShown; },
         },
+        // Special
+        factory_core_frame: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes() {
+                /** @type {[items, Decimal][]} */
+                let costs = [
+                    ['factory_core_casing', D.dOne],
+                    ['rib', D(25)],
+                    ['clear_iron_ore', D(15)],
+                ];
+
+                if (D.gt(getBuyableAmount('c', 42), 0)) {
+                    const iron_row = costs.find(([item]) => item == 'clear_iron_ore');
+                    iron_row[0] = 'iron_ingot';
+                    iron_row[1] = D.div(iron_row[1], item_effect('iron_heataxe').cost_div);
+                }
+
+                return costs;
+            },
+            produces() { return [['factory_core_frame', D.dOne]]; },
+            duration() { return D(60); },
+            formulas: {
+                consumes: {
+                    'factory_core_casing': '1',
+                    'rib': '25',
+                    'clear_iron_ore': '15',
+                    'iron_ingot'() { return `${this.clear_iron_ore} / ${format(item_effect('iron_heataxe').cost_div)}`; },
+                },
+                produces: {
+                    'factory_core_frame': '1',
+                },
+                duration: '60 seconds',
+            },
+            categories: ['materials', 'boss'],
+            unlocked() {
+                return inChallenge('b', 41) &&
+                    (D.gte(player.items.factory_core_casing.amount, 1) || D.gt(player.c.recipes[this.id].time, 0));
+            },
+            manual: true,
+        },
+        factory_core_scaffolding: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes() {
+                /** @type {[items, Decimal][]} */
+                let costs = [
+                    ['factory_core_frame', D.dOne],
+                    ['slime_core_shard', D(75)],
+                    ['coal', D(150)],
+                ];
+
+                return costs;
+            },
+            produces() { return [['factory_core_scaffolding', D.dOne], ['bronze_ingot', D(5)]]; },
+            duration() { return D(90); },
+            heat: D(150),
+            formulas: {
+                consumes: {
+                    'factory_core_casing': '1',
+                    'slime_goo': '100',
+                    'coal': '150',
+                },
+                produces: {
+                    'factory_core_scaffolding': '1',
+                    'bronze_ingot': '5',
+                },
+                duration: '90 seconds',
+                heat: '150',
+            },
+            categories: ['materials', 'boss'],
+            unlocked() {
+                return inChallenge('b', 41) &&
+                    (D.gte(player.items.factory_core_frame.amount, 1) || D.gt(player.c.recipes[this.id].time, 0));
+            },
+            manual: true,
+        },
+        factory_core: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes() {
+                /** @type {[items, Decimal][]} */
+                let costs = [
+                    ['factory_core_scaffolding', D.dOne],
+                ];
+
+                return costs;
+            },
+            produces() { return [['factory_core', D.dOne]]; },
+            duration() { return D(150); },
+            heat: D(250),
+            formulas: {
+                consumes: {
+                    'factory_core_scaffolding': '1',
+                },
+                produces: {
+                    'factory_core': '1',
+                },
+                duration: '150 seconds',
+                heat: '250',
+            },
+            categories: ['equipment', 'boss', 'arca'],
+            unlocked() {
+                return inChallenge('b', 41) &&
+                    (D.gte(player.items.factory_core_scaffolding.amount, 1) || D.gt(player.c.recipes[this.id].time, 0));
+            },
+            manual: true,
+        },
     },
     modifiers: {
         craft: { cost_mult() { return D.dOne; }, },
@@ -3239,12 +3350,6 @@ addLayer('c', {
         });
 
         if (!player.c.visited_forge && player.subtabs.c.mainTabs == 'Forge') player.c.visited_forge = true;
-    },
-    shouldNotify() {
-        return Object.values(tmp.c.recipes).filter(rec => (rec.unlocked ?? true) &&
-            rec.categories.includes('equipment') &&
-            crafting_can(rec.id, D.dOne) &&
-            D.lte(player.c.recipes[rec.id].making, 0)).length;
     },
     prestigeNotify() { return canBuyBuyable('c', 11) || (tmp.c.forge.unlocked && !player.c.visited_forge); },
     nodeStyle: {

@@ -692,7 +692,10 @@ addLayer('xp', {
         attack_selected: {
             direction: RIGHT,
             progress() { return player.xp.attack_time_selected; },
-            height: 10,
+            height() {
+                if (D.lte(player.items.disco_ball.amount, 0)) return 10;
+                return 20;
+            },
             width: 320,
             fillStyle: {
                 backgroundColor() { return tmp.xp.color; },
@@ -707,7 +710,10 @@ addLayer('xp', {
         attack_all: {
             direction: RIGHT,
             progress() { return player.xp.attack_time_all; },
-            height: 10,
+            height() {
+                if (D.lte(player.items.disco_ball.amount, 0)) return 10;
+                return 20;
+            },
             width: 320,
             fillStyle: {
                 backgroundColor() { return tmp.xp.kill.color; },
@@ -1012,9 +1018,12 @@ addLayer('xp', {
             },
             defense(level) {
                 if (inChallenge('b', 41)) {
-                    let l = D(level ?? tmp?.xp?.monsters[this.id].level);
+                    let l = D(level ?? tmp?.xp?.monsters[this.id].level),
+                        defense = D.pow(1.25, l).minus(1);
 
-                    return D.pow(1.25, l).minus(1);
+                    defense = defense.times(tmp.xp.modifiers.defense.mult);
+
+                    return defense;
                 }
             },
             experience(level) {
@@ -1119,9 +1128,12 @@ addLayer('xp', {
             },
             defense(level) {
                 if (inChallenge('b', 41)) {
-                    let l = D(level ?? tmp?.xp?.monsters[this.id].level);
+                    let l = D(level ?? tmp?.xp?.monsters[this.id].level),
+                        defense = D.pow(1.5, l).minus(1);
 
-                    return D.pow(1.5, l).minus(1);
+                    defense = defense.times(tmp.xp.modifiers.defense.mult);
+
+                    return defense;
                 }
             },
             experience(level) {
@@ -1214,6 +1226,8 @@ addLayer('xp', {
                 if (inChallenge('b', 41)) l = l.times(2);
 
                 let defense = D.pow(2, l).minus(1);
+
+                defense = defense.times(tmp.xp.modifiers.defense.mult);
 
                 return defense;
             },
@@ -1428,6 +1442,15 @@ addLayer('xp', {
             mult() { return D.dOne; },
             exp() { return D(.5); },
         },
+        defense: {
+            mult() {
+                let mult = D.dOne;
+
+                mult = mult.div(tmp.a.spells.acid.effect.def_div);
+
+                return mult;
+            },
+        },
     },
     list() {
         let list = Object.values(tmp.xp.monsters)
@@ -1455,6 +1478,6 @@ addLayer('xp', {
         player.xp.upgrades.push(...upgs);
 
         // Correctly reset health
-        Object.values(layers.xp.monsters).forEach(data => player.xp.monsters[data.id].health = data.health(data.level(0)));
+        Object.values(layers.xp.monsters).forEach(data => player.xp.monsters[data.id].health = data.health(data.level(1)));
     },
 });
