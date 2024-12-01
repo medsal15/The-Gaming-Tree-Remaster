@@ -1508,6 +1508,7 @@ type items = 'unknown' |
     'package_1' | 'package_2' | 'package_3' | 'package_4' |
     'factory_core_casing' | 'factory_core_frame' | 'factory_core_scaffolding' | 'factory_core' |
     'cueball';
+//todo item effects
 
 type monsters = 'slime' | 'skeleton' | 'golem';
 
@@ -1520,6 +1521,43 @@ type categories = 'materials' | 'equipment' | 'craftable' |
     'mining' | 'densium' | 'deep_mining' |
     'forge' | 'shop' | 'arca' | 'boss' |
     monsters;
+
+type spells = 'convertion' | 'drain' | 'acid' | 'lava' |
+    'rank' | 'magic_hands' | 'fireburn' | 'speed';
+type spell_effects = {
+    convertion: {
+        xp_loss: Decimal
+        m_xp_loss: Decimal
+        arca: Decimal
+    }
+    drain: {
+        damage_mult: Decimal
+        xp_passive: Decimal
+    }
+    acid: {
+        def_div: Decimal
+        ore_health_div: Decimal
+    }
+    lava: {
+        vein_size: Decimal
+        heat_gain: Decimal
+    }
+    rank: {
+        level_cost: Decimal
+        skill_point: Decimal
+    }
+    magic_hands: {
+        crafting_speed: Decimal
+    }
+    fireburn: {
+        heat_mult: Decimal
+        forge_speed: Decimal
+    }
+    speed: {
+        cycle_duration: Decimal
+        cycle_time: Decimal
+    }
+}
 
 type death_resources = 'karma' | 'souls';
 
@@ -1628,6 +1666,8 @@ type Layers = {
             defense?(level?: DecimalSource): Decimal
             /** XP gained on kill */
             experience(level?: DecimalSource): Decimal
+            /** XP gained per second */
+            passive_experience(level?: DecimalSource): Decimal
             /** How many kills on kill (affects item gain) */
             kills(): Decimal
             /** Damage on attack */
@@ -1662,6 +1702,15 @@ type Layers = {
                 passive(): Decimal
             }
             xp: {
+                /** XP gain without killing enemies */
+                passive: {
+                    /** Multiplier for target enemy */
+                    active(): Decimal
+                    /** Multiplier for all enemies */
+                    passive(): Decimal
+                    /** Total passive gain per second */
+                    total(): Decimal
+                }
                 mult(): Decimal
                 exp(): Decimal
             }
@@ -1875,7 +1924,6 @@ type Layers = {
     a: Layer<'a'> & {
         /**
          * TODO: Arcanism
-         * spells for boosts
          * transmutation (slime goo -> bone, etc.)
          */
         /**
@@ -1944,9 +1992,9 @@ type Layers = {
             }
         }
         spells: {
-            [id: string]: {
-                private _id: string | null
-                readonly id: string
+            [id in spells]: {
+                private _id: id | null
+                readonly id: id
                 unlocked?: Computable<boolean>
                 name: string
 
@@ -1959,7 +2007,7 @@ type Layers = {
                  *
                  * @param {boolean} [active] If true, returns the active effect
                  */
-                effect(active?: boolean): any
+                effect(active?: boolean): spell_effects[id]
                 /**
                  * Current effect description
                  *

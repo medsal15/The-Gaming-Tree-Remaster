@@ -51,15 +51,24 @@ addLayer('xp', {
                 ['display-text', () => {
                     const selected = player.xp.selected,
                         color = tmp.xp.color,
-                        cap = tmp.xp.modifiers.cap.total;
-                    let gain_txt = '';
+                        cap = tmp.xp.modifiers.cap,
+                        /** @type {string[]} */
+                        gain_extra = [];
+
                     if (selected) {
-                        const gain = D.min(tmp.xp.monsters[selected].experience, tmp.xp.modifiers.cap.gain);
-                        gain_txt = D.gt(gain, 0) ? ` (+${resourceColor(color, format(gain))})` : '';
+                        const gain = D.min(tmp.xp.monsters[selected].experience, cap.gain);
+                        gain_extra.push(`+${resourceColor(color, format(gain))}`);
+                    }
+                    if (D.gt(tmp.xp.modifiers.xp.passive.total, 0)) {
+                        const gain = D.min(tmp.xp.modifiers.xp.passive.total, cap.gain);
+                        gain_extra.push(`+${resourceColor(color, format(gain))} /s`);
                     }
 
+                    let gain_txt = '';
+                    if (gain_extra.length) gain_txt = ` (${gain_extra.join(', ')})`;
+
                     return `You have ${resourceColor(color, formatWhole(player.xp.points), 'font-size:1.5em;')}${gain_txt}\
-                        /${resourceColor(color, formatWhole(cap))} experience`;
+                        /${resourceColor(color, formatWhole(cap.total))} experience`;
                 }],
                 ['display-text', () => {
                     const selected = player.xp.selected;
@@ -967,8 +976,14 @@ addLayer('xp', {
     update(diff) {
         if (inChallenge('b', 31) && D.lte(player.dea.health, 0)) return;
 
+        // Fill auto attack
         player.xp.attack_time_selected = D.times(diff, tmp.xp.modifiers.speed.active).add(player.xp.attack_time_selected).min(1);
         player.xp.attack_time_all = D.times(diff, tmp.xp.modifiers.speed.passive).add(player.xp.attack_time_all).min(1);
+
+        // Passive gain
+        let passive_gain = D.times(tmp.xp.modifiers.xp.passive.total, diff)
+            .min(tmp.xp.modifiers.cap.gain);
+        addPoints('xp', passive_gain);
     },
     monsters: {
         slime: {
@@ -1040,6 +1055,18 @@ addLayer('xp', {
                 xp = D.pow(xp, tmp.xp.modifiers.xp.exp);
 
                 return xp;
+            },
+            passive_experience(level) {
+                let mult = D.dZero;
+
+                mult = mult.add(tmp.xp.modifiers.xp.passive.passive);
+                if (this.id == player.xp.selected) mult = mult.add(tmp.xp.modifiers.xp.passive.active);
+
+                if (mult.lte(0)) return D.dZero;
+
+                const l = D(level ?? tmp.xp.monsters[this.id].level);
+
+                return this.experience(l).times(mult);
             },
             kills() {
                 let kills = D.dOne;
@@ -1147,6 +1174,18 @@ addLayer('xp', {
 
                 return xp;
             },
+            passive_experience(level) {
+                let mult = D.dZero;
+
+                mult = mult.add(tmp.xp.modifiers.xp.passive.passive);
+                if (this.id == player.xp.selected) mult = mult.add(tmp.xp.modifiers.xp.passive.active);
+
+                if (mult.lte(0)) return D.dZero;
+
+                const l = D(level ?? tmp.xp.monsters[this.id].level);
+
+                return this.experience(l).times(mult);
+            },
             kills() { return D.dOne; },
             damage() {
                 let base = tmp.xp.modifiers.damage.base;
@@ -1242,6 +1281,18 @@ addLayer('xp', {
 
                 return xp;
             },
+            passive_experience(level) {
+                let mult = D.dZero;
+
+                mult = mult.add(tmp.xp.modifiers.xp.passive.passive);
+                if (this.id == player.xp.selected) mult = mult.add(tmp.xp.modifiers.xp.passive.active);
+
+                if (mult.lte(0)) return D.dZero;
+
+                const l = D(level ?? tmp.xp.monsters[this.id].level);
+
+                return this.experience(l).times(mult);
+            },
             kills() { return D.dOne; },
             damage() {
                 let base = tmp.xp.modifiers.damage.base;
@@ -1322,6 +1373,8 @@ addLayer('xp', {
 
                 if (hasUpgrade('l', 21)) mult = mult.times(upgradeEffect('l', 21));
 
+                mult = mult.times(tmp.a.spells.drain.effect.damage_mult);
+
                 mult = mult.times(item_effect('slime_knife').damage);
                 mult = mult.times(item_effect('lead_coating').damage_mult);
 
@@ -1351,6 +1404,21 @@ addLayer('xp', {
             },
         },
         xp: {
+            passive: {
+                active: D.dZero,
+                passive() {
+                    let mult = D.dZero;
+
+                    mult = mult.add(tmp.a.spells.drain.effect.xp_passive);
+
+                    return mult;
+                },
+                total() {
+                    return Object.values(tmp.xp.monsters)
+                        .filter(data => (data.unlocked ?? true) && D.gt(data.passive_experience, 0))
+                        .reduce((sum, data) => sum.add(data.passive_experience), D.dZero);
+                },
+            },
             mult() {
                 let mult = D.dOne;
 

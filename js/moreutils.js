@@ -436,8 +436,10 @@ function bestiary_content(monster) {
 
     if (D.neq(tmonst.kills, 1)) lines.push(['display-text', `Each kill counts as ${resourceColor(tmp.xp.kill.color, format(tmonst.kills))} kills`]);
 
+    lines.push(['display-text', `Gives ${resourceColor(tmp.xp.color, format(tmonst.experience))} XP on kill`]);
+    if (D.gt(tmonst.passive_experience, 0)) lines.push(['display-text', `Producing ${resourceColor(tmp.xp.color, format(tmonst.passive_experience))} XP per second`]);
+
     lines.push(
-        ['display-text', `Gives ${resourceColor(tmp.xp.color, format(tmonst.experience))} XP on kill`],
         'blank',
         ['display-text', `Health: ${format(player.xp.monsters[monster].health)} / ${format(tmonst.health)}`],
     );

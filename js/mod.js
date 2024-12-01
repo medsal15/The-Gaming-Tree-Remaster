@@ -28,12 +28,13 @@ let VERSION = {
 	/**
 	 * The version's name, displayed alongside the number in the info tab.
 	 */
-	name: '//todo',
+	name: 'Cast and Wait',
 	beta: true,
 };
 
 let changelog = `<h1>Changelog:</h1><br>
-	<h3>v0.3: ???</h3>
+	<h3>v0.3: Cast and Wait</h3><br>
+		- Buff levels.<br>
 		- 2 new layers.<br>
 		- Add a new enemy.<br>
 		- Improve Crafting and Shop displays.<br>

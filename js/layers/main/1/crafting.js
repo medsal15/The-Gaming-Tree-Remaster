@@ -648,6 +648,8 @@ addLayer('c', {
 
             if (hasAchievement('ach', 45)) speed = speed.times(achievementEffect('ach', 45));
 
+            speed = speed.times(tmp.a.spells.magic_hands.effect.crafting_speed);
+
             speed = speed.times(item_effect('copper_golem').speed_mult);
 
             return speed;
@@ -657,6 +659,8 @@ addLayer('c', {
         unlocked() { return hasUpgrade('m', 62) || player.c.visited_forge; },
         speed() {
             let speed = D.dOne;
+
+            speed = speed.times(tmp.a.spells.fireburn.effect.forge_speed);
 
             speed = speed.times(item_effect('copper_golem').speed_mult);
             speed = speed.times(item_effect('bellow').speed_mult);
@@ -3278,12 +3282,16 @@ addLayer('c', {
 
                     if (hasUpgrade('m', 62)) base = base.add(upgradeEffect('m', 62));
 
+                    base = base.add(tmp.a.spells.lava.effect.heat_gain);
+
                     base = base.add(buyableEffect('c', 21).heat);
 
                     return base;
                 },
                 mult() {
                     let mult = D.dOne;
+
+                    mult = mult.times(tmp.a.spells.fireburn.effect.heat_mult);
 
                     mult = mult.times(item_effect('furnace').heat_mult);
                     mult = mult.times(item_effect('bellow').heat_mult);

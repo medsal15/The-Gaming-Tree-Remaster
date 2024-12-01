@@ -3121,14 +3121,14 @@ const item_list = {
 
             let arcane = D.dZero;
 
-            if (D.gte(x, 1)) arcane = D.dTen;
+            if (D.gte(x, 1)) arcane = D(5);
 
             return { arcane, };
         },
         effectDescription(amount) {
             let arcane;
             if (shiftDown) {
-                arcane = '[10]';
+                arcane = '[5]';
             } else {
                 const x = D(amount ?? player.items[this.id].amount),
                     effect = item_list[this.id].effect(x);

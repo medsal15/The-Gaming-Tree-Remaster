@@ -125,8 +125,6 @@ addLayer('a', {
                     base = base.add(item_effect('arcane_generator').arcane);
                     base = base.add(item_effect('factory_core').arcane);
 
-                    if (hasChallenge('b', 41)) base = base.add(10);
-
                     return base;
                 },
                 mult() {
@@ -213,36 +211,11 @@ addLayer('a', {
         },
     },
     spells: {
-        acid: {
-            _id: null,
-            get id() { return this._id ??= Object.keys(layers.a.spells).find(id => layers.a.spells[id] == this); },
-            name: 'acid melt',
-            cost() { return D.times(1, tmp.a.modifiers.spell.cost_mult); },
-            duration() { return D.times(60, tmp.a.modifiers.spell.duration_mult); },
-            effect(active) {
-                active ??= D.gt(player.a.spells[this.id].time, 0) && D.gte(tmp.a.modifiers.arca.total, 0);
-
-                let def_div = D.dOne,
-                    ore_health_div = D.dOne;
-
-                if (active) {
-                    def_div = D.dTwo;
-                    ore_health_div = D.dTwo;
-                }
-
-                return { def_div, ore_health_div, };
-            },
-            effectDescription(active) {
-                const effect = this.effect(active);
-
-                return `Divide enemy defense by ${format(effect.def_div)} and ore health by ${format(effect.ore_health_div)}`;
-            },
-        },
         convertion: {
             _id: null,
             get id() { return this._id ??= Object.keys(layers.a.spells).find(id => layers.a.spells[id] == this); },
             name: 'XP convertion',
-            cost() { return D.dZero; },
+            cost: D.dZero,
             duration() { return D.times(90, tmp.a.modifiers.spell.duration_mult); },
             effect(active) {
                 active ??= D.gt(player.a.spells[this.id].time, 0) && D.gte(tmp.a.modifiers.arca.total, 0);
@@ -270,6 +243,156 @@ addLayer('a', {
                 return `Lose ${xp_loss} XP${m_txt} per second, gain ${arca} arca`;
             },
         },
+        drain: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.spells).find(id => layers.a.spells[id] == this); },
+            name: 'drain',
+            cost() { return D.times(1.5, tmp.a.modifiers.spell.cost_mult); },
+            duration() { return D.times(60, tmp.a.modifiers.spell.duration_mult); },
+            effect(active) {
+                active ??= D.gt(player.a.spells[this.id].time, 0) && D.gte(tmp.a.modifiers.arca.total, 0);
+
+                let damage_mult = D.dOne,
+                    xp_passive = D.dZero;
+
+                if (active) {
+                    damage_mult = D.dZero;
+                    xp_passive = D.div(tmp.a.modifiers.arca.total, 20);
+                }
+
+                return { damage_mult, xp_passive, };
+            },
+            effectDescription(active) {
+                const effect = this.effect(active);
+
+                let xp_passive = shiftDown ? '[arca / 20]' : `${formatWhole(D.times(effect.xp_passive, 100))}%`;
+
+                return `Multiply enemy damage by ${formatWhole(effect.damage_mult)}, and increase passive xp by ${xp_passive}`;
+            },
+        },
+        acid: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.spells).find(id => layers.a.spells[id] == this); },
+            name: 'acid melt',
+            cost() { return D.times(1, tmp.a.modifiers.spell.cost_mult); },
+            duration() { return D.times(60, tmp.a.modifiers.spell.duration_mult); },
+            effect(active) {
+                active ??= D.gt(player.a.spells[this.id].time, 0) && D.gte(tmp.a.modifiers.arca.total, 0);
+
+                let def_div = D.dOne,
+                    ore_health_div = D.dOne;
+
+                if (active) {
+                    def_div = D.dTwo;
+                    ore_health_div = D.dTwo;
+                }
+
+                return { def_div, ore_health_div, };
+            },
+            effectDescription(active) {
+                const effect = this.effect(active);
+
+                return `Divide enemy defense by ${formatWhole(effect.def_div)} and ore health by ${formatWhole(effect.ore_health_div)}`;
+            },
+        },
+        lava: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.spells).find(id => layers.a.spells[id] == this); },
+            name: 'lava flow',
+            cost() { return D.times(1, tmp.a.modifiers.spell.cost_mult); },
+            duration() { return D.times(30, tmp.a.modifiers.spell.duration_mult); },
+            effect(active) {
+                active ??= D.gt(player.a.spells[this.id].time, 0) && D.gte(tmp.a.modifiers.arca.total, 0);
+
+                let vein_size = D.dOne,
+                    heat_gain = D.dZero;
+
+                if (active) {
+                    vein_size = D.dTwo;
+                    heat_gain = D(.5);
+                }
+
+                return { vein_size, heat_gain, };
+            },
+            effectDescription(active) {
+                const effect = this.effect(active);
+
+                return `Multiply vein size by ${formatWhole(effect.vein_size)}, and increase heat gain by ${format(effect.heat_gain)}`;
+            },
+        },
+        rank: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.spells).find(id => layers.a.spells[id] == this); },
+            name: 'ranking',
+            cost() { return D.times(2, tmp.a.modifiers.spell.cost_mult); },
+            duration() { return D.times(60, tmp.a.modifiers.spell.duration_mult); },
+            effect(active) {
+                active ??= D.gt(player.a.spells[this.id].time, 0) && D.gte(tmp.a.modifiers.arca.total, 0);
+
+                let level_cost = D.dOne,
+                    skill_point = D.dZero;
+
+                if (active) {
+                    level_cost = D.dTwo;
+                    skill_point = D.dOne;
+                }
+
+                return { level_cost, skill_point, };
+            },
+            effectDescription(active) {
+                const effect = this.effect(active);
+
+                return `Divide level cost by ${formatWhole(effect.level_cost)}, and increase skill points by ${formatWhole(effect.skill_point)}`;
+            },
+        },
+        magic_hands: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.spells).find(id => layers.a.spells[id] == this); },
+            name: 'magic hands',
+            cost() { return D.times(1.5, tmp.a.modifiers.spell.cost_mult); },
+            duration() { return D.times(60, tmp.a.modifiers.spell.duration_mult); },
+            effect(active) {
+                active ??= D.gt(player.a.spells[this.id].time, 0) && D.gte(tmp.a.modifiers.arca.total, 0);
+
+                let crafting_speed = D.dOne;
+
+                if (active) {
+                    crafting_speed = D.dTwo;
+                }
+
+                return { crafting_speed, };
+            },
+            effectDescription(active) {
+                const effect = this.effect(active);
+
+                return `Multiplies crafting speed by ${formatWhole(effect.crafting_speed)}`;
+            },
+        },
+        fireburn: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.spells).find(id => layers.a.spells[id] == this); },
+            name: 'fireburn',
+            cost() { return D.times(2, tmp.a.modifiers.spell.cost_mult); },
+            duration() { return D.times(60, tmp.a.modifiers.spell.duration_mult); },
+            effect(active) {
+                active ??= D.gt(player.a.spells[this.id].time, 0) && D.gte(tmp.a.modifiers.arca.total, 0);
+
+                let forge_speed = D.dOne,
+                    heat_mult = D.dOne;
+
+                if (active) {
+                    forge_speed = D.dTwo;
+                    heat_mult = D.dTwo;
+                }
+
+                return { forge_speed, heat_mult, };
+            },
+            effectDescription(active) {
+                const effect = this.effect(active);
+
+                return `Multiplies forging speed by ${formatWhole(effect.forge_speed)} and heat gain by ${formatWhole(effect.heat_mult)}`;
+            },
+        },
         speed: {
             _id: null,
             get id() { return this._id ??= Object.keys(layers.a.spells).find(id => layers.a.spells[id] == this); },
@@ -292,10 +415,15 @@ addLayer('a', {
             effectDescription(active) {
                 const effect = this.effect(active);
 
-                return `Divide time between cycles by ${format(effect.cycle_duration)}, and multiply cycle time by ${format(effect.cycle_time)}`;
+                return `Divide time between cycles by ${formatWhole(effect.cycle_duration)}, and multiply cycle time by ${formatWhole(effect.cycle_time)}`;
             },
         },
-        //TODO more spells
+        /**
+         * TODO more spells
+         *
+         * boss magic (+arca per main boss)
+         * money magic (-1% value, +log4(value) arca)
+         */
     },
     update(diff) {
         player.a.cycle_time = D.add(player.a.cycle_time, diff);

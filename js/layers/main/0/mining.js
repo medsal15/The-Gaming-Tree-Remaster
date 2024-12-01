@@ -1860,7 +1860,7 @@ addLayer('m', {
 
                 return mult;
             },
-            total() { return player.m.targets.map(ore => tmp.m.ores[ore].health).reduce((sum, health) => D.add(sum, health), D.dZero); },
+            total() { return player.m.targets.map(ore => D.isNaN(tmp.m.ores[ore].health) ? D(100) : tmp.m.ores[ore].health).reduce((sum, health) => D.add(sum, health), D.dZero); },
         },
         xp: {
             base() {
@@ -1895,7 +1895,13 @@ addLayer('m', {
             color: '#BB8822',
         },
         vein: {
-            size() { return D.dTen; },
+            size() {
+                let size = D.dTen;
+
+                size = size.times(tmp.a.spells.lava.effect.vein_size);
+
+                return size;
+            },
             health_mult() { return D(1.25); },
             xp_add_mult() { return D.dOne; },
             color: '#8822BB',

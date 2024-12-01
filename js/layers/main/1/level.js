@@ -41,17 +41,22 @@ addLayer('l', {
         'Levels': {
             content: [
                 ['display-text', () => {
-                    let effect;
+                    let effect, skill;
                     if (shiftDown) {
                         let base = D.dTwo;
 
                         if (hasUpgrade('l', 33)) base = base.add(upgradeEffect('l', 33));
 
                         effect = `[${formatWhole(base)} ^ levels]`;
-                    } else effect = formatWhole(tmp.l.effect);
+                        skill = '[2 ^ levels - 1]';
+                    } else {
+                        effect = formatWhole(tmp.l.effect);
+                        skill = formatWhole(D.pow(2, player.l.points).minus(1));
+                    }
 
                     return `You have ${resourceColor(tmp.l.color, formatWhole(player.l.points), 'font-size:1.5em;')} levels,\
-                        which multiply the XP cap by ${resourceColor(tmp.l.color, effect)}`;
+                        which multiply the XP cap by ${resourceColor(tmp.l.color, effect)}\
+                        and grant ${resourceColor(tmp.l.skill_points.color, skill)} skill points`;
                 }],
                 'blank',
                 ['row', [
@@ -91,13 +96,36 @@ addLayer('l', {
             direction: RIGHT,
             height: 40,
             width: 320,
-            progress() { return D.div(tmp.l.baseAmount, getNextAt('l', true, 'static')); },
+            progress() {
+                if (canReset('l')) {
+                    const prev = getNextAt('l', false, 'static'),
+                        diff = D.minus(getNextAt('l', true, 'static'), prev),
+                        prog = D.minus(tmp.l.baseAmount, prev);
+                    return D.div(prog, diff);
+                }
+                return D.div(tmp.l.baseAmount, getNextAt('l', true, 'static'));
+            },
             display() { return `${formatWhole(tmp.l.baseAmount)} / ${formatWhole(getNextAt('l', true, 'static'))} experience`; },
             fillStyle: {
                 'backgroundColor'() { return tmp.l.color; },
             },
             baseStyle: { 'border-radius': 0, },
-            borderStyle: { 'border-radius': 0, },
+            borderStyle: {
+                //'border-radius': 0,
+                'borderRadius'() {
+                    let cap = tmp.xp.modifiers.cap.total;
+                    if (D.gt(tmp.m.modifiers.xp.base, 0)) cap = cap.add(tmp.m.modifiers.xp.cap);
+
+                    if (D.lt(cap, getNextAt('l', true, 'static'))) return '10px';
+                    return 0;
+                },
+                'borderColor'() {
+                    let cap = tmp.xp.modifiers.cap.total;
+                    if (D.gt(tmp.m.modifiers.xp.base, 0)) cap = cap.add(tmp.m.modifiers.xp.cap);
+
+                    if (D.lt(cap, getNextAt('l', true, 'static'))) return '#CC6600';
+                },
+            },
         },
     },
     upgrades: {
@@ -325,6 +353,13 @@ addLayer('l', {
                 );
             },
             effectDisplay() { return `+${format(upgradeEffect(this.layer, this.id)[player.xp.selected])}`; },
+            style() {
+                let style = {};
+
+                if (!hasUpgrade(this.layer, this.id) && canAffordUpgrade(this.layer, this.id)) style['backgroundColor'] = tmp.l.skill_points.color;
+
+                return style;
+            },
             cost: D(3),
             currencyDisplayName: 'skill points',
             canAfford() { return this.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
@@ -345,6 +380,13 @@ addLayer('l', {
                     .reduce((sum, level) => D.add(sum, level), D.dZero).add(1).root(2);
             },
             effectDisplay() { return `/${format(upgradeEffect(this.layer, this.id))}`; },
+            style() {
+                let style = {};
+
+                if (!hasUpgrade(this.layer, this.id) && canAffordUpgrade(this.layer, this.id)) style['backgroundColor'] = tmp.l.skill_points.color;
+
+                return style;
+            },
             cost: D(3),
             currencyDisplayName: 'skill points',
             canAfford() { return this.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
@@ -356,6 +398,13 @@ addLayer('l', {
             description: 'Level effect base +1',
             effect() { return D.dOne; },
             effectDisplay() { return `+${formatWhole(upgradeEffect(this.layer, this.id))}`; },
+            style() {
+                let style = {};
+
+                if (!hasUpgrade(this.layer, this.id) && canAffordUpgrade(this.layer, this.id)) style['backgroundColor'] = tmp.l.skill_points.color;
+
+                return style;
+            },
             cost: D(3),
             currencyDisplayName: 'skill points',
             canAfford() { return this.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
@@ -405,7 +454,7 @@ addLayer('l', {
 
                 return style;
             },
-            cost: D(2),
+            cost: D(4),
             currencyDisplayName: 'skill points',
             canAfford() { return this.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
             pay() { },
@@ -430,7 +479,7 @@ addLayer('l', {
 
                 return style;
             },
-            cost: D(2),
+            cost: D(4),
             currencyDisplayName: 'skill points',
             canAfford() { return this.branches().every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
             pay() { },
@@ -459,7 +508,7 @@ addLayer('l', {
 
                 return style;
             },
-            cost: D(2),
+            cost: D(4),
             currencyDisplayName: 'skill points',
             canAfford() { return this.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
             pay() { },
@@ -484,7 +533,7 @@ addLayer('l', {
 
                 return style;
             },
-            cost: D(2),
+            cost: D(4),
             currencyDisplayName: 'skill points',
             canAfford() { return this.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
             pay() { },
@@ -512,9 +561,11 @@ addLayer('l', {
     skill_points: {
         color: '#00CCCC',
         total() {
-            let points = player.l.points;
+            let points = D.pow(2, player.l.points).minus(1);
 
             if (hasAchievement('ach', 34)) points = points.add(achievementEffect('ach', 34));
+
+            points = points.add(tmp.a.spells.rank.effect.skill_point);
 
             if (hasUpgrade('l', 43)) points = points.times(upgradeEffect('l', 43));
 
@@ -552,6 +603,8 @@ addLayer('l', {
 
         if (hasUpgrade('m', 31)) mult = mult.div(upgradeEffect('m', 31));
 
+        mult = mult.div(tmp.a.spells.rank.effect.level_cost);
+
         if (hasUpgrade('dea', 13)) mult = mult.div(upgradeEffect('dea', 13));
         if (hasUpgrade('dea', 33)) mult = mult.div(upgradeEffect('dea', 33));
 
@@ -560,5 +613,9 @@ addLayer('l', {
         mult = mult.div(item_effect('tin_cache').level);
 
         return mult;
+    },
+    automate() {
+        // Remove most recent upgrade until we run out
+        if (D.lt(tmp.l.skill_points.total, 0)) player.l.upgrades.pop();
     },
 });
