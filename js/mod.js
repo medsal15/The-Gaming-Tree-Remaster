@@ -29,7 +29,7 @@ let VERSION = {
 	 * The version's name, displayed alongside the number in the info tab.
 	 */
 	name: 'Cast and Wait',
-	beta: true,
+	beta: false,
 };
 
 let changelog = `<h1>Changelog:</h1><br>
