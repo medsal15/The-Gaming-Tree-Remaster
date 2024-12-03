@@ -540,9 +540,9 @@ addLayer('ach', {
             unlocked() { return tmp.a.layerShown; },
         },
         123: {
-            name: 'Yer A Magician',
-            tooltip: 'Cast a spell',
-            done() { return Object.values(player.a.spells).some(data => D.gt(data.cast, 0)); },
+            name: 'Recycling',
+            tooltip: 'Transmute an item into another',
+            done() { return Object.values(player.a.transmutation).some(data => D.gt(data.used, 0)); },
             onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.a.color); },
             style() {
                 let style = {};
@@ -553,8 +553,53 @@ addLayer('ach', {
             },
             unlocked() { return tmp.a.layerShown; },
         },
-        //todo 124 transmute tier 3 -> tier 4 (slime core -> dense slime core, skull -> slimy skull, etc.)
-        //todo 125 arca > ???
+        124: {
+            name: 'Yer A Magician',
+            tooltip: 'Cast a spell<br>Reward: Spells last 25% longer',
+            done() { return Object.values(player.a.spells).some(data => D.gt(data.cast, 0)); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.a.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.a.color;
+                style['border'] = `solid 3px ${tmp.ach.color}`;
+
+                return style;
+            },
+            unlocked() { return tmp.a.layerShown; },
+            effect() { return D(1.25); },
+        },
+        125: {
+            name: 'An Alchemist\'s Dream',
+            tooltip: 'Transmute some gold<br>Reward: Gain 25% more arca',
+            done() { return ['tin_ore_up', 'tin_ore_down', 'silver_ore_up', 'silver_ore_down'].some(id => D.gt(player.a.transmutation[id].used, 0)); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.a.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.a.color;
+                style['border'] = `solid 3px ${tmp.ach.color}`;
+
+                return style;
+            },
+            unlocked() { return tmp.a.layerShown; },
+            effect() { return D(1.25); },
+        },
+        131: {
+            name: 'Going Down',
+            tooltip: 'Enter the Dungeon',
+            done() { return inChallenge('b', 71); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.b.groups.dungeon.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.b.groups.dungeon.color;
+
+                return style;
+            },
+            unlocked() { return tmp.b.challenges[71].unlocked; },
+        },
+        //todo dungeon achievements
         //#endregion Normal
         //#region Bonus
         81: {
@@ -795,7 +840,7 @@ addLayer('ach', {
     achievementPopups: false, // This is done manually
     categories: {
         normal: {
-            rows: [1, 3, 4, 5, 7, 9, 12],
+            rows: [1, 3, 4, 5, 7, 9, 12, 13],
             color() { return tmp.ach.color; },
             visible() {
                 return Object.values(tmp.ach.achievements)

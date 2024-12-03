@@ -1938,10 +1938,6 @@ type Layers = {
     }
     a: Layer<'a'> & {
         /**
-         * TODO: Arcanism
-         * transmutation (slime goo -> bone, etc.)
-         */
-        /**
          * Overrides for chains
          *
          * Id must be the same as the recipe it overrides
@@ -2005,6 +2001,9 @@ type Layers = {
                 cost_mult(): Decimal
                 duration_mult(): Decimal
             }
+            transmute: {
+                arca_cost_mult(): Decimal
+            }
         }
         spells: {
             [id in spells]: {
@@ -2031,6 +2030,21 @@ type Layers = {
                 effectDescription(active?: boolean): string
             }
         }
+        transmutations: {
+            [id: string]: {
+                private _id: string | null
+                readonly id: string
+                unlocked?: Computable<boolean>
+
+                /** Items consumed */
+                consumes: Computable<[items, Decimal][]>
+                /** Items produced */
+                produces: Computable<[items, Decimal][]>
+                /** Arca required to transmute */
+                arca: Computable<Decimal>
+                categories: categories[]
+            }
+        }
     }
     // Row 2
     b: Layer<'b'> & {
@@ -2038,14 +2052,33 @@ type Layers = {
             [id: string]: Challenge<'b'> & {
                 progress(): Decimal
                 display(): string
-                group: 'boss' | 'mini' | 'relic'
+                group: 'boss' | 'mini' | 'relic' | 'dungeon'
             }
         }
         groups: {
-            [type in 'boss' | 'mini' | 'relic']: {
+            [type in 'boss' | 'mini' | 'relic' | 'dungeon']: {
                 completions(): Decimal
                 color: Computable<string>
                 rows: number[]
+            }
+        }
+        dungeon: {
+            [floor: number]: {
+                private _floor: number | null
+                readonly floor: number
+
+                /** Floor effect, earlier floors are applied first */
+                effect: Computable<any>
+                effectDisplay: Computable<string>
+                /**
+                 * Floor reward, earlier floors are applied first
+                 * Applied outside of the dungeon
+                 */
+                reward: Computable<any>
+                rewardDisplay: Computable<string>
+                /** If true, the floor can be finished */
+                canComplete(): boolean
+                requirement: Computable<string>
             }
         }
         complete: {
@@ -2231,6 +2264,12 @@ type Player = {
                 time: Decimal
             }
         }
+        transmutation: {
+            [id: string]: {
+                /** Amount of times the transmutation was used */
+                used: Decimal
+            }
+        }
         /** Time since the last cycle */
         cycle_time: Decimal
     }
@@ -2240,6 +2279,10 @@ type Player = {
         /** List of visible challenges */
         visible_challenges: string[]
         lore: string
+        dungeon: {
+            floor: number
+            max: number
+        }
     }
     s: LayerData & {
         /** Total value spent */

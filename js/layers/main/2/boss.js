@@ -1,7 +1,7 @@
 'use strict';
 
 const BOSS_SIZES = {
-    width: 3,
+    width: 5,
     height: 3,
 };
 
@@ -27,6 +27,10 @@ addLayer('b', {
             points: D.dZero,
             visible_challenges: [],
             lore: 'slime_sovereign',
+            dungeon: {
+                floor: 0,
+                max: 0
+            },
         };
     },
     layerShown() { return player.b.shown || (player.l.unlocked && player.c.shown); },
@@ -91,6 +95,50 @@ addLayer('b', {
                 'borderColor'() { return tmp.b.groups.relic.color; },
             },
             unlocked() { return D.gte(tmp.b.groups.mini.completions, 1); },
+        },
+        'Dungeon': {
+            content: [
+                ['display-text', () => {
+                    return `You have cleared ${resourceColor(tmp.b.groups.dungeon.color, formatWhole(player.b.dungeon.max), 'font-size:1.5em;')} floors of the Dungeon`;
+                }],
+                ['display-text', () => {
+                    if (!inChallenge('b', 71)) return 'You are not currently in the Dungeon';
+                    return `You are on floor ${formatWhole(player.b.dungeon.floor)} floor of the Dungeon`;
+                }],
+                'blank',
+                ['clickables', [2]],
+                ['challenges', () => tmp.b.groups.dungeon.rows],
+                'blank',
+                ['display-text', '<u>Current Dungeon effects:</u>'],
+                ['display-text', () => {
+                    let lines = '';
+                    for (let i = 0; i <= player.b.dungeon.max; i++) {
+                        const active = (i <= player.b.dungeon.floor && inChallenge('b', 71)) ? '' : ' <i>(inactive)</i>';
+                        if (lines.length) lines += '<br><br>';
+                        let color = `#${(15 - i).toString(16).repeat(6)}`;
+                        lines += `<div style="color:${color}"><b>Floor ${formatWhole(i)}${active}</b><br>\
+                            ${run(layers.b.dungeon[i].effectDisplay, layers.b.dungeon[i])}</div>`;
+                    }
+                    return lines;
+                }],
+                'blank',
+                ['display-text', '<u>Current Dungeon rewards:</u>'],
+                ['display-text', () => {
+                    let lines = '';
+                    for (let i = 0; i <= player.b.dungeon.max; i++) {
+                        const active = (i < player.b.dungeon.max && inChallenge('b', 71)) ? '' : ' <i>(inactive)</i>';
+                        if (lines.length) lines += '<br><br>';
+                        let color = `#${(15 - i).toString(16).repeat(6)}`;
+                        lines += `<div style="color:${color}"><b>Floor ${formatWhole(i)}${active}</b><br>\
+                            ${run(layers.b.dungeon[i].rewardDisplay, layers.b.dungeon[i])}</div>`;
+                    }
+                    return lines;
+                }],
+            ],
+            buttonStyle: {
+                'borderColor'() { return tmp.b.groups.dungeon.color; },
+            },
+            unlocked() { return tmp.b.challenges[71].unlocked; },
         },
         'Bosstiary': {
             content: [
@@ -287,6 +335,7 @@ addLayer('b', {
             onExit() { tmp.s.coins.list.forEach(([item]) => player.items[item].amount = D.dZero); },
             onEnter() { tmp.s.coins.list.forEach(([item]) => player.items[item].amount = D.dZero); },
         },
+        //todo 51: ???
         // Gods
         31: {
             name: 'Thanatos',
@@ -351,8 +400,24 @@ addLayer('b', {
             },
             onEnter() { player.wor.position = [12, 12]; },
         },
+        //todo 61: ???
         // Dungeon
-        //todo
+        71: {
+            name: 'The Dungeon',
+            challengeDescription: `Enter the dungeon.<br>
+                The deeper you go, the stronger enemies get.`,
+            goalDescription: 'Clear all 10 floors',
+            rewardDescription() { return 'Whatever lies at the bottom of the Dungeon will be yours.'; },
+            canComplete() { return false; },
+            progress() { return 0; },
+            display() { return `${formatWhole(0)} / ${formatWhole(10)}`; },
+            unlocked() { return hasChallenge('b', 41); },
+            group: 'dungeon',
+            buttonStyle() {
+                const group = tmp[this.layer].challenges[this.id].group
+                return { 'backgroundColor': tmp.b.groups[group].color, };
+            },
+        },
     },
     clickables: {
         // Bosstiary
@@ -406,6 +471,45 @@ addLayer('b', {
                 return list.length > 1;
             },
         },
+        // Dungeon
+        21: {
+            style: {
+                'background-image': `url(./resources/images/UI.png)`,
+                'background-repeat': 'no-repeat',
+                'image-rendering': 'pixelated',
+                'background-size': `${UI_SIZES.width * 120}px ${UI_SIZES.height * 120}px`,
+                'background-position': '0px -360px',
+            },
+            onClick() { player.b.dungeon.floor = Math.max(0, player.b.dungeon.floor - 1); },
+            canClick() { return D.gte(player.b.dungeon.floor, 1) && inChallenge('b', 71); },
+        },
+        22: {
+            style: {
+                'background-image': `url(./resources/images/UI.png)`,
+                'background-repeat': 'no-repeat',
+                'image-rendering': 'pixelated',
+                'background-size': `${UI_SIZES.width * 120}px ${UI_SIZES.height * 120}px`,
+                'background-position': '-120px -360px',
+            },
+            onClick() { player.b.dungeon.floor = Math.min(10, player.b.dungeon.floor + 1); },
+            canClick() { return D.lte(player.b.dungeon.floor, 9) && inChallenge('b', 71) && false; },
+        },
+    },
+    dungeon: {
+        0: {
+            _floor: null,
+            get floor() { return this._floor ??= +Object.entries(layers.b.dungeon).find(([, r]) => r == this)[0]; },
+            effect: {
+                xp_health: D.dTwo,
+            },
+            effectDisplay() { return `Multiply enemy health by ${formatWhole(this.effect.xp_health)}`; },
+            reward: {
+                xp_mult: D(1.25)
+            },
+            rewardDisplay() { return `Multiply xp gain by ${format(this.reward.xp_mult)}`; },
+            canComplete() { return (player.b.dungeon.max > this.floor) || false; },
+            requirement: 'This is the maximum depth in the update',
+        },
     },
     complete: {
         total() {
@@ -439,6 +543,15 @@ addLayer('b', {
             },
             color: '#55CCCC',
             rows: [3],
+        },
+        dungeon: {
+            completions() {
+                return Object.keys(tmp.b.challenges)
+                    .filter(id => !isNaN(id) && this.rows.includes(Math.floor(id / 10)))
+                    .reduce((sum, id) => D.add(sum, challengeCompletions('b', id)), D.dZero);
+            },
+            color: '#FFFFFF',
+            rows: [7],
         },
     },
     branches: ['l'],
@@ -565,6 +678,19 @@ addLayer('b', {
                 Your entrepreneurship has inspired him to hire you.<br>
                 It's just a small delivery, how hard could it be?`,
             challenge: 32,
+        },
+        // Dungeon
+        'dungeon': {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.b.bosses).find(([, r]) => r == this)[0]; },
+            unlocked() { return tmp.b.challenges[71].unlocked; },
+            name: 'The Dungeon',
+            position: [4, 0],
+            lore: `An underground complex that predates all known nations.<br>
+                An unknown energy seems to radiate from its depths.<br>
+                The only entrance is in the capital and behind a locked door.<br>
+                Luckily, you have the key.`,
+            challenge: 71,
         },
     },
     list() { return Object.keys(layers.b.bosses).filter(boss => tmp.b.bosses[boss].unlocked ?? true); },

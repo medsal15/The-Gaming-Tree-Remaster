@@ -14,6 +14,9 @@ addLayer('a', {
                 cast: D.dZero,
                 time: D.dZero,
             }])),
+            transmutation: Object.fromEntries(Object.keys(layers.a.transmutations).map(id => [id, {
+                used: D.dZero,
+            }])),
         };
     },
     tooltip() { return `${formatWhole(tmp.a.modifiers.arca.total)} arca`; },
@@ -70,13 +73,14 @@ addLayer('a', {
                         ${resourceColor(tmp.a.color, format(total), 'font-size:1.5em;')} ${tmp.a.resource}`;
                 }],
                 'blank',
-                //todo display recipes
+                ['microtabs', 'transmutation'],
             ],
         },
     },
     branches: ['c'],
     microtabs: {
         factory: { ...arcane_subtabs_factory(), },
+        transmutation: { ...arcane_subtabs_transmute(), },
     },
     bars: {
         cycle: {
@@ -131,6 +135,8 @@ addLayer('a', {
                     let mult = D.dOne;
 
                     mult = mult.times(tmp.a.spells.bossardry.effect.arca);
+
+                    if (hasAchievement('ach', 125)) mult = mult.times(achievementEffect('ach', 125));
 
                     return mult;
                 },
@@ -209,7 +215,16 @@ addLayer('a', {
 
                 return mult;
             },
-            duration_mult() { return D.dOne; },
+            duration_mult() {
+                let mult = D.dOne;
+
+                if (hasAchievement('ach', 124)) mult = mult.times(achievementEffect('ach', 124));
+
+                return mult;
+            },
+        },
+        transmute: {
+            arca_cost_mult() { return D.dOne; },
         },
     },
     spells: {
@@ -476,6 +491,324 @@ addLayer('a', {
 
                 return `Gain ${list} every second, but divide crafting speed by ${format(effect.craft_speed, 1)} and forging speed by ${format(effect.forge_speed, 1)}`;
             },
+        },
+    },
+    transmutations: {
+        // Slime
+        slime_goo_up: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['slime_goo', D.dTen]],
+            produces: [['slime_core_shard', D.dTwo]],
+            arca() { return D.times(1, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['slime'],
+        },
+        slime_goo_down: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['slime_core_shard', D.dOne]],
+            produces: [['slime_goo', D(4)]],
+            arca() { return D.times(.5, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['slime'],
+        },
+        slime_core_shard_up: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['slime_core_shard', D.dTen]],
+            produces: [['slime_core', D.dTwo]],
+            arca() { return D.times(2, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['slime'],
+        },
+        slime_core_shard_down: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['slime_core', D.dOne]],
+            produces: [['slime_core_shard', D(4)]],
+            arca() { return D.times(1, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['slime'],
+        },
+        slime_core_up: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['slime_core', D.dTen]],
+            produces: [['dense_slime_core', D.dTwo]],
+            arca() { return D.times(4, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['slime'],
+        },
+        slime_core_down: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['dense_slime_core', D.dOne]],
+            produces: [['slime_core', D(4)]],
+            arca() { return D.times(2, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['slime'],
+        },
+        // Skeleton
+        bone_up: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['bone', D.dTen]],
+            produces: [['rib', D.dTwo]],
+            arca() { return D.times(2, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['skeleton'],
+        },
+        bone_down: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['rib', D.dOne]],
+            produces: [['bone', D(4)]],
+            arca() { return D.times(1, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['skeleton'],
+        },
+        rib_up: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['rib', D.dTen]],
+            produces: [['skull', D.dTwo]],
+            arca() { return D.times(3, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['skeleton'],
+        },
+        rib_down: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['skull', D.dOne]],
+            produces: [['rib', D(4)]],
+            arca() { return D.times(1.5, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['skeleton'],
+        },
+        skull_up: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['skull', D.dTen]],
+            produces: [['slimy_skull', D.dTwo]],
+            arca() { return D.times(5, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['skeleton'],
+        },
+        skull_down: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['slimy_skull', D.dOne]],
+            produces: [['skull', D(4)]],
+            arca() { return D.times(2.5, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['skeleton'],
+        },
+        // Golem
+        mud_up: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['mud', D.dTen]],
+            produces: [['mud_brick', D.dTwo]],
+            arca() { return D.times(3, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['golem'],
+        },
+        mud_down: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['mud_brick', D.dOne]],
+            produces: [['mud', D(4)]],
+            arca() { return D.times(1.5, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['golem'],
+        },
+        mud_brick_up: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['mud_brick', D.dTen]],
+            produces: [['golem_eye', D.dTwo]],
+            arca() { return D.times(4, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['golem'],
+        },
+        mud_brick_down: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['golem_eye', D.dOne]],
+            produces: [['mud_brick', D(4)]],
+            arca() { return D.times(2, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['golem'],
+        },
+        golem_eye_up: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['golem_eye', D.dTen]],
+            produces: [['golem_core', D.dTwo]],
+            arca() { return D.times(6, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['golem'],
+        },
+        golem_eye_down: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['golem_core', D.dOne]],
+            produces: [['golem_eye', D(4)]],
+            arca() { return D.times(3, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['golem'],
+        },
+        // Bug
+        chitin_up: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['chitin', D.dTen]],
+            produces: [['antenna', D.dTwo]],
+            arca() { return D.times(4, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['bug'],
+            unlocked() { return tmp.xp.monsters.bug.unlocked; },
+        },
+        chitin_down: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['antenna', D.dOne]],
+            produces: [['chitin', D(4)]],
+            arca() { return D.times(2, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['bug'],
+            unlocked() { return tmp.xp.monsters.bug.unlocked; },
+        },
+        antenna_up: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['antenna', D.dTen]],
+            produces: [['exoskeleton', D.dTwo]],
+            arca() { return D.times(5, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['bug'],
+            unlocked() { return tmp.xp.monsters.bug.unlocked; },
+        },
+        antenna_down: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['exoskeleton', D.dOne]],
+            produces: [['antenna', D(4)]],
+            arca() { return D.times(2.5, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['bug'],
+            unlocked() { return tmp.xp.monsters.bug.unlocked; },
+        },
+        exoskeleton_up: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['exoskeleton', D.dTen]],
+            produces: [['egg', D.dTwo]],
+            arca() { return D.times(7, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['bug'],
+            unlocked() { return tmp.xp.monsters.bug.unlocked; },
+        },
+        exoskeleton_down: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['egg', D.dOne]],
+            produces: [['exoskeleton', D(4)]],
+            arca() { return D.times(3.5, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['bug'],
+            unlocked() { return tmp.xp.monsters.bug.unlocked; },
+        },
+        // Mining
+        stone_up: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['stone', D.dTen]],
+            produces: [['copper_ore', D.dOne]],
+            arca() { return D.times(1, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['mining'],
+        },
+        stone_down: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['copper_ore', D.dOne]],
+            produces: [['stone', D(8)]],
+            arca() { return D.times(.5, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['mining'],
+        },
+        copper_ore_up: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['copper_ore', D.dTen]],
+            produces: [['tin_ore', D.dTwo]],
+            arca() { return D.times(4, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['mining'],
+        },
+        copper_ore_down: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['tin_ore', D.dOne]],
+            produces: [['copper_ore', D(4)]],
+            arca() { return D.times(2, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['mining'],
+        },
+        tin_ore_up: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['tin_ore', D(50)]],
+            produces: [['gold_nugget', D.dTwo]],
+            arca() { return D.times(16, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['mining'],
+        },
+        tin_ore_down: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['gold_nugget', D.dOne]],
+            produces: [['tin_ore', D(20)]],
+            arca() { return D.times(8, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['mining'],
+        },
+        // Deep mining
+        coal_up: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['coal', D.dTen]],
+            produces: [['iron_ore', D.dOne]],
+            arca() { return D.times(1, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['deep_mining'],
+        },
+        coal_down: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['iron_ore', D.dOne]],
+            produces: [['coal', D(8)]],
+            arca() { return D.times(.5, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['deep_mining'],
+        },
+        iron_ore_up: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['iron_ore', D.dTen]],
+            produces: [['clear_iron_ore', D.dOne]],
+            arca() { return D.times(3, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['deep_mining'],
+        },
+        iron_ore_down: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['clear_iron_ore', D.dOne]],
+            produces: [['iron_ore', D(8)]],
+            arca() { return D.times(1.5, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['deep_mining'],
+        },
+        clear_iron_ore_up: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['clear_iron_ore', D.dTen]],
+            produces: [['silver_ore', D.dOne]],
+            arca() { return D.times(9, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['deep_mining'],
+        },
+        clear_iron_ore_down: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['silver_ore', D.dOne]],
+            produces: [['clear_iron_ore', D(8)]],
+            arca() { return D.times(4.5, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['deep_mining'],
+        },
+        silver_ore_up: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['silver_ore', D(25)]],
+            produces: [['gold_nugget', D.dTwo]],
+            arca() { return D.times(27, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['deep_mining'],
+        },
+        silver_ore_down: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.transmutations).find(id => layers.a.transmutations[id] == this); },
+            consumes: [['gold_nugget', D.dOne]],
+            produces: [['silver_ore', D(10)]],
+            arca() { return D.times(13.5, tmp.a.modifiers.transmute.arca_cost_mult); },
+            categories: ['deep_mining'],
         },
     },
     update(diff) {

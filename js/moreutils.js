@@ -1,6 +1,6 @@
 const UI_SIZES = {
     width: 4,
-    height: 3,
+    height: 4,
 };
 /**
  * Checks if an upgrade can be purchased in a layer
@@ -1353,42 +1353,127 @@ function arcane_show_chain(chain) {
  * @returns {Record<string, TabFormat<'a'>>}
  */
 function arcane_subtabs_factory() {
-    return Object.fromEntries(CATEG_UTILS.list.map(/**@return {[categories, TabFormat<'a'>]}*/cat => {
-        return [cat, {
-            content: [
-                ['column', () => {
-                    const types = {
-                        /** @type {TabFormatEntries<'c'>[]} */
-                        materials: [],
-                        /** @type {TabFormatEntries<'c'>[]} */
-                        equipment: [],
-                    },
-                        /** @type {TabFormatEntries<'c'>[]} */
-                        lines = [];
+    return Object.fromEntries(CATEG_UTILS.list.map(/**@return {[categories, TabFormat<'a'>]}*/cat => [cat, {
+        content: [
+            ['column', () => {
+                const types = {
+                    /** @type {TabFormatEntries<'c'>[]} */
+                    materials: [],
+                    /** @type {TabFormatEntries<'c'>[]} */
+                    equipment: [],
+                },
+                    /** @type {TabFormatEntries<'a'>[]} */
+                    lines = [];
 
-                    Object.values(tmp.c.recipes)
-                        .filter(data => (data.unlocked ?? true) && data.categories.includes(cat) && !(data.manual ?? false))
-                        .forEach(data => {
-                            const recipe = arcane_show_chain(data.id);
-                            if (!recipe.length) return;
-                            if (data.categories.includes('materials')) types.materials.push(recipe);
-                            else if (data.categories.includes('equipment')) types.equipment.push(recipe);
-                        });
+                Object.values(tmp.c.recipes)
+                    .filter(data => (data.unlocked ?? true) && data.categories.includes(cat) && !(data.manual ?? false))
+                    .forEach(data => {
+                        const recipe = arcane_show_chain(data.id);
+                        if (!recipe.length) return;
+                        if (data.categories.includes('materials')) types.materials.push(recipe);
+                        else if (data.categories.includes('equipment')) types.equipment.push(recipe);
+                    });
 
-                    lines.push(...types.materials);
-                    lines.push(...types.equipment);
+                lines.push(...types.materials);
+                lines.push(...types.equipment);
 
-                    return lines;
-                }],
-            ],
-            name: () => capitalize(CATEG_UTILS.names[cat]()),
-            buttonStyle: { 'border-color': CATEG_UTILS.color[cat], },
-            unlocked() {
-                return CATEG_UTILS.unlocked(cat) && Object.values(tmp.c.recipes)
-                    .some(data => (data.unlocked ?? true) && data.categories.includes(cat) && !(data.manual ?? false));
-            },
-        }];
-    }));
+                return lines;
+            }],
+        ],
+        name: () => capitalize(CATEG_UTILS.names[cat]()),
+        buttonStyle: { 'border-color': CATEG_UTILS.color[cat], },
+        unlocked() {
+            return CATEG_UTILS.unlocked(cat) && Object.values(tmp.c.recipes)
+                .some(data => (data.unlocked ?? true) && data.categories.includes(cat) && !(data.manual ?? false));
+        },
+    }]));
+}
+/**
+ * Returns the subtabs for transmutation
+ *
+ * @returns {Record<string, TabFormat<'a'>>}
+ */
+function arcane_subtabs_transmute() {
+    return Object.fromEntries(CATEG_UTILS.list.map(/**@return {[categories, TabFormat<'a'>]}*/cat => [cat, {
+        content: [
+            ['column', () => {
+                return Object.values(tmp.a.transmutations)
+                    .filter(data => (data.unlocked ?? true) && data.categories.includes(cat))
+                    .map(/**@return {TabFormatEntries<'a'>}*/data => {
+                        return ['row',
+                            [
+                                'blank',
+                                ['row', square(data.consumes.map(([item, cost]) => {
+                                    const tile = item_tile(item, 100),
+                                        text = `${format(player.items[item].amount)} / ${format(cost)}`;
+
+                                    tile.text = `${capitalize(tmp.items[item].name)}<br>${text}`;
+
+                                    return ['tile', tile];
+                                })).map(row => ['row', row])],
+                                'blank',
+                                ['raw-html', `<div style="width:100px;height:100px;overflow:hidden;">
+                                    <img src="./resources/images/UI.png"
+                                        style="width: ${UI_SIZES.width * 100}%;
+                                            height: ${UI_SIZES.height * 100}%;
+                                            margin-left: -${100 * 3}%;
+                                            margin-top: 0;
+                                            image-rendering: pixelated;"/>
+                                    </div>`],
+                                'blank',
+                                ['row', square(data.produces.map(([item, cost]) => {
+                                    const tile = item_tile(item, 100);
+
+                                    tile.text = `${capitalize(tmp.items[item].name)}<br>${format(cost)}`;
+
+                                    return ['tile', tile];
+                                })).map(row => ['row', row])],
+                                ['raw-html', `<div style="width:40px;"></div>`],
+                                ['dynabar', {
+                                    direction: UP,
+                                    height: 80,
+                                    width: 40,
+                                    progress() { return D.div(tmp.a.modifiers.arca.total, data.arca); },
+                                    display() { return `${format(tmp.a.modifiers.arca.total, 1)}<br>———<br>${format(data.arca, 1)}`; },
+                                    fillStyle: {
+                                        'backgroundColor': tmp.a.color,
+                                    },
+                                }],
+                                'blank',
+                                ['tile', {
+                                    text: 'Transmute',
+                                    canClick() {
+                                        return D.gte(tmp.a.modifiers.arca.total, data.arca) &&
+                                            data.consumes.every(([item, cost]) => D.gte(player.items[item].amount, cost));
+                                    },
+                                    onClick() {
+                                        gain_items(data.consumes.map(([item, cost]) => [item, D.neg(cost)]));
+                                        gain_items(data.produces);
+                                        player.a.transmutation[data.id].used = D.add(player.a.transmutation[data.id].used, 1);
+                                    },
+                                    onHold() {
+                                        gain_items(data.consumes.map(([item, cost]) => [item, D.neg(cost)]));
+                                        gain_items(data.produces);
+                                        player.a.transmutation[data.id].used = D.add(player.a.transmutation[data.id].used, 1);
+                                    },
+                                    style: {
+                                        'height': '100px',
+                                        'width': '100px',
+                                    },
+                                }],
+                                'blank',
+                            ]
+                        ];
+                    });
+            }],
+        ],
+        name: () => capitalize(CATEG_UTILS.names[cat]()),
+        buttonStyle: { 'border-color': CATEG_UTILS.color[cat], },
+        unlocked() {
+            return CATEG_UTILS.unlocked(cat) &&
+                Object.values(tmp.a.transmutations).filter(data => (data.unlocked ?? true) && data.categories.includes(cat)).length;
+        },
+    }]));
 }
 /**
  * Displays all arcane spells

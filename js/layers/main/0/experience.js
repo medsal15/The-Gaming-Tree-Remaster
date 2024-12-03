@@ -1535,6 +1535,10 @@ addLayer('xp', {
 
                 if (hasAchievement('ach', 14)) mult = mult.times(achievementEffect('ach', 14));
 
+                if (player.b.dungeon.max > 0) {
+                    mult = mult.times(tmp.b.dungeon[0].reward.xp_mult);
+                }
+
                 mult = mult.times(buyableEffect('dea', 23));
 
                 return mult;
@@ -1583,8 +1587,13 @@ addLayer('xp', {
                 if (hasUpgrade('xp', 31)) mult = mult.div(upgradeEffect('xp', 31));
 
                 mult = mult.div(item_effect('stone_wall').health_div);
-
                 mult = mult.div(item_effect('slime_injector').health);
+
+                if (inChallenge('b', 71)) {
+                    if (player.b.dungeon.floor >= 0) {
+                        mult = mult.times(tmp.b.dungeon[0].effect.xp_health);
+                    }
+                }
 
                 if (hasUpgrade('dea', 21)) mult = mult.div(upgradeEffect('dea', 21));
 
