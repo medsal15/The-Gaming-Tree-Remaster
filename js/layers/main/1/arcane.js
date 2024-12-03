@@ -130,6 +130,8 @@ addLayer('a', {
                 mult() {
                     let mult = D.dOne;
 
+                    mult = mult.times(tmp.a.spells.bossardry.effect.arca);
+
                     return mult;
                 },
                 total() {
@@ -397,7 +399,7 @@ addLayer('a', {
             _id: null,
             get id() { return this._id ??= Object.keys(layers.a.spells).find(id => layers.a.spells[id] == this); },
             name: 'speed',
-            cost() { return D.dTwo; },
+            cost() { return D.times(2, tmp.a.modifiers.spell.cost_mult); },
             duration() { return D.times(60, tmp.a.modifiers.spell.duration_mult); },
             effect(active) {
                 active ??= D.gt(player.a.spells[this.id].time, 0) && D.gte(tmp.a.modifiers.arca.total, 0);
@@ -418,12 +420,63 @@ addLayer('a', {
                 return `Divide time between cycles by ${formatWhole(effect.cycle_duration)}, and multiply cycle time by ${formatWhole(effect.cycle_time)}`;
             },
         },
-        /**
-         * TODO more spells
-         *
-         * boss magic (+arca per main boss)
-         * money magic (-1% value, +log4(value) arca)
-         */
+        bossardry: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.spells).find(id => layers.a.spells[id] == this); },
+            name: 'bossardry',
+            cost() { return D.times(1, tmp.a.modifiers.spell.cost_mult); },
+            duration() { return D.times(120, tmp.a.modifiers.spell.duration_mult); },
+            effect(active) {
+                active ??= D.gt(player.a.spells[this.id].time, 0) && D.gte(tmp.a.modifiers.arca.total, 0);
+
+                let arca = D.dOne;
+
+                if (active) {
+                    arca = D.div(tmp.b.groups.boss.completions, 5).add(1);
+                }
+
+                return { arca, };
+            },
+            effectDescription(active) {
+                const effect = this.effect(active),
+                    arca = shiftDown ? '[main bosses / 5 + 1]' : format(effect.arca);
+
+                return `Multiplies arca by ${arca}`;
+            },
+        },
+        thaumconomics: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.a.spells).find(id => layers.a.spells[id] == this); },
+            name: 'thaumconomics',
+            cost() { return D.times(2.5, tmp.a.modifiers.spell.cost_mult); },
+            duration() { return D.times(60, tmp.a.modifiers.spell.duration_mult); },
+            effect(active) {
+                active ??= D.gt(player.a.spells[this.id].time, 0) && D.gte(tmp.a.modifiers.arca.total, 0);
+
+                let value_gain = D.dZero,
+                    craft_speed = D.dOne,
+                    forge_speed = D.dOne;
+
+                if (active) {
+                    value_gain = Object.values(tmp.s.items)
+                        .filter(data => ('value' in data) && (tmp.items[data.id].unlocked ?? true) && D.gt(player.items[data.id].amount, 0))
+                        .reduce((sum, data) => D.times(data.value, player.items[data.id].amount).add(sum), D.dZero)
+                        .div(100);
+                    craft_speed = D(2.5);
+                    forge_speed = D(2.5);
+                }
+
+                return { value_gain, craft_speed, forge_speed, };
+            },
+            effectDescription(active) {
+                const effect = this.effect(active),
+                    coins = value_coin(effect.value_gain);
+                if (coins.length == 0) coins.push(['coin_copper', D.dZero]);
+                const list = listFormat.format(coins.map(([item, amount]) => `${format(amount)} ${tmp.items[item].name}`));
+
+                return `Gain ${list} every second, but divide crafting speed by ${format(effect.craft_speed, 1)} and forging speed by ${format(effect.forge_speed, 1)}`;
+            },
+        },
     },
     update(diff) {
         player.a.cycle_time = D.add(player.a.cycle_time, diff);
@@ -435,6 +488,12 @@ addLayer('a', {
 
             addPoints('xp', xp_loss.neg());
             player.m.experience = D.minus(player.m.experience, m_xp_loss);
+        }
+
+        if (D.gt(player.a.spells.thaumconomics.time, 0)) {
+            const eff = tmp.a.spells.thaumconomics.effect,
+                coins = value_coin(eff.value_gain);
+            if (coins.length) gain_items(coins);
         }
 
         Object.values(player.a.spells).forEach(spell => {

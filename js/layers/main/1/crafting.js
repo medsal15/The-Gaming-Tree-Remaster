@@ -649,6 +649,7 @@ addLayer('c', {
             if (hasAchievement('ach', 45)) speed = speed.times(achievementEffect('ach', 45));
 
             speed = speed.times(tmp.a.spells.magic_hands.effect.crafting_speed);
+            speed = speed.div(tmp.a.spells.thaumconomics.effect.craft_speed);
 
             speed = speed.times(item_effect('copper_golem').speed_mult);
 
@@ -661,6 +662,7 @@ addLayer('c', {
             let speed = D.dOne;
 
             speed = speed.times(tmp.a.spells.fireburn.effect.forge_speed);
+            speed = speed.div(tmp.a.spells.thaumconomics.effect.forge_speed);
 
             speed = speed.times(item_effect('copper_golem').speed_mult);
             speed = speed.times(item_effect('bellow').speed_mult);
@@ -906,6 +908,88 @@ addLayer('c', {
             },
             categories: ['materials', 'golem',],
             unlocked() { return tmp.items.mud.unlocked && tmp.items.mud_brick.unlocked; },
+        },
+        exoskeleton: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                /** @type {[items, Decimal][]} */
+                let costs = [
+                    ['chitin', D.times(10, count)],
+                    ['antenna', D.times(2, count)],
+                ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['exoskeleton', count],
+                ];
+            },
+            duration() {
+                let duration = D(30);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'chitin': '10 * count',
+                    'antenna': '2 * count',
+                },
+                produces: {
+                    'exoskeleton': 'count',
+                },
+                duration: '30 seconds',
+            },
+            categories: ['materials', 'bug',],
+            unlocked() { return tmp.items.chitin.unlocked && tmp.items.exoskeleton.unlocked; },
+        },
+        egg: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                /** @type {[items, Decimal][]} */
+                let costs = [
+                    ['chitin', D.times(15, count)],
+                    ['slime_goo', D.times(25, count)],
+                ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['egg', count],
+                ];
+            },
+            duration() {
+                let duration = D(60);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'chitin': '15 * count',
+                    'slime_goo': '25 * count',
+                },
+                produces: {
+                    'egg': 'count',
+                },
+                duration: '60 seconds',
+            },
+            categories: ['materials', 'bug',],
+            unlocked() { return tmp.items.chitin.unlocked && tmp.items.egg.unlocked; },
         },
         bronze_blend: {
             _id: null,
@@ -2152,6 +2236,58 @@ addLayer('c', {
             categories: ['equipment', 'golem',],
             static: true,
             unlocked() { return hasUpgrade('m', 61) || hasAchievement('ach', 94); },
+        },
+        // Bug
+        bug_armor: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let costs = [
+                    ['chitin', D.sumGeometricSeries(count, 10, 1.8, all)],
+                    ['bone', D.sumGeometricSeries(count, 7.5, 1.8, all)],
+                ];
+
+                if (D.gt(getBuyableAmount('c', 31), 0)) {
+                    const stone_row = costs.find(([item]) => item == 'stone');
+                    stone_row[0] = 'stone_brick';
+                    stone_row[1] = D.div(stone_row[1], item_effect('stone_wall').cost_div);
+                }
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['bug_armor', count],
+                ];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let duration = D.times(count, 4).add(all).times(15).add(10);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'chitin': '10 * 1.8 ^ amount',
+                    'bone': '7.5 * 1.8 ^ amount',
+                },
+                produces: {
+                    'bug_armor': 'amount',
+                },
+                duration: '(crafting * 4 + crafted) * 15 + 10 seconds',
+            },
+            categories: ['equipment', 'bug',],
+            static: true,
+            unlocked() { return tmp.items.chitin.unlocked && tmp.xp.monsters.bug.unlocked; },
         },
         // Mining
         stone_mace: {

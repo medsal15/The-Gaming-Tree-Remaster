@@ -1,7 +1,7 @@
 'use strict';
 
 const MONSTER_SIZES = {
-    width: 3,
+    width: 4,
     height: 4,
 };
 addLayer('xp', {
@@ -1324,6 +1324,107 @@ addLayer('xp', {
             },
             unlocked() { return hasUpgrade('s', 33); },
         },
+        bug: {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.xp.monsters).find(mon => layers.xp.monsters[mon] == this); },
+            color() {
+                if (inChallenge('b', 41)) return '#8899EE';
+                return '#990099';
+            },
+            name() {
+                if (inChallenge('b', 41)) return 'chrome insect';
+                return 'insect';
+            },
+            position() {
+                let i = 0;
+
+                if (inChallenge('b', 41)) i = 1;
+
+                return [3, i];
+            },
+            level(kills) {
+                let k = D(kills ?? player.xp.monsters[this.id].kills);
+
+                const mod = tmp.xp.modifiers.level;
+
+                return k.div(mod.base).pow(mod.exp).times(mod.mult).floor().add(1);
+            },
+            health(level) {
+                let l = D(level ?? tmp?.xp?.monsters[this.id].level);
+
+                const level_mult = D.minus(l, 1).pow_base(2);
+
+                let health = D.times(level_mult, 20).times(tmp.xp?.modifiers.health.mult ?? 1);
+
+                if (inChallenge('b', 41)) health = health.times(3);
+
+                return health;
+            },
+            defense(level) {
+                let l = D(level ?? tmp?.xp?.monsters[this.id].level);
+
+                if (inChallenge('b', 41)) l = l.times(4);
+
+                let defense = D.pow(1.5, l).minus(.5);
+
+                defense = defense.times(tmp.xp.modifiers.defense.mult);
+
+                return defense;
+            },
+            experience(level) {
+                const l = D(level ?? tmp.xp.monsters[this.id].level);
+
+                let xp = D.times(l, tmp.xp.modifiers.xp.mult).times(8);
+
+                xp = xp.pow(1.75);
+
+                xp = D.pow(xp, tmp.xp.modifiers.xp.exp);
+
+                return xp;
+            },
+            passive_experience(level) {
+                let mult = D.dZero;
+
+                mult = mult.add(tmp.xp.modifiers.xp.passive.passive);
+                if (this.id == player.xp.selected) mult = mult.add(tmp.xp.modifiers.xp.passive.active);
+
+                if (mult.lte(0)) return D.dZero;
+
+                const l = D(level ?? tmp.xp.monsters[this.id].level);
+
+                return this.experience(l).times(mult);
+            },
+            kills() { return D.dOne; },
+            damage() {
+                let base = tmp.xp.modifiers.damage.base;
+
+                if (hasUpgrade('l', 31)) base = base.add(upgradeEffect('l', 31)[this.id]);
+
+                let damage = D.times(base, tmp.xp.modifiers.damage.mult);
+
+                damage = damage.minus(tmp.xp.monsters[this.id].defense ?? 0).max(0);
+
+                return damage;
+            },
+            damage_per_second() {
+                let mult = D.dZero;
+
+                if (this.id == player.xp.selected && D.gt(tmp.xp.modifiers.speed.active, 0)) mult = D.add(mult, tmp.xp.modifiers.speed.active);
+                if (D.gt(tmp.xp.modifiers.speed.passive, 0)) mult = D.add(mult, tmp.xp.modifiers.speed.passive);
+
+                return D.times(mult, tmp.xp.monsters[this.id].damage);
+            },
+            lore() {
+                if (inChallenge('b', 41)) return `A large insect made of metal.<br>
+                    Some believe these are naturally born, but you can only find them in the factory.<br>
+                    They're very shiny and pretty, you'd need to search for a good use.`;
+
+                return `A large insect.<br>
+                    It's uh, a bit uncomfortable how big it is.<br>
+                    Can bugs be aware of how many you've squished, if only by accident? Can they be mad?`;
+            },
+            unlocked() { return hasChallenge('b', 41); },
+        },
     },
     kill: {
         color: '#DD4477',
@@ -1515,6 +1616,8 @@ addLayer('xp', {
                 let mult = D.dOne;
 
                 mult = mult.div(tmp.a.spells.acid.effect.def_div);
+
+                mult = mult.div(item_effect('bug_armor').defense_div);
 
                 return mult;
             },

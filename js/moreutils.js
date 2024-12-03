@@ -325,7 +325,7 @@ function square(list, size) {
 }
 const CATEG_UTILS = {
     /** @type {categories[]} List of categories */
-    list: ['slime', 'skeleton', 'golem', 'mining', 'deep_mining', 'densium', 'forge', 'arca', 'boss'],
+    list: ['slime', 'skeleton', 'golem', 'bug', 'mining', 'deep_mining', 'densium', 'forge', 'arca', 'boss'],
     /** @type {categories[]} Extra categories */
     ext: ['materials', 'equipment'],
     /**
@@ -341,6 +341,8 @@ const CATEG_UTILS = {
                 return tmp.xp.monsters.skeleton.unlocked ?? true;
             case 'golem':
                 return tmp.xp.monsters.golem.unlocked ?? true;
+            case 'bug':
+                return tmp.xp.monsters.bug.unlocked ?? true;
             case 'mining':
                 return tmp.m.layerShown;
             case 'densium':
@@ -369,6 +371,7 @@ const CATEG_UTILS = {
         'slime': () => tmp.xp.monsters.slime.name,
         'skeleton': () => tmp.xp.monsters.skeleton.name,
         'golem': () => tmp.xp.monsters.golem.name,
+        'bug': () => tmp.xp.monsters.bug.name,
         'mining': () => tmp.m.name,
         'deep_mining': () => 'deep ' + tmp.m.name,
         'densium': () => tmp.items.densium.name,
@@ -388,6 +391,7 @@ const CATEG_UTILS = {
         'slime': () => tmp.xp.monsters.slime.color,
         'skeleton': () => tmp.xp.monsters.skeleton.color,
         'golem': () => tmp.xp.monsters.golem.color,
+        'bug': () => tmp.xp.monsters.bug.color,
         'mining': () => tmp.items.copper_ore.color,
         'deep_mining': () => tmp.items.clear_iron_ore.color,
         'densium': () => tmp.items.densium.color,
@@ -1250,6 +1254,7 @@ function arcane_show_chain(chain) {
     ],
         upkeep = cost.map(([item, amount]) => D.times(tmp.a.upkeep[item] ?? 0, amount))
             .reduce((sum, upkeep) => D.add(sum, upkeep), D.dZero),
+        continuous = thain?.continuous ?? (D.gt(trecipe.heat, 0) || D.lte(trecipe.duration, 0)),
         /** @type {(list: ReturnType<square<['tile', tile]>>) => TabFormatEntries<'a'>} */
         line = list => {
             if (options.colCraft) return ['row', list.map(row => ['column', row])];
@@ -1271,11 +1276,11 @@ function arcane_show_chain(chain) {
                 height: 60,
                 width: 300,
                 progress() {
-                    if ('duration' in trecipe) return D.div(phain.time, D.times(trecipe.duration, thain?.time_multiplier ?? 1));
+                    if ('duration' in trecipe && !continuous) return D.div(phain.time, D.times(trecipe.duration, thain?.time_multiplier ?? 1));
                     return D.dZero;
                 },
                 display() {
-                    if ('duration' in trecipe) {
+                    if ('duration' in trecipe && !continuous) {
                         return `${formatTime(phain.time)} / ${formatTime(D.times(trecipe.duration, thain?.time_multiplier ?? 1))}`;
                     }
                 },

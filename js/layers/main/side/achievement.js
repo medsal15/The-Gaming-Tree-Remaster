@@ -525,7 +525,36 @@ addLayer('ach', {
             },
             unlocked() { return tmp.a.layerShown; },
         },
-        //todo arcane achievements (12X)
+        122: {
+            name: 'Never Touching This Again',
+            tooltip: 'Automate crafting',
+            done() { return Object.values(player.a.chains).some(data => D.gte(data.built, 1)); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.a.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.a.color;
+
+                return style;
+            },
+            unlocked() { return tmp.a.layerShown; },
+        },
+        123: {
+            name: 'Yer A Magician',
+            tooltip: 'Cast a spell',
+            done() { return Object.values(player.a.spells).some(data => D.gt(data.cast, 0)); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.a.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.a.color;
+
+                return style;
+            },
+            unlocked() { return tmp.a.layerShown; },
+        },
+        //todo 124 transmute tier 3 -> tier 4 (slime core -> dense slime core, skull -> slimy skull, etc.)
+        //todo 125 arca > ???
         //#endregion Normal
         //#region Bonus
         81: {

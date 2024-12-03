@@ -1492,6 +1492,9 @@ type items = 'unknown' |
     // Golem
     'mud' | 'mud_brick' | 'golem_eye' | 'golem_core' |
     'mud_kiln' | 'weakness_finder' | 'arcane_generator' | 'record_golem' |
+    // Insect
+    'chitin' | 'antenna' | 'exoskeleton' | 'egg' |
+    'bug_armor' |
     // Mining
     'stone' | 'copper_ore' | 'tin_ore' | 'bronze_blend' | 'gold_nugget' | 'densium' |
     'coal' | 'iron_ore' | 'clear_iron_ore' | 'silver_ore' | 'electrum_blend' |
@@ -1508,9 +1511,12 @@ type items = 'unknown' |
     'package_1' | 'package_2' | 'package_3' | 'package_4' |
     'factory_core_casing' | 'factory_core_frame' | 'factory_core_scaffolding' | 'factory_core' |
     'cueball';
+//todo ??? (antenna), ??? (exoskeleton), bug finder (golem eye + exoskeleton + egg, +exoskeleton & +chance)
+//todo chrome lump, chrome ingot, chrome plating (+ore drops), chrome coating (*damage)
+//todo? ruby (<-chrome, material), yellow dye (yellow slime override)
 //todo item effects
 
-type monsters = 'slime' | 'skeleton' | 'golem';
+type monsters = 'slime' | 'skeleton' | 'golem' | 'bug';
 
 type ores = 'stone' | 'copper' | 'tin' |
     'coal' | 'iron' | 'silver';
@@ -1523,7 +1529,8 @@ type categories = 'materials' | 'equipment' | 'craftable' |
     monsters;
 
 type spells = 'convertion' | 'drain' | 'acid' | 'lava' |
-    'rank' | 'magic_hands' | 'fireburn' | 'speed';
+    'rank' | 'magic_hands' | 'fireburn' | 'speed' |
+    'bossardry' | 'thaumconomics';
 type spell_effects = {
     convertion: {
         xp_loss: Decimal
@@ -1556,6 +1563,14 @@ type spell_effects = {
     speed: {
         cycle_duration: Decimal
         cycle_time: Decimal
+    }
+    bossardry: {
+        arca: Decimal
+    }
+    thaumconomics: {
+        value_gain: Decimal
+        craft_speed: Decimal
+        forge_speed: Decimal
     }
 }
 
@@ -2209,7 +2224,7 @@ type Player = {
             }
         }
         spells: {
-            [id: string]: {
+            [id in spells]: {
                 /** Amount of times the spell was cast */
                 cast: Decimal
                 /** Time left for the spell */

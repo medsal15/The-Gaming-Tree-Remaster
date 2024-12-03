@@ -96,6 +96,9 @@ const world = {
         'F': {
             color: '#226644',
             name: 'forest',
+            overrides: {
+                monsters: ['bug'],
+            },
         },
         'D': {
             color: '#BB7744',

@@ -1306,6 +1306,189 @@ const item_list = {
         categories: ['equipment', 'golem'],
         unlocked() { return tmp.items.golem_core.unlocked; },
     },
+    // Bug
+    'chitin': {
+        id: null,
+        color() { return tmp.xp.monsters.bug.color; },
+        name: 'chitin',
+        icon: [14, 0],
+        row: 1,
+        sources: {
+            chance() {
+                if (D.eq(tmp.c.chance_multiplier, 0) || inChallenge('b', 12) || inChallenge('b', 41)) return {};
+
+                let chance = D(1 / 5);
+
+                chance = chance.times(tmp.c.chance_multiplier);
+                chance = chance.times(tmp.xp.modifiers.drops.mult);
+
+                if (inChallenge('b', 41)) chance = chance.div(2);
+
+                return { 'kill:bug': chance };
+            },
+            other() {
+                /** @type {drop_sources[]} */
+                const other = [];
+
+                if (inChallenge('b', 12) || inChallenge('b', 22) || hasChallenge('b', 32)) other.push('shop');
+
+                return other;
+            },
+        },
+        value: {
+            cost() {
+                if (inChallenge('b', 12) || inChallenge('b', 22) || hasChallenge('b', 32)) return D(11);
+            },
+        },
+        lore: `A large piece of a large insect's exoskeleton.<br>
+            A decent material for crafting.<br>
+            Its peculiar shape reminds you of something... But nothing comes to mind.`,
+        categories: ['materials', 'bug'],
+        unlocked() { return tmp.xp.monsters.bug.unlocked; },
+    },
+    'antenna': {
+        id: null,
+        color() { return tmp.xp.monsters.bug.color; },
+        name: 'antennae',
+        icon: [14, 1],
+        row: 1,
+        sources: {
+            chance() {
+                if (D.eq(tmp.c.chance_multiplier, 0) || inChallenge('b', 12) || inChallenge('b', 41)) return {};
+
+                let chance = D(1 / 16);
+
+                chance = chance.times(tmp.c.chance_multiplier);
+                chance = chance.times(tmp.xp.modifiers.drops.mult);
+
+                if (inChallenge('b', 41)) chance = chance.div(2);
+
+                return { 'kill:bug': chance };
+            },
+            other() {
+                /** @type {drop_sources[]} */
+                const other = [];
+
+                if (inChallenge('b', 12) || inChallenge('b', 22) || hasChallenge('b', 32)) other.push('shop');
+
+                return other;
+            },
+        },
+        value: {
+            cost() {
+                if (inChallenge('b', 12) || inChallenge('b', 22) || hasChallenge('b', 32)) return D(32);
+            },
+        },
+        lore: `A solid chitin rod with an olfactory sensor at the end.<br>
+            That means it can smell better than your nose.<br>
+            Wait, if these are for smelling, where are the insect's eyes?`,
+        categories: ['materials', 'bug'],
+        unlocked() { return tmp.xp.monsters.bug.unlocked; },
+    },
+    'exoskeleton': {
+        id: null,
+        color() { return tmp.xp.monsters.bug.color; },
+        name: 'exoskeleton',
+        icon: [14, 2],
+        row: 1,
+        sources: {
+            chance() {
+                if (D.eq(tmp.c.chance_multiplier, 0) || inChallenge('b', 12) || inChallenge('b', 41)) return {};
+
+                let chance = D(1 / 49);
+
+                chance = chance.times(tmp.c.chance_multiplier);
+                chance = chance.times(tmp.xp.modifiers.drops.mult);
+
+                chance = chance.times(0); //todo
+
+                if (inChallenge('b', 41)) chance = chance.times(2);
+
+                return { 'kill:bug': chance };
+            },
+            other() {
+                /** @type {drop_sources[]} */
+                const other = ['crafting'];
+
+                if (inChallenge('b', 12) || inChallenge('b', 22) || hasChallenge('b', 32)) other.push('shop');
+
+                return other;
+            },
+        },
+        value: {
+            cost() {
+                if (inChallenge('b', 12) || inChallenge('b', 22) || hasChallenge('b', 32)) return D(96);
+            },
+        },
+        lore: `A full bug's exoskeleton!<br>
+            Incredibly rare, and not suitable for normal people.<br>
+            Do not try wearing it in a city, the last person who did was in the healers' care for a full month.`,
+        categories: ['materials', 'bug'],
+        unlocked() { return tmp.xp.monsters.bug.unlocked; },
+    },
+    'egg': {
+        id: null,
+        color() { return tmp.xp.monsters.bug.color; },
+        name: 'egg',
+        icon: [14, 3],
+        row: 1,
+        sources: {
+            other() {
+                /** @type {drop_sources[]} */
+                const other = ['crafting', 'shop'];
+
+                return other;
+            },
+        },
+        value: {
+            cost() {
+                return D(240);
+            },
+        },
+        lore: `An large insect egg.<br>
+            You could hatch it into your own insect (not recommended).<br>
+            Great chefs can turn this into a rare insect omelette.`,
+        categories: ['materials', 'bug'],
+        unlocked() { return tmp.xp.monsters.bug.unlocked; },
+    },
+    'bug_armor': {
+        id: null,
+        color() { return tmp.xp.monsters.bug.color; },
+        name: 'bug armor',
+        icon: [14, 4],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        value: {
+            value: D(175),
+        },
+        lore: `A solid armor made of insect chitin.<br>
+            Thanks to being made of insect parts, monsters lower their defenses.<br>
+            Honestly, you'd also be scared if you saw a strange monster covered in insect parts...`,
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let defense_div = D.div(x, 8).add(1);
+
+            return { defense_div, };
+        },
+        effectDescription(amount) {
+            let defense_div;
+            if (shiftDown) {
+                defense_div = '[amount / 8 + 1]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                defense_div = format(effect.defense_div);
+            }
+
+            return `Divides enemy defense by ${defense_div}`;
+        },
+        categories: ['equipment', 'bug'],
+        unlocked() { return tmp.items.chitin.unlocked; },
+    },
     // Mining
     'stone': {
         id: null,
@@ -3145,7 +3328,7 @@ const item_list = {
 
 const ITEM_SIZES = {
     width: 16,
-    height: 14,
+    height: 15,
 };
 /**
  * @type {{[row in Layer['row']]: items[]}}
