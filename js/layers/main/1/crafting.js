@@ -107,6 +107,8 @@ addLayer('c', {
         if (hasAchievement('ach', 44)) mult = mult.add(achievementEffect('ach', 44));
         if (hasAchievement('ach', 55)) mult = mult.add(achievementEffect('ach', 55));
 
+        mult = mult.add(item_effect('bug_collector').luck);
+
         if (hasUpgrade('dea', 22)) mult = mult.times(upgradeEffect('dea', 22));
 
         mult = mult.times(item_effect('slime_die').luck);
@@ -950,6 +952,47 @@ addLayer('c', {
             categories: ['materials', 'bug',],
             unlocked() { return tmp.items.chitin.unlocked && tmp.items.exoskeleton.unlocked; },
         },
+        exoskeleton_alt: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                /** @type {[items, Decimal][]} */
+                let costs = [
+                    ['chrome_lump', D.times(10, count)],
+                    ['antenna', D.times(2, count)],
+                ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['exoskeleton', count],
+                ];
+            },
+            duration() {
+                let duration = D(30);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'chrome_lump': '10 * count',
+                    'antenna': '2 * count',
+                },
+                produces: {
+                    'exoskeleton': 'count',
+                },
+                duration: '30 seconds',
+            },
+            categories: ['materials', 'bug',],
+            unlocked() { return tmp.items.chrome_lump.unlocked && !tmp.items.chitin.unlocked && tmp.items.exoskeleton.unlocked; },
+        },
         egg: {
             _id: null,
             get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
@@ -990,6 +1033,47 @@ addLayer('c', {
             },
             categories: ['materials', 'bug',],
             unlocked() { return tmp.items.chitin.unlocked && tmp.items.egg.unlocked; },
+        },
+        egg: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                /** @type {[items, Decimal][]} */
+                let costs = [
+                    ['chrome_lump', D.times(15, count)],
+                    ['slime_goo', D.times(25, count)],
+                ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['egg', count],
+                ];
+            },
+            duration() {
+                let duration = D(60);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'chrome_lump': '15 * count',
+                    'slime_goo': '25 * count',
+                },
+                produces: {
+                    'egg': 'count',
+                },
+                duration: '60 seconds',
+            },
+            categories: ['materials', 'bug',],
+            unlocked() { return tmp.items.chrome_lump.unlocked && !tmp.items.chitin.unlocked && tmp.items.egg.unlocked; },
         },
         bronze_blend: {
             _id: null,
@@ -1653,6 +1737,51 @@ addLayer('c', {
             static: true,
             unlocked() { return tmp.c.forge.unlocked && tmp.items.electrum_blend.unlocked; },
         },
+        chrome_ingot: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let costs = [
+                    ['chrome_lump', D.sumGeometricSeries(count, 32, 1.25, all)],
+                ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.forge.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['chrome_ingot', count],
+                ];
+            },
+            duration(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                let duration = D.times(count, 4).add(8);
+
+                return D.div(duration, tmp.c.forge.speed);
+            },
+            heat: D(64),
+            formulas: {
+                consumes: {
+                    'chrome_lump': '32 * 1.25 ^ amount',
+                },
+                produces: {
+                    'chrome_ingot': 'amount',
+                },
+                duration: 'crafting * 4 + 8 seconds',
+                heat: '64',
+            },
+            categories: ['materials', 'bug',],
+            static: true,
+            unlocked() { return tmp.c.forge.unlocked && tmp.items.chrome_ingot.unlocked; },
+        },
         // Equipment
         // Slime
         slime_crystal: {
@@ -2250,12 +2379,6 @@ addLayer('c', {
                     ['bone', D.sumGeometricSeries(count, 7.5, 1.8, all)],
                 ];
 
-                if (D.gt(getBuyableAmount('c', 31), 0)) {
-                    const stone_row = costs.find(([item]) => item == 'stone');
-                    stone_row[0] = 'stone_brick';
-                    stone_row[1] = D.div(stone_row[1], item_effect('stone_wall').cost_div);
-                }
-
                 costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
 
                 return costs;
@@ -2288,6 +2411,245 @@ addLayer('c', {
             categories: ['equipment', 'bug',],
             static: true,
             unlocked() { return tmp.items.chitin.unlocked && tmp.xp.monsters.bug.unlocked; },
+        },
+        ore_locator: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let costs = [
+                    ['antenna', D.sumGeometricSeries(count, 3, 1.4, all)],
+                    ['bronze_blend', D.sumGeometricSeries(count, 15, 1.1, all)],
+                ];
+
+                if (D.gt(getBuyableAmount('c', 34), 0)) {
+                    const bronze_row = costs.find(([item]) => item == 'bronze_blend');
+                    bronze_row[0] = 'bronze_ingot';
+                    bronze_row[1] = D.div(bronze_row[1], item_effect('bronze_mold').cost_div);
+                }
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['ore_locator', count],
+                ];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let duration = D.times(count, 4).add(all).times(15).add(10);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'antenna': '3 * 1.4 ^ amount',
+                    'bronze_blend': '15 * 1.1 ^ amount',
+                    'bronze_ingot'() { return `${this.bronze_blend} / ${format(item_effect('bronze_mold').cost_div)}`; },
+                },
+                produces: {
+                    'ore_locator': 'amount',
+                },
+                duration: '(crafting * 4 + crafted) * 15 + 10 seconds',
+            },
+            categories: ['equipment', 'bug',],
+            static: true,
+            unlocked() { return tmp.items.ore_locator.unlocked && tmp.xp.monsters.bug.unlocked; },
+        },
+        bug_collector: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let costs = [
+                    ['exoskeleton', D.sumGeometricSeries(count, 1, 1.2, all)],
+                    ['rib', D.sumGeometricSeries(count, 15, 1.4, all)],
+                    ['slime_core', D.sumGeometricSeries(count, 5, 1.2, all)],
+                ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['bug_collector', count],
+                ];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let duration = D.times(count, 2).add(all).times(20).add(20);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'exoskeleton': '1.2 ^ amount',
+                    'rib': '15 * 1.4 ^ amount',
+                    'slime_core': ' 5 * 1.2 ^ amount',
+                },
+                produces: {
+                    'bug_collector': 'amount',
+                },
+                duration: '(crafting * 2 + crafted) * 20 + 20 seconds',
+            },
+            categories: ['equipment', 'bug',],
+            static: true,
+            unlocked() { return tmp.items.bug_collector.unlocked && tmp.xp.monsters.bug.unlocked; },
+        },
+        bug_pheromones: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let costs = [
+                    ['egg', D.sumGeometricSeries(count, 1, 1.1, all)],
+                    ['slime_goo', D.sumGeometricSeries(count, 50, 1.8, all)],
+                    ['antenna', D.sumGeometricSeries(count, 3, 1.4, all)],
+                ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['bug_pheromones', count],
+                ];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let duration = D.times(count, 2).add(all).times(15).add(30);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'egg': '1.1 ^ amount',
+                    'slime_goo': '50 * 1.8 ^ amount',
+                    'antenna': ' 3 * 1.4 ^ amount',
+                },
+                produces: {
+                    'bug_pheromones': 'amount',
+                },
+                duration: '(crafting * 2 + crafted) * 15 + 30 seconds',
+            },
+            categories: ['equipment', 'bug',],
+            static: true,
+            unlocked() { return tmp.items.bug_pheromones.unlocked && tmp.xp.monsters.bug.unlocked; },
+        },
+        chrome_plating: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let costs = [
+                    ['chrome_ingot', D.sumGeometricSeries(count, 2, 1.1125, all)],
+                    ['slime_goo', D.pow(count, .9).times(100)],
+                ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.materials.cost_mult));
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.forge.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['chrome_plating', count],
+                ];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let duration = D.times(count, 4).add(all).times(4).add(16);
+
+                return D.div(duration, tmp.c.forge.speed);
+            },
+            heat: D(64),
+            formulas: {
+                consumes: {
+                    'chrome_ingot': '2 * 1.1125 ^ amount',
+                    'slime_goo': '100 * amount ^ .9',
+                },
+                produces: {
+                    'chrome_plating': 'amount',
+                },
+                duration: '(crafting * 4 + total) * 4 + 16 seconds',
+                heat: '64',
+            },
+            categories: ['equipment', 'bug',],
+            static: true,
+            unlocked() { return tmp.c.forge.unlocked && tmp.items.chrome_ingot.unlocked; },
+        },
+        chrome_coating: {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
+            consumes(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let costs = [
+                    ['slime_goo', D.sumGeometricSeries(count, 50, 1.8, all)],
+                    ['chrome_ingot', D.sumGeometricSeries(count, 1, 1.15, all)],
+                ];
+
+                costs.forEach(([, c], i) => costs[i][1] = D.times(c, tmp.c.modifiers.equipment.cost_mult));
+
+                return costs;
+            },
+            produces(amount) {
+                const count = crafting_default_amount(this.id, amount);
+
+                return [
+                    ['chrome_coating', count],
+                ];
+            },
+            duration(amount, all_time) {
+                const count = crafting_default_amount(this.id, amount),
+                    all = crafting_default_all_time(this.id, all_time);
+
+                let duration = D.times(count, 4).add(D.div(all, 4)).times(4).add(16);
+
+                return D.div(duration, tmp.c.crafting.speed);
+            },
+            formulas: {
+                consumes: {
+                    'slime_goo': '50 * 1.8 ^ amount',
+                    'chrome_ingot': '1.1125 ^ amount',
+                },
+                produces: {
+                    'chrome_coating': 'amount',
+                },
+                duration: '(crafting * 4 + crafted / 4) * 4 + 16 seconds',
+            },
+            categories: ['equipment', 'bug', 'forge',],
+            static: true,
+            unlocked() { return tmp.c.forge.unlocked; },
         },
         // Mining
         stone_mace: {

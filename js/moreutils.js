@@ -325,7 +325,7 @@ function square(list, size) {
 }
 const CATEG_UTILS = {
     /** @type {categories[]} List of categories */
-    list: ['slime', 'skeleton', 'golem', 'bug', 'mining', 'deep_mining', 'densium', 'forge', 'arca', 'boss'],
+    list: ['slime', 'skeleton', 'golem', 'bug', 'mining', 'deep_mining', 'densium', 'forge', 'arca', 'boss', 'dungeon'],
     /** @type {categories[]} Extra categories */
     ext: ['materials', 'equipment'],
     /**
@@ -358,6 +358,8 @@ const CATEG_UTILS = {
                 return tmp.a.layerShown;
             case 'boss':
                 return tmp.b.layerShown;
+            case 'dungeon':
+                return hasChallenge('b', 41);
             case 'shop':
                 return tmp.s.layerShown;
         }
@@ -380,6 +382,7 @@ const CATEG_UTILS = {
         'forge': () => 'forge',
         'arca': () => tmp.a.name,
         'boss': () => tmp.b.name,
+        'dungeon': () => 'The Dungeon',
         'shop': () => tmp.s.name,
     },
     /**
@@ -400,6 +403,7 @@ const CATEG_UTILS = {
         'forge': () => tmp.c.modifiers.heat.color,
         'arca': () => tmp.a.color,
         'boss': () => tmp.b.color,
+        'dungeon': () => tmp.b.groups.dungeon.color,
         'shop': () => tmp.s.color,
     },
 };

@@ -52,6 +52,7 @@ addLayer('ach', {
 
                     return `You have ${resourceColor(color, formatWhole(owned), 'font-size:1.5em;')} secrets`;
                 }],
+                /*
                 ['display-text', () => {
                     const owned = player.ach.pool_balls.length;
                     if (owned <= 0) return;
@@ -59,6 +60,7 @@ addLayer('ach', {
                     if (owned > 7) name = 'Balls';
                     return `${name}: ${resourceColor(tmp.items.cueball.color, formatWhole(owned))} /${resourceColor(tmp.items.cueball.color, formatWhole(15))}`;
                 }],
+                */
                 'blank',
                 ['achievements', () => tmp.ach.categories.secret.rows],
             ],

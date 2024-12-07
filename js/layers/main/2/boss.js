@@ -481,7 +481,7 @@ addLayer('b', {
                 'background-position': '0px -360px',
             },
             onClick() { player.b.dungeon.floor = Math.max(0, player.b.dungeon.floor - 1); },
-            canClick() { return D.gte(player.b.dungeon.floor, 1) && inChallenge('b', 71); },
+            canClick() { return (player.b.dungeon.floor - 1) in tmp.b.dungeon && inChallenge('b', 71); },
         },
         22: {
             style: {
@@ -492,7 +492,7 @@ addLayer('b', {
                 'background-position': '-120px -360px',
             },
             onClick() { player.b.dungeon.floor = Math.min(10, player.b.dungeon.floor + 1); },
-            canClick() { return D.lte(player.b.dungeon.floor, 9) && inChallenge('b', 71) && false; },
+            canClick() { return (player.b.dungeon.floor + 1) in tmp.b.dungeon && inChallenge('b', 71); },
         },
     },
     dungeon: {
@@ -504,7 +504,7 @@ addLayer('b', {
             },
             effectDisplay() { return `Multiply enemy health by ${formatWhole(this.effect.xp_health)}`; },
             reward: {
-                xp_mult: D(1.25)
+                xp_mult: D(1.5)
             },
             rewardDisplay() { return `Multiply xp gain by ${format(this.reward.xp_mult)}`; },
             canComplete() { return (player.b.dungeon.max > this.floor) || false; },

@@ -611,6 +611,7 @@ addLayer('l', {
         mult = mult.div(item_effect('slime_injector').level);
         mult = mult.div(item_effect('bone_slate').level);
         mult = mult.div(item_effect('tin_cache').level);
+        mult = mult.div(item_effect('bug_pheromones').level_div);
 
         return mult;
     },

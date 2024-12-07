@@ -1816,6 +1816,7 @@ addLayer('m', {
 
                 mult = mult.times(item_effect('stone_mace').m_damage);
                 mult = mult.times(item_effect('copper_pick').damage);
+                mult = mult.times(item_effect('chrome_coating').damage);
 
                 return mult;
             },
@@ -1846,6 +1847,8 @@ addLayer('m', {
 
                 mult = mult.times(item_effect('copper_pick').ores);
                 mult = mult.times(item_effect('bronze_cart').m_drop);
+                mult = mult.times(item_effect('ore_locator').ore_mult);
+                mult = mult.times(item_effect('chrome_plating').ore_mult);
 
                 return mult;
             },

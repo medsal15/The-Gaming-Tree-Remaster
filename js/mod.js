@@ -24,15 +24,17 @@ let VERSION = {
 	/**
 	 * The mod's version number, displayed at the top right of the tree tab.
 	 */
-	num: 'R0.3.1',
+	num: 'R0.4',
 	/**
 	 * The version's name, displayed alongside the number in the info tab.
 	 */
-	name: 'Cast and Wait',
-	beta: false,
+	name: '???',
+	beta: true,
 };
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h3>v0.4: ???</h4><br>
+		- Update endgame: ???<br>
 	<h3>v0.3.1t</h3><br>
 		- Fix golems not dealing damage in Thanatos challenge.<br>
 		- Fix kill upgrades not needing kills.<br>

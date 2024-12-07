@@ -976,6 +976,8 @@ const item_list = {
                 chance = chance.times(tmp.c.chance_multiplier);
                 chance = chance.times(tmp.xp.modifiers.drops.mult);
 
+                chance = chance.times(item_effect('bug_collector').mud_mult);
+
                 const chances = {};
 
                 if (inChallenge('b', 41)) {
@@ -1311,7 +1313,10 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.bug.color; },
         name: 'chitin',
-        icon: [14, 0],
+        icon() {
+            if (inChallenge('b', 41)) return [14, 8];
+            return [14, 0];
+        },
         row: 1,
         sources: {
             chance() {
@@ -1321,8 +1326,6 @@ const item_list = {
 
                 chance = chance.times(tmp.c.chance_multiplier);
                 chance = chance.times(tmp.xp.modifiers.drops.mult);
-
-                if (inChallenge('b', 41)) chance = chance.div(2);
 
                 return { 'kill:bug': chance };
             },
@@ -1344,13 +1347,16 @@ const item_list = {
             A decent material for crafting.<br>
             Its peculiar shape reminds you of something... But nothing comes to mind.`,
         categories: ['materials', 'bug'],
-        unlocked() { return tmp.xp.monsters.bug.unlocked; },
+        unlocked() { return tmp.xp.monsters.bug.unlocked && !inChallenge('b', 41); },
     },
     'antenna': {
         id: null,
         color() { return tmp.xp.monsters.bug.color; },
         name: 'antennae',
-        icon: [14, 1],
+        icon() {
+            if (inChallenge('b', 41)) return [14, 9];
+            return [14, 1];
+        },
         row: 1,
         sources: {
             chance() {
@@ -1389,7 +1395,10 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.bug.color; },
         name: 'exoskeleton',
-        icon: [14, 2],
+        icon() {
+            if (inChallenge('b', 41)) return [14, 10];
+            return [14, 2];
+        },
         row: 1,
         sources: {
             chance() {
@@ -1400,7 +1409,7 @@ const item_list = {
                 chance = chance.times(tmp.c.chance_multiplier);
                 chance = chance.times(tmp.xp.modifiers.drops.mult);
 
-                chance = chance.times(0); //todo
+                chance = chance.times(item_effect('bug_pheromones').exoskeleton_chance);
 
                 if (inChallenge('b', 41)) chance = chance.times(2);
 
@@ -1430,7 +1439,10 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.bug.color; },
         name: 'egg',
-        icon: [14, 3],
+        icon() {
+            if (inChallenge('b', 41)) return [14, 11];
+            return [14, 3];
+        },
         row: 1,
         sources: {
             other() {
@@ -1451,11 +1463,63 @@ const item_list = {
         categories: ['materials', 'bug'],
         unlocked() { return tmp.xp.monsters.bug.unlocked; },
     },
+    'chrome_lump': {
+        id: null,
+        color() { return tmp.xp.monsters.bug.color; },
+        name: 'chrome lump',
+        icon: [15, 0],
+        row: 1,
+        sources: {
+            chance() {
+                if (D.eq(tmp.c.chance_multiplier, 0) || inChallenge('b', 12) || !inChallenge('b', 41)) return {};
+
+                let chance = D(1 / 8);
+
+                chance = chance.times(tmp.c.chance_multiplier);
+                chance = chance.times(tmp.xp.modifiers.drops.mult);
+
+                return { 'kill:bug': chance };
+            },
+        },
+        value: {
+            cost() {
+                if (inChallenge('b', 12) || inChallenge('b', 22) || hasChallenge('b', 32)) return D(8);
+            },
+        },
+        lore: `A chunk of a clear white metal.<br>
+            What in the gods' names are these insects made of?<br>
+            Nobody has ever found chrome ore, so where is it from?`,
+        categories: ['materials', 'bug'],
+        unlocked() { return tmp.xp.monsters.bug.unlocked && inChallenge('b', 41); },
+    },
+    'chrome_ingot': {
+        id: null,
+        color() { return tmp.xp.monsters.bug.color; },
+        name: 'chitin',
+        icon: [15, 1],
+        row: 1,
+        sources: {
+            other: ['forge'],
+        },
+        value: {
+            value() {
+                return D(320);
+            },
+        },
+        lore: `A cylinder of white metal.<br>
+            Your only clue of its origins seem to be deep in the factory... But you can't get there.<br>
+            One thing you do know, is that it's very valuable...`,
+        categories: ['materials', 'bug'],
+        unlocked() { return tmp.items.chrome_lump.unlocked; },
+    },
     'bug_armor': {
         id: null,
         color() { return tmp.xp.monsters.bug.color; },
         name: 'bug armor',
-        icon: [14, 4],
+        icon() {
+            if (inChallenge('b', 41)) return [14, 12];
+            return [14, 4];
+        },
         row: 1,
         sources: {
             other: ['crafting'],
@@ -1489,6 +1553,218 @@ const item_list = {
         categories: ['equipment', 'bug'],
         unlocked() { return tmp.items.chitin.unlocked; },
     },
+    'ore_locator': {
+        id: null,
+        color() { return tmp.xp.monsters.bug.color; },
+        name: 'ore locator',
+        icon() {
+            if (inChallenge('b', 41)) return [14, 13];
+            return [14, 5];
+        },
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        value: {
+            value: D(400),
+        },
+        lore: `A strange tool that can smell ores.<br>
+            How does that work? No idea.<br>
+            Can it smell anything else?`,
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let ore_mult = D.pow(1.05, x);
+
+            return { ore_mult, };
+        },
+        effectDescription(amount) {
+            let ore_mult;
+            if (shiftDown) {
+                ore_mult = '[1.05 ^ amount]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                ore_mult = format(effect.ore_mult);
+            }
+
+            return `Multiplies ore gain by ${ore_mult}`;
+        },
+        categories: ['equipment', 'bug'],
+        unlocked() { return tmp.items.antenna.unlocked; },
+    },
+    'bug_collector': {
+        id: null,
+        color() { return tmp.xp.monsters.bug.color; },
+        name: 'collector bug',
+        icon() {
+            if (inChallenge('b', 41)) return [14, 14];
+            return [14, 6];
+        },
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        value: {
+            value: D(700),
+        },
+        lore: `A miniature insect whose purpose to is to collect stuff.<br>
+            Its curved body allows it to easily carry things with minimal efforts.<br>
+            It's also very fond of sediments... Is that normal?`,
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let stone_mult = D.pow(1.125, x),
+                mud_mult = D.pow(1.0625, x),
+                luck = D.div(x, 8);
+
+            return { stone_mult, mud_mult, luck, };
+        },
+        effectDescription(amount) {
+            let stone_mult, mud_mult, luck;
+            if (shiftDown) {
+                stone_mult = '[1.125 ^ amount]';
+                mud_mult = '[1.0625 ^ amount]';
+                luck = '[amount / 8]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                stone_mult = format(effect.stone_mult);
+                mud_mult = format(effect.mud_mult);
+                luck = format(effect.luck_add);
+            }
+
+            return `Multiplies stone gain by ${stone_mult}, mud chance by ${mud_mult}, and increases luck by ${luck}`;
+        },
+        categories: ['equipment', 'bug'],
+        unlocked() { return tmp.items.exoskeleton.unlocked; },
+    },
+    'bug_pheromones': {
+        id: null,
+        color() { return tmp.xp.monsters.bug.color; },
+        name: 'pheromones',
+        icon() {
+            if (inChallenge('b', 41)) return [14, 15];
+            return [14, 14];
+        },
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        value: {
+            value: D(650),
+        },
+        lore: `A trap made of a special smell that attracts all kinds of insects.<br>
+            It seems to work on all kinds of monsters too.<br>
+            <i>sniff</i> Smells like a pie ready to be taken out of the oven...`,
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let exoskeleton_chance = D.root(x, 2.4).floor(),
+                level_div = D.pow(1.1, x);
+
+            return { exoskeleton_chance, level_div, };
+        },
+        effectDescription(amount) {
+            let exoskeleton_chance, level_div;
+            if (shiftDown) {
+                exoskeleton_chance = '[floor(2.4√(amount))]';
+                level_div = '[1.1 ^ amount]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                exoskeleton_chance = formatWhole(effect.exoskeleton_chance);
+                level_div = format(effect.level_div);
+            }
+
+            return `Multiplies exoskeleton gain by ${exoskeleton_chance}, divides enemy levels by ${level_div}, and divides level costs by ${level_div}`;
+        },
+        categories: ['equipment', 'bug'],
+        unlocked() { return tmp.items.exoskeleton.unlocked; },
+    },
+    'chrome_plating': {
+        id: null,
+        color() { return tmp.xp.monsters.bug.color; },
+        name: 'chrome plating',
+        icon: [15, 2],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        value: {
+            value() {
+                return D(720);
+            },
+        },
+        lore: `A solid plate made of a white material.<br>
+            Very useful in mining operations.<br>
+            It's also surprisingly pretty.`,
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let ore_mult = D.root(x, 1.5).add(1);
+
+            return { ore_mult, };
+        },
+        effectDescription(amount) {
+            let ore_mult;
+            if (shiftDown) {
+                ore_mult = '[1.5√(amount) + 1]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                ore_mult = formatWhole(effect.ore_mult);
+            }
+
+            return `Multiplies ore gain by ${ore_mult}`;
+        },
+        categories: ['materials', 'bug'],
+        unlocked() { return tmp.items.chrome_ingot.unlocked; },
+    },
+    'chrome_coating': {
+        id: null,
+        color() { return tmp.xp.monsters.bug.color; },
+        name: 'chrome coating',
+        icon: [15, 3],
+        row: 1,
+        sources: {
+            other: ['crafting'],
+        },
+        value: {
+            value() {
+                return D(600);
+            },
+        },
+        lore: `Chrome coating for a tool.<br>
+            It's great for hitting rocks and enemies.<br>
+            You almost mistook it for silver.`,
+        effect(amount) {
+            const x = D(amount ?? player.items[this.id].amount);
+
+            let damage_mult = D.root(x, 2).add(1);
+
+            return { damage_mult, };
+        },
+        effectDescription(amount) {
+            let damage_mult;
+            if (shiftDown) {
+                damage_mult = '[2√(amount) + 1]';
+            } else {
+                const x = D(amount ?? player.items[this.id].amount),
+                    effect = item_list[this.id].effect(x);
+
+                damage_mult = formatWhole(effect.damage_mult);
+            }
+
+            return `Multiplies damage by ${damage_mult}`;
+        },
+        categories: ['materials', 'bug'],
+        unlocked() { return tmp.items.chrome_ingot.unlocked; },
+    },
     // Mining
     'stone': {
         id: null,
@@ -1505,6 +1781,8 @@ const item_list = {
                 if (hasUpgrade('xp', 51)) mult = mult.times(upgradeEffect('xp', 51));
                 if (hasUpgrade('m', 23)) mult = mult.times(upgradeEffect('m', 23).stone);
                 if (hasUpgrade('m', 51)) mult = mult.times(upgradeEffect('m', 51));
+
+                mult = mult.times(item_effect('bug_collector').stone_mult);
 
                 min = D.times(min, mult);
                 max = D.times(max, mult);
@@ -3328,7 +3606,7 @@ const item_list = {
 
 const ITEM_SIZES = {
     width: 16,
-    height: 15,
+    height: 16,
 };
 /**
  * @type {{[row in Layer['row']]: items[]}}

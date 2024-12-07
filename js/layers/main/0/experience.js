@@ -1487,6 +1487,7 @@ addLayer('xp', {
 
                 mult = mult.times(item_effect('slime_knife').damage);
                 mult = mult.times(item_effect('lead_coating').damage_mult);
+                mult = mult.times(item_effect('chrome_coating').damage);
 
                 if (hasChallenge('b', 21)) mult = mult.times(2);
 
@@ -1626,7 +1627,13 @@ addLayer('xp', {
 
                 return base;
             },
-            mult() { return D.dOne; },
+            mult() {
+                let mult = D.dOne;
+
+                mult = mult.div(item_effect('bug_pheromones').level_div);
+
+                return mult;
+            },
             exp() { return D(.5); },
         },
         defense: {

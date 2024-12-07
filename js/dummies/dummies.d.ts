@@ -1493,8 +1493,8 @@ type items = 'unknown' |
     'mud' | 'mud_brick' | 'golem_eye' | 'golem_core' |
     'mud_kiln' | 'weakness_finder' | 'arcane_generator' | 'record_golem' |
     // Insect
-    'chitin' | 'antenna' | 'exoskeleton' | 'egg' |
-    'bug_armor' |
+    'chitin' | 'antenna' | 'exoskeleton' | 'egg' | 'chrome_lump' | 'chrome_ingot' |
+    'bug_armor' | 'ore_locator' | 'bug_collector' | 'bug_pheromones' | 'chrome_plating' | 'chrome_coating' |
     // Mining
     'stone' | 'copper_ore' | 'tin_ore' | 'bronze_blend' | 'gold_nugget' | 'densium' |
     'coal' | 'iron_ore' | 'clear_iron_ore' | 'silver_ore' | 'electrum_blend' |
@@ -1511,10 +1511,7 @@ type items = 'unknown' |
     'package_1' | 'package_2' | 'package_3' | 'package_4' |
     'factory_core_casing' | 'factory_core_frame' | 'factory_core_scaffolding' | 'factory_core' |
     'cueball';
-//todo ??? (antenna), ??? (exoskeleton), bug finder (golem eye + exoskeleton + egg, +exoskeleton & +chance)
-//todo chrome lump, chrome ingot, chrome plating (+ore drops), chrome coating (*damage)
-//todo? ruby (<-chrome, material), yellow dye (yellow slime override)
-//todo item effects
+//todo separate type for item effects
 
 type monsters = 'slime' | 'skeleton' | 'golem' | 'bug';
 
@@ -1525,7 +1522,7 @@ type drop_sources = `kill:${monsters}` | 'kill:any' | 'crafting' | 'forge' | `mi
 type drop_types = 'kill' | 'crafting' | 'forge' | 'mining' | 'shop';
 type categories = 'materials' | 'equipment' | 'craftable' |
     'mining' | 'densium' | 'deep_mining' |
-    'forge' | 'shop' | 'arca' | 'boss' |
+    'forge' | 'shop' | 'arca' | 'boss' | 'dungeon' |
     monsters;
 
 type spells = 'convertion' | 'drain' | 'acid' | 'lava' |
