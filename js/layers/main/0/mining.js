@@ -94,8 +94,19 @@ addLayer('m', {
 
                     const color = tmp.m.modifiers.xp.color,
                         gain = tmp.m.modifiers.xp.gain,
-                        gain_txt = D.gt(gain, 0) ? ` (+${resourceColor(color, format(gain))})` : '',
+                        /** @type {string[]} */
+                        gain_extra = [],
                         cap = tmp.m.modifiers.xp.cap;
+
+                    if (D.gt(gain, 1e-3)) {
+                        gain_extra.push(`+${resourceColor(color, gain)}`);
+                        if (D.gt(tmp.m.modifiers.xp.passive, 0)) {
+                            gain_extra.push(`+${resourceColor(color, D.times(gain, tmp.m.modifiers.xp.passive))} /s`);
+                        }
+                    }
+
+                    let gain_txt = '';
+                    if (gain_extra.length) gain_txt = ` (${gain_extra.join(', ')})`;
 
                     return `You have ${resourceColor(color, formatWhole(player.m.experience), 'font-size:1.5em')}${gain_txt}\
                         /${resourceColor(color, formatWhole(cap))} experience`;
@@ -1364,6 +1375,7 @@ addLayer('m', {
                 strike_ore(damage);
             },
             canClick() {
+                if (inChallenge('b', 51)) return false;
                 if (inChallenge('b', 31) && D.lte(player.dea.health, 0)) return false;
 
                 return D.gt(player.m.health, 0) && player.m.targets.length;
@@ -1816,7 +1828,7 @@ addLayer('m', {
 
                 mult = mult.times(item_effect('stone_mace').m_damage);
                 mult = mult.times(item_effect('copper_pick').damage);
-                mult = mult.times(item_effect('chrome_coating').damage);
+                mult = mult.times(item_effect('chrome_coating').damage_mult);
 
                 return mult;
             },
@@ -1829,6 +1841,8 @@ addLayer('m', {
                 if (hasUpgrade('m', 22)) speed = speed.add(upgradeEffect('m', 22));
                 if (hasUpgrade('m', 52)) speed = speed.add(upgradeEffect('m', 52));
                 if (hasUpgrade('m', 54)) speed = speed.add(upgradeEffect('m', 54));
+
+                if (inChallenge('b', 51)) speed = speed.add(1);
 
                 return speed;
             },
@@ -1850,6 +1864,10 @@ addLayer('m', {
                 mult = mult.times(item_effect('ore_locator').ore_mult);
                 mult = mult.times(item_effect('chrome_plating').ore_mult);
 
+                if (player.b.dungeon.max > 1) {
+                    mult = mult.times(tmp.b.dungeon[1].reward.ore_mult);
+                }
+
                 return mult;
             },
         },
@@ -1860,6 +1878,12 @@ addLayer('m', {
                 if (hasUpgrade('xp', 43)) mult = mult.times(upgradeEffect('xp', 43));
 
                 if (hasUpgrade('dea', 31)) mult = mult.div(upgradeEffect('dea', 31));
+
+                if (inChallenge('b', 71)) {
+                    if (player.b.dungeon.floor >= 1) {
+                        mult = mult.times(tmp.b.dungeon[1].effect.m_health);
+                    }
+                }
 
                 return mult;
             },
@@ -1895,6 +1919,15 @@ addLayer('m', {
             },
             cap() { return D.times(tmp.m.modifiers.xp.cap_base, tmp.xp.modifiers.cap.mult); },
             gain_cap() { return D.minus(tmp.m.modifiers.xp.cap, player.m.experience); },
+            passive() {
+                let passive = D.dZero;
+
+                if (player.b.dungeon.max > 1) {
+                    passive = passive.add(tmp.b.dungeon[1].reward.m_xp_passive);
+                }
+
+                return passive;
+            },
             color: '#BB8822',
         },
         vein: {
@@ -2025,6 +2058,9 @@ addLayer('m', {
                     attack_monster(selected, damage);
                 }
             }
+
+            if (tmp.m.compactor.unlocked && (inChallenge('b', 51) || (hasChallenge('b', 51) && player.a.automation.m.compactor)))
+                player.m.compactor.enabled = !player.m.compactor.enabled;
         }
 
         if (tmp.m.compactor.unlocked) {
@@ -2049,6 +2085,10 @@ addLayer('m', {
         if (tmp.m.compactor.unlocked && player.m.compactor.running) player.m.compactor.time = D.add(diff, player.m.compactor.time);
 
         player.m.mine_time = D.times(diff, tmp.m.modifiers.damage.speed).add(player.m.mine_time).min(1);
+
+        if (D.gt(tmp.m.modifiers.xp.passive, 0) && D.gt(tmp.m.modifiers.xp.gain, 0)) {
+            player.m.experience = D.times(tmp.m.modifiers.xp.passive, tmp.m.modifiers.xp.gain).times(diff).add(player.m.experience);
+        }
     },
     doReset(layer) {
         if (tmp[layer].row <= this.row) return;
@@ -2069,4 +2109,5 @@ addLayer('m', {
 
         player.m.upgrades.push(...upgs);
     },
+    autoUpgrade() { return inChallenge('b', 51) || (hasChallenge('b', 51) && player.a.automation.m.upgrades); },
 });

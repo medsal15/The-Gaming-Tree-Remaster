@@ -802,6 +802,8 @@ addLayer('xp', {
                 player.xp.selected = tmp.xp.list[i - 1];
             },
             canClick() {
+                if (inChallenge('b', 51)) return false;
+
                 const selected = player.xp.selected;
 
                 return selected != tmp.xp.list[0];
@@ -826,6 +828,7 @@ addLayer('xp', {
                 attack_monster(player.xp.selected, damage);
             },
             canClick() {
+                if (inChallenge('b', 51)) return false;
                 if (inChallenge('b', 31) && D.lte(player.dea.health, 0)) return false;
 
                 const selected = player.xp.selected;
@@ -852,6 +855,7 @@ addLayer('xp', {
                 player.xp.selected = tmp.xp.list[i + 1];
             },
             canClick() {
+                if (inChallenge('b', 51)) return false;
                 const selected = player.xp.selected;
 
                 return selected != tmp.xp.list[tmp.xp.list.length - 1];
@@ -959,9 +963,21 @@ addLayer('xp', {
                 }
             });
 
-        if (hasUpgrade('m', 64) && D.gt(killed, 0)) {
+        if (D.gt(killed, 0) && hasUpgrade('m', 64)) {
             let damage = D.times(tmp.m.modifiers.damage.total, killed).div(upgradeEffect('m', 64));
             strike_ore(damage);
+        }
+        if (D.gt(killed, 0) && (inChallenge('b', 51) || (hasChallenge('b', 51) && player.a.automation.xp.select))) {
+            const list = tmp.xp.list,
+                add = (inChallenge('b', 51) || player.a.automation.xp.select == 'next') ? 1 : list.length - 1;
+            let i = (list.indexOf(player.xp.selected) + add) % list.length,
+                j = 0;
+            // Prevent attacking with 0 damage and infinite loop if there's no enemy to damage
+            while (D.lte(tmp.xp.monsters[list[i]].damage, 0) && j < list.length) {
+                i = (i + add) % list.length;
+                j++;
+            }
+            if (j < list.length) player.xp.selected = list[i];
         }
 
         if (D.gte(player.xp.attack_time_selected, 1)) player.xp.attack_time_selected = D.minus(player.xp.attack_time_selected, 1);
@@ -980,6 +996,17 @@ addLayer('xp', {
             } else {
                 player.xp.lore = false;
             }
+        }
+
+        if (hasChallenge('b', 51) && player.a.automation.xp.upgrades) {
+            Object.keys(tmp.xp.upgrades)
+                .filter(id => typeof tmp.xp.upgrades[id] == 'object' && !('currencyInternalName' in tmp.xp.upgrades[id]))
+                .forEach(id => { if (canAffordUpgrade('xp', id)) buyUpg('xp', id); });
+        }
+        if (hasChallenge('b', 51) && player.a.automation.xp.kill_upgrades) {
+            Object.keys(tmp.xp.upgrades)
+                .filter(id => typeof tmp.xp.upgrades[id] == 'object' && ('currencyInternalName' in tmp.xp.upgrades[id]))
+                .forEach(id => { if (canAffordUpgrade('xp', id)) buyUpg('xp', id); });
         }
     },
     update(diff) {
@@ -1037,6 +1064,8 @@ addLayer('xp', {
                 if (inChallenge('b', 41)) health = health.times(5);
 
                 health = D.times(health, item_effect('densium_slime')?.slime_mult);
+
+                health = D.pow(health, tmp.xp.modifiers.health.exp);
 
                 return health;
             },
@@ -1160,6 +1189,8 @@ addLayer('xp', {
 
                 if (inChallenge('b', 41)) health = health.times(4);
 
+                health = D.pow(health, tmp.xp.modifiers.health.exp);
+
                 return health;
             },
             defense(level) {
@@ -1266,6 +1297,8 @@ addLayer('xp', {
 
                 if (inChallenge('b', 41)) health = health.times(3);
 
+                health = D.pow(health, tmp.xp.modifiers.health.exp);
+
                 return health;
             },
             defense(level) {
@@ -1366,6 +1399,8 @@ addLayer('xp', {
                 let health = D.times(level_mult, 20).times(tmp.xp?.modifiers.health.mult ?? 1);
 
                 if (inChallenge('b', 41)) health = health.times(3);
+
+                health = D.pow(health, tmp.xp.modifiers.health.exp);
 
                 return health;
             },
@@ -1487,7 +1522,7 @@ addLayer('xp', {
 
                 mult = mult.times(item_effect('slime_knife').damage);
                 mult = mult.times(item_effect('lead_coating').damage_mult);
-                mult = mult.times(item_effect('chrome_coating').damage);
+                mult = mult.times(item_effect('chrome_coating').damage_mult);
 
                 if (hasChallenge('b', 21)) mult = mult.times(2);
 
@@ -1503,6 +1538,8 @@ addLayer('xp', {
                 speed = speed.add(item_effect('disco_ball').speed);
 
                 if (hasUpgrade('xp', 22)) speed = speed.add(upgradeEffect('xp', 22));
+
+                if (inChallenge('b', 51)) speed = speed.add(1);
 
                 return speed;
             },
@@ -1609,6 +1646,17 @@ addLayer('xp', {
 
                 return mult;
             },
+            exp() {
+                let exp = D.dOne;
+
+                if (inChallenge('b', 71)) {
+                    if (player.b.dungeon.floor >= 1) {
+                        exp = exp.add(tmp.b.dungeon[1].effect.xp_health_pow);
+                    }
+                }
+
+                return exp;
+            },
         },
         drops: {
             mult() {
@@ -1676,4 +1724,5 @@ addLayer('xp', {
         // Correctly reset health
         Object.values(layers.xp.monsters).forEach(data => player.xp.monsters[data.id].health = data.health(data.level(1)));
     },
+    autoUpgrade() { return inChallenge('b', 51); },
 });

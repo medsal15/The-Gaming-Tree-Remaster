@@ -601,6 +601,23 @@ addLayer('ach', {
             },
             unlocked() { return tmp.b.challenges[71].unlocked; },
         },
+        132: {
+            name: 'I Heard You Like Recursion',
+            tooltip() {
+                if (player.b.dungeon.max < 1) return 'Kill the ???';
+                return 'Kill the Recurslime';
+            },
+            done() { return false; },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.b.groups.dungeon.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.b.groups.dungeon.color;
+
+                return style;
+            },
+            unlocked() { return tmp.b.challenges[71].unlocked; },
+        },
         //todo dungeon achievements
         //#endregion Normal
         //#region Bonus
@@ -744,6 +761,21 @@ addLayer('ach', {
             },
             unlocked() { return hasChallenge('b', 22); },
         },
+        141: {
+            name: 'I Still Had To Click :(',
+            tooltip: 'Complete Hands Off',
+            done() { return hasChallenge('b', 51); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.b.groups.mini.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.b.groups.mini.color;
+
+                return style;
+            },
+            unlocked() { return hasChallenge('b', 41); },
+        },
+        //todo boss 61 achievements
         //#endregion Bonus
         //#region Secret
         21: {
@@ -851,7 +883,7 @@ addLayer('ach', {
             owned() { return player.ach.achievements.filter(id => this.rows.includes(Math.floor(id / 10))); },
         },
         bonus: {
-            rows: [8, 11],
+            rows: [8, 11, 14],
             color: '#0077FF',
             visible() {
                 return Object.values(tmp.ach.achievements)

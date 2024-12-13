@@ -575,6 +575,20 @@ addLayer('dea', {
                 return damage.max(0);
             },
         },
+        'bug': {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.dea.monsters).find(mon => layers.dea.monsters[mon] == this); },
+            damage() {
+                const mod = tmp.dea.modifiers.damage;
+                let damage = D.add(tmp.xp.monsters[this.id].level, 2);
+
+                damage = damage.add(mod.base);
+                damage = damage.times(mod.mult);
+                damage = damage.pow(1.5);
+
+                return damage.max(0);
+            },
+        },
     },
     player: {
         health() {
@@ -662,6 +676,16 @@ addLayer('dea', {
         if (D.gt(player.dea.health, tmp.dea.player.health)) {
             player.dea.health = tmp.dea.player.health;
         }
+
+        if (hasChallenge('b', 51)) {
+            if (player.a.automation.dea.samsara && D.lte(player.dea.health, 0)) {
+                clickClickable('dea', 11);
+            }
+            if (player.a.automation.dea.buyables) Object.keys(tmp.dea.buyables)
+                .filter(id => typeof tmp.dea.buyables[id] == 'object')
+                .forEach(id => { if (canBuyBuyable('dea', id)) buyBuyable('dea', id); });
+        }
     },
     prestigeNotify() { return D.lte(player.dea.health, 0); },
+    autoUpgrade() { return hasChallenge('b', 51) && player.a.automation.dea.upgrades; },
 });

@@ -642,6 +642,8 @@ addLayer('c', {
 
             max = max.add(item_effect('electrum_package').limit);
 
+            if (hasChallenge('b', 51)) max = max.add(10);
+
             return max;
         },
         crafted() { return Object.values(player.c.recipes).reduce((sum, rec) => D.add(sum, rec.crafted), D.dZero); },
@@ -1034,7 +1036,7 @@ addLayer('c', {
             categories: ['materials', 'bug',],
             unlocked() { return tmp.items.chitin.unlocked && tmp.items.egg.unlocked; },
         },
-        egg: {
+        chrome_egg: {
             _id: null,
             get id() { return this._id ??= Object.entries(layers.c.recipes).find(([, r]) => r == this)[0]; },
             consumes(amount) {
@@ -2649,7 +2651,7 @@ addLayer('c', {
             },
             categories: ['equipment', 'bug', 'forge',],
             static: true,
-            unlocked() { return tmp.c.forge.unlocked; },
+            unlocked() { return tmp.c.forge.unlocked && tmp.items.chrome_ingot.unlocked; },
         },
         // Mining
         stone_mace: {
@@ -3856,6 +3858,30 @@ addLayer('c', {
         });
 
         if (!player.c.visited_forge && player.subtabs.c.mainTabs == 'Forge') player.c.visited_forge = true;
+
+        if (inChallenge('b', 51)) {
+            // Autobuy all buyables
+            Object.keys(tmp.c.buyables)
+                .filter(id => !['layer', 'rows', 'cols'].includes(id))
+                .forEach(id => { if (canBuyBuyable('c', id)) buyBuyable('c', id); });
+
+            // Autocraft equipment
+            Object.keys(tmp.c.recipes)
+                .filter(id => D.lte(player.a.chains[id].built, 0) &&
+                    D.lte(player.c.recipes[id].making, 0) &&
+                    tmp.c.recipes[id].categories.includes('equipment') &&
+                    crafting_can(id, player.c.recipes[id].target))
+                .forEach(id => player.c.recipes[id].making = player.c.recipes[id].target);
+        } else if (hasChallenge('b', 51)) {
+            const auto = player.a.automation.c;
+
+            if (auto.heating && canBuyBuyable('c', 21)) buyBuyable('c', 21);
+            if (auto.dividers) [31, 32, 33, 34, 41, 42, 43, 44].forEach(id => {
+                if (canBuyBuyable('c', id)) buyBuyable('c', id);
+            });
+
+            if (auto.looting && canBuyBuyable('c', 11)) buyBuyable('c', 11);
+        }
     },
     prestigeNotify() { return canBuyBuyable('c', 11) || (tmp.c.forge.unlocked && !player.c.visited_forge); },
     nodeStyle: {

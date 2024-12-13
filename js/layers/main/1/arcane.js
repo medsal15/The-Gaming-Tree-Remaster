@@ -17,6 +17,31 @@ addLayer('a', {
             transmutation: Object.fromEntries(Object.keys(layers.a.transmutations).map(id => [id, {
                 used: D.dZero,
             }])),
+            automation: {
+                xp: {
+                    select: false,
+                    upgrades: false,
+                    kill_upgrades: false,
+                },
+                m: {
+                    upgrades: false,
+                    compactor: false,
+                },
+                l: {
+                    prestige: false,
+                    upgrades: false,
+                },
+                c: {
+                    looting: false,
+                    heating: false,
+                    dividers: false,
+                },
+                dea: {
+                    samsara: false,
+                    buyables: false,
+                    upgrades: false,
+                },
+            },
         };
     },
     tooltip() { return `${formatWhole(tmp.a.modifiers.arca.total)} arca`; },
@@ -76,6 +101,52 @@ addLayer('a', {
                 ['microtabs', 'transmutation'],
             ],
         },
+        'Automation': {
+            content: [
+                ['row', [
+                    ['clickable', 'xp_select'],
+                    'blank',
+                    ['clickable', 'xp_upgrades'],
+                    'blank',
+                    ['clickable', 'xp_kill_upgrades'],
+                ]],
+                'blank',
+                ['row', [
+                    ['clickable', 'm_upgrades'],
+                    'blank',
+                    ['clickable', 'm_compactor'],
+                ]],
+                'blank',
+                ['row', [
+                    ['clickable', 'l_prestige'],
+                    'blank',
+                    ['clickable', 'l_upgrades'],
+                ]],
+                'blank',
+                ['row', [
+                    ['clickable', 'c_looting'],
+                    'blank',
+                    ['clickable', 'c_heating'],
+                    'blank',
+                    ['clickable', 'c_dividers'],
+                ]],
+                ['column', () => {
+                    if (inChallenge('b', 31)) {
+                        return [
+                            'blank',
+                            ['row', [
+                                ['clickable', 'dea_samsara'],
+                                'blank',
+                                ['clickable', 'dea_buyables'],
+                                'blank',
+                                ['clickable', 'dea_upgrades'],
+                            ]],
+                        ];
+                    }
+                }],
+            ],
+            unlocked() { return hasChallenge('b', 51); },
+        },
     },
     branches: ['c'],
     microtabs: {
@@ -99,6 +170,159 @@ addLayer('a', {
                     return `${formatWhole(D.div(60, tmp.a.modifiers.cycle.duration))} BPM`;
                 }
             },
+        },
+    },
+    clickables: {
+        // Automation
+        'xp_select': {
+            style: {
+                'background-color'() { return tmp.xp.color; },
+            },
+            title: 'Auto enemy switcher',
+            display() {
+                let text = 'Currently: ';
+
+                switch (player.a.automation.xp.select) {
+                    case false:
+                        text += 'Disabled';
+                        break;
+                    case 'next':
+                        text += 'Next attackable';
+                        break;
+                    case 'prev':
+                        text += 'Previous attackable';
+                        break;
+                }
+
+                return text;
+            },
+            canClick: true,
+            onClick() {
+                const auto = player.a.automation.xp;
+                switch (auto.select) {
+                    case false:
+                        auto.select = 'next';
+                        break;
+                    case 'next':
+                        auto.select = 'prev';
+                        break;
+                    case 'prev':
+                        auto.select = false;
+                        break;
+                }
+            },
+        },
+        'xp_upgrades': {
+            style: {
+                'background-color'() { return tmp.xp.color; },
+            },
+            title: 'Autobuy XP upgrades',
+            display() { return 'Currently: ' + (player.a.automation.xp.upgrades ? 'Enabled' : 'Disabled'); },
+            canClick: true,
+            onClick() { player.a.automation.xp.upgrades = !player.a.automation.xp.upgrades; },
+        },
+        'xp_kill_upgrades': {
+            style: {
+                'background-color'() { return tmp.xp.kill.color; },
+            },
+            title: 'Autobuy kill upgrades',
+            display() { return 'Currently: ' + (player.a.automation.xp.kill_upgrades ? 'Enabled' : 'Disabled'); },
+            canClick: true,
+            onClick() { player.a.automation.xp.kill_upgrades = !player.a.automation.xp.kill_upgrades; },
+            unlocked() { return hasChallenge('b', 31); },
+        },
+        'm_upgrades': {
+            style: {
+                'background-color'() { return tmp.m.nodeStyle.backgroundColor; },
+            },
+            title: 'Autobuy mining upgrades',
+            display() { return 'Currently: ' + (player.a.automation.m.upgrades ? 'Enabled' : 'Disabled'); },
+            canClick: true,
+            onClick() { player.a.automation.m.upgrades = !player.a.automation.m.upgrades; },
+        },
+        'm_compactor': {
+            style: {
+                'background-color'() { return tmp.items.densium.color; },
+            },
+            title: 'Auto toggle compactor',
+            display() { return 'Currently: ' + (player.a.automation.m.compactor ? 'After breaking ores' : 'Disabled'); },
+            canClick: true,
+            onClick() { player.a.automation.m.compactor = !player.a.automation.m.compactor; },
+        },
+        'l_prestige': {
+            style: {
+                'background-color'() { return tmp.l.color; },
+            },
+            title: 'Auto prestige for levels',
+            display() { return 'Currently: ' + (player.a.automation.l.prestige ? 'Enabled' : 'Disabled'); },
+            canClick: true,
+            onClick() { player.a.automation.l.prestige = !player.a.automation.l.prestige; },
+        },
+        'l_upgrades': {
+            style: {
+                'background-color'() { return tmp.l.color; },
+            },
+            title: 'Autobuy level upgrades',
+            display() { return 'Currently: ' + (player.a.automation.l.upgrades ? 'Enabled' : 'Disabled'); },
+            canClick: true,
+            onClick() { player.a.automation.l.upgrades = !player.a.automation.l.upgrades; },
+        },
+        'c_looting': {
+            style: {
+                'background-color'() { return tmp.c.color; },
+            },
+            title: 'Autobuy looting',
+            display() { return 'Currently: ' + (player.a.automation.c.looting ? 'Enabled' : 'Disabled'); },
+            canClick: true,
+            onClick() { player.a.automation.c.looting = !player.a.automation.c.looting; },
+        },
+        'c_heating': {
+            style: {
+                'background-color'() { return tmp.c.modifiers.heat.color; },
+            },
+            title: 'Autobuy heating',
+            display() { return 'Currently: ' + (player.a.automation.c.heating ? 'Enabled' : 'Disabled'); },
+            canClick: true,
+            onClick() { player.a.automation.c.heating = !player.a.automation.c.heating; },
+        },
+        'c_dividers': {
+            style: {
+                'background-color'() { return tmp.c.color; },
+            },
+            title: 'Autobuy heating buyables',
+            display() { return 'Currently: ' + (player.a.automation.c.dividers ? 'Enabled' : 'Disabled'); },
+            canClick: true,
+            onClick() { player.a.automation.c.dividers = !player.a.automation.c.dividers; },
+        },
+        'dea_samsara': {
+            style: {
+                'background-color'() { return tmp.dea.color; },
+            },
+            title: 'Auto revive',
+            display() { return 'Currently: ' + (player.a.automation.dea.samsara ? 'Enabled' : 'Disabled'); },
+            canClick: true,
+            onClick() { player.a.automation.dea.samsara = !player.a.automation.dea.samsara; },
+            unlocked() { return inChallenge('b', 31) },
+        },
+        'dea_buyables': {
+            style: {
+                'background-color'() { return tmp.dea.color; },
+            },
+            title: 'Autobuy karma buyables',
+            display() { return 'Currently: ' + (player.a.automation.dea.buyables ? 'Enabled' : 'Disabled'); },
+            canClick: true,
+            onClick() { player.a.automation.dea.buyables = !player.a.automation.dea.buyables; },
+            unlocked() { return inChallenge('b', 31) },
+        },
+        'dea_upgrades': {
+            style: {
+                'background-color'() { return tmp.dea.color; },
+            },
+            title: 'Autobuy soul upgrades',
+            display() { return 'Currently: ' + (player.a.automation.dea.upgrades ? 'Enabled' : 'Disabled'); },
+            canClick: true,
+            onClick() { player.a.automation.dea.upgrades = !player.a.automation.dea.upgrades; },
+            unlocked() { return inChallenge('b', 31) },
         },
     },
     chains: {
@@ -197,12 +421,16 @@ addLayer('a', {
 
                 duration = duration.div(tmp.a.spells.speed.effect.cycle_duration);
 
+                if (inChallenge('b', 51)) duration = duration.div(2);
+
                 return duration;
             },
             time() {
                 let time = D(2.5);
 
                 time = time.times(tmp.a.spells.speed.effect.cycle_time);
+
+                if (inChallenge('b', 51)) time = time.times(2);
 
                 return time;
             },

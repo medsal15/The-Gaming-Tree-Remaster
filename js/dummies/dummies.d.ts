@@ -1736,6 +1736,7 @@ type Layers = {
             }
             health: {
                 mult(): Decimal
+                exp(): Decimal
             }
             drops: {
                 mult(): Decimal
@@ -1813,6 +1814,8 @@ type Layers = {
                 cap(): Decimal
                 /** XP left until limit */
                 gain_cap(): Decimal
+                /** Multiplier to passively generated xp */
+                passive(): Decimal
                 color: string
             }
             vein: {
@@ -2269,6 +2272,31 @@ type Player = {
         }
         /** Time since the last cycle */
         cycle_time: Decimal
+        automation: {
+            xp: {
+                select: false | 'next' | 'prev'
+                upgrades: boolean
+                kill_upgrades: boolean
+            }
+            m: {
+                upgrades: boolean
+                compactor: boolean
+            }
+            l: {
+                prestige: boolean
+                upgrades: boolean
+            }
+            c: {
+                looting: boolean
+                heating: boolean
+                dividers: boolean
+            }
+            dea: {
+                samsara: boolean
+                upgrades: boolean
+                buyables: boolean
+            }
+        }
     }
     // Row 2
     b: LayerData & {

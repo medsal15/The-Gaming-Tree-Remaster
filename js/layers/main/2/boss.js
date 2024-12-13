@@ -107,6 +107,15 @@ addLayer('b', {
                 }],
                 'blank',
                 ['clickables', [2]],
+                ['column', () => {
+                    if (player.b.dungeon.floor == player.b.dungeon.max) {
+                        return [
+                            ['display-text', '<u>Floor requirements:</u>'],
+                            ['display-text', tmp.b.dungeon[player.b.dungeon.floor].requirement],
+                            'blank',
+                        ];
+                    }
+                }],
                 ['challenges', () => tmp.b.groups.dungeon.rows],
                 'blank',
                 ['display-text', '<u>Current Dungeon effects:</u>'],
@@ -289,6 +298,7 @@ addLayer('b', {
                 return { 'backgroundColor': tmp.b.groups[group].color, };
             },
         },
+        //todo 42: ???
         // Mini
         21: {
             name: 'Slime Monarch',
@@ -335,7 +345,42 @@ addLayer('b', {
             onExit() { tmp.s.coins.list.forEach(([item]) => player.items[item].amount = D.dZero); },
             onEnter() { tmp.s.coins.list.forEach(([item]) => player.items[item].amount = D.dZero); },
         },
-        //todo 51: ???
+        51: {
+            name: 'Hands Off',
+            challengeDescription: `Most of the first 2 rows is automated.<br>
+                Everything that is automated cannot be manually done.<br>
+                Factory cycles are 50% faster and have 50% more time.`,
+            goalDescription() {
+                return `Craft a ${tmp.items.slime_die.name}, a ${tmp.items.magic_slime_ball.name},
+                    a ${tmp.items.record_golem.name}, and ${tmp.items.bug_pheromones.name}`;
+            },
+            rewardDescription: 'Unlock the automation tab in Arcane,\
+                factories are twice as fast, and double maximum crafting amount.',
+            canComplete() {
+                /** @type {items[]} */
+                const list = ['slime_die', 'magic_slime_ball', 'record_golem', 'bug_pheromones'];
+
+                return list.every(id => D.gte(player.items[id].total, 1));
+            },
+            progress() {
+                /** @type {items[]} */
+                const list = ['slime_die', 'magic_slime_ball', 'record_golem', 'bug_pheromones'];
+
+                return list.filter(id => D.gte(player.items[id].total, 1)).length / list.length;
+            },
+            display() {
+                /** @type {items[]} */
+                const list = ['slime_die', 'magic_slime_ball', 'record_golem', 'bug_pheromones'];
+
+                return `${formatWhole(list.filter(id => D.gte(player.items[id].total, 1)).length)} / ${formatWhole(list.length)} items crafted`;
+            },
+            unlocked() { return hasChallenge('b', 41); },
+            group: 'mini',
+            buttonStyle() {
+                const group = tmp[this.layer].challenges[this.id].group
+                return { 'backgroundColor': tmp.b.groups[group].color, };
+            },
+        },
         // Gods
         31: {
             name: 'Thanatos',
@@ -491,24 +536,83 @@ addLayer('b', {
                 'background-size': `${UI_SIZES.width * 120}px ${UI_SIZES.height * 120}px`,
                 'background-position': '-120px -360px',
             },
-            onClick() { player.b.dungeon.floor = Math.min(10, player.b.dungeon.floor + 1); },
-            canClick() { return (player.b.dungeon.floor + 1) in tmp.b.dungeon && inChallenge('b', 71); },
+            onClick() {
+                player.b.dungeon.floor += 1;
+                doReset('b', true);
+            },
+            canClick() {
+                return ((player.b.dungeon.floor + 1) in tmp.b.dungeon) &&
+                    inChallenge('b', 71) && (
+                        player.b.dungeon.floor < player.b.dungeon.max ||
+                        tmp.b.dungeon[player.b.dungeon.floor].canComplete
+                    );
+            },
         },
     },
     dungeon: {
         0: {
             _floor: null,
             get floor() { return this._floor ??= +Object.entries(layers.b.dungeon).find(([, r]) => r == this)[0]; },
-            effect: {
-                xp_health: D.dTwo,
+            effect() {
+                return {
+                    xp_health: D.add(player.b.dungeon.floor, 2),
+                };
             },
-            effectDisplay() { return `Multiply enemy health by ${formatWhole(this.effect.xp_health)}`; },
-            reward: {
-                xp_mult: D(1.5)
+            effectDisplay() {
+                const effect = tmp.b.dungeon[this.floor].effect;
+
+                let xp_health = shiftDown ? '[floor + 2]' : formatWhole(effect.xp_health);
+
+                return `Multiply enemy health by ${xp_health}`;
             },
-            rewardDisplay() { return `Multiply xp gain by ${format(this.reward.xp_mult)}`; },
-            canComplete() { return (player.b.dungeon.max > this.floor) || false; },
-            requirement: 'This is the maximum depth in the update',
+            reward() {
+                return {
+                    xp_mult: D.div(player.b.dungeon.max, 2).add(1),
+                };
+            },
+            rewardDisplay() {
+                const reward = tmp.b.dungeon[this.floor].reward;
+
+                let xp_mult = shiftDown ? '[max floor / 2 + 1]' : format(reward.xp_mult);
+
+                return `Multiply xp gain by ${xp_mult}`;
+            },
+            canComplete() { return (player.b.dungeon.max > this.floor) || D.gte(tmp.xp.kill.total, 100); },
+            requirement() { return `Kill ${formatWhole(tmp.xp.kill.total)} / 100 enemies`; },
+        },
+        1: {
+            _floor: null,
+            get floor() { return this._floor ??= +Object.entries(layers.b.dungeon).find(([, r]) => r == this)[0]; },
+            effect() {
+                return {
+                    xp_health_pow: D.div(player.b.dungeon.floor, 5),
+                    m_health: D.div(player.b.dungeon.floor, 2).add(1),
+                };
+            },
+            effectDisplay() {
+                const effect = tmp.b.dungeon[this.floor].effect;
+
+                let xp_health_pow = shiftDown ? '[floor / 5]' : format(effect.xp_health_pow),
+                    m_health = shiftDown ? '[floor / 2 + 1]' : format(effect.m_health);
+
+                return `Power enemy health by +^${xp_health_pow} and multiply ore health by ${m_health}`;
+            },
+            reward() {
+                return {
+                    ore_mult: D.div(player.b.dungeon.max, 4).add(1),
+                    m_xp_passive: D.div(player.b.dungeon.max, 100),
+                };
+            },
+            rewardDisplay() {
+                const reward = tmp.b.dungeon[this.floor].reward;
+
+                let ore_mult = shiftDown ? '[max floor / 4 + 1]' : format(reward.ore_mult),
+                    m_xp_passive = shiftDown ? '[max floor / 100]' : formatWhole(D.times(reward.m_xp_passive, 100)) + '%';
+
+                return `Multiply ore gain by ${ore_mult}, and passively generate ${m_xp_passive} mining experience every second`;
+            },
+            canComplete() { return (player.b.dungeon.max > this.floor) || D.gte(tmp.xp.kill.total, 200); },
+            requirement() { return `Kill ${formatWhole(tmp.xp.kill.total)} / 200 enemies`; },
         },
     },
     complete: {
@@ -533,7 +637,7 @@ addLayer('b', {
                     .reduce((sum, id) => D.add(sum, challengeCompletions('b', id)), D.dZero);
             },
             color: '#CC5599',
-            rows: [2],
+            rows: [2, 5],
         },
         relic: {
             completions() {
@@ -655,6 +759,17 @@ addLayer('b', {
                     I haven't had a break in 3 years, so if I misspell 'hunting' as 'mining', it's not my fault."`;
             },
             challenge: 22,
+        },
+        'strange_hand': {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.b.bosses).find(([, r]) => r == this)[0]; },
+            unlocked() { return tmp.b.challenges[51].unlocked; },
+            name: 'strange hand',
+            position: [2, 1],
+            lore: `A strange hand that you found in the factory.<br>
+                All documents about it seem to about its use.<br>
+                Sometimes it turns into an arrow.`,
+            challenge: 51,
         },
         // Relics
         'thanatos': {

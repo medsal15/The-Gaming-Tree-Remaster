@@ -28,13 +28,14 @@ let VERSION = {
 	/**
 	 * The version's name, displayed alongside the number in the info tab.
 	 */
-	name: '???',
+	name: 'Going Down',
 	beta: true,
 };
 
 let changelog = `<h1>Changelog:</h1><br>
-	<h3>v0.4: ???</h4><br>
-		- Update endgame: ???<br>
+	<h3>v0.4: Going Down</h4><br>
+		- Added the Dungeon.<br>
+		- Update endgame: Beat floor 3<br>
 	<h3>v0.3.1t</h3><br>
 		- Fix golems not dealing damage in Thanatos challenge.<br>
 		- Fix kill upgrades not needing kills.<br>

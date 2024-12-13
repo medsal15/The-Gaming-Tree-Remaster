@@ -145,6 +145,8 @@ addLayer('l', {
             currencyDisplayName: 'skill points',
             canAfford() { return D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
             pay() { },
+            currencyLocation() { return tmp.l.skill_points; },
+            currencyInternalName: 'remaining',
         },
         12: {
             title: 'Success Knowledge',
@@ -162,6 +164,8 @@ addLayer('l', {
             currencyDisplayName: 'skill points',
             canAfford() { return D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
             pay() { },
+            currencyLocation() { return tmp.l.skill_points; },
+            currencyInternalName: 'remaining',
         },
         13: {
             title: 'Higher Limit',
@@ -185,6 +189,8 @@ addLayer('l', {
             currencyDisplayName: 'skill points',
             canAfford() { return D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
             pay() { },
+            currencyLocation() { return tmp.l.skill_points; },
+            currencyInternalName: 'remaining',
         },
         14: {
             title: 'Straight Hit',
@@ -208,6 +214,8 @@ addLayer('l', {
             currencyDisplayName: 'skill points',
             canAfford() { return D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
             pay() { },
+            currencyLocation() { return tmp.l.skill_points; },
+            currencyInternalName: 'remaining',
             unlocked() { return tmp.m.layerShown; },
         },
         21: {
@@ -232,6 +240,8 @@ addLayer('l', {
                 return thismp.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost);
             },
             pay() { },
+            currencyLocation() { return tmp.l.skill_points; },
+            currencyInternalName: 'remaining',
             branches() {
                 let branches = [11, 12];
 
@@ -262,6 +272,8 @@ addLayer('l', {
                 return thismp.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost);
             },
             pay() { },
+            currencyLocation() { return tmp.l.skill_points; },
+            currencyInternalName: 'remaining',
             branches: [12],
         },
         23: {
@@ -292,6 +304,8 @@ addLayer('l', {
                 return thismp.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost);
             },
             pay() { },
+            currencyLocation() { return tmp.l.skill_points; },
+            currencyInternalName: 'remaining',
             branches() {
                 let branches = [12, 13];
 
@@ -328,6 +342,8 @@ addLayer('l', {
                 return thismp.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost);
             },
             pay() { },
+            currencyLocation() { return tmp.l.skill_points; },
+            currencyInternalName: 'remaining',
             branches() {
                 let branches = [14, 13];
 
@@ -364,6 +380,8 @@ addLayer('l', {
             currencyDisplayName: 'skill points',
             canAfford() { return this.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
             pay() { },
+            currencyLocation() { return tmp.l.skill_points; },
+            currencyInternalName: 'remaining',
             branches: [21],
         },
         32: {
@@ -391,6 +409,8 @@ addLayer('l', {
             currencyDisplayName: 'skill points',
             canAfford() { return this.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
             pay() { },
+            currencyLocation() { return tmp.l.skill_points; },
+            currencyInternalName: 'remaining',
             branches: [22],
         },
         33: {
@@ -409,6 +429,8 @@ addLayer('l', {
             currencyDisplayName: 'skill points',
             canAfford() { return this.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
             pay() { },
+            currencyLocation() { return tmp.l.skill_points; },
+            currencyInternalName: 'remaining',
             branches: [22, 23],
         },
         34: {
@@ -433,6 +455,8 @@ addLayer('l', {
             currencyDisplayName: 'skill points',
             canAfford() { return this.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
             pay() { },
+            currencyLocation() { return tmp.l.skill_points; },
+            currencyInternalName: 'remaining',
             branches: [23, 24],
             unlocked() { return tmp.m.layerShown; },
         },
@@ -458,6 +482,8 @@ addLayer('l', {
             currencyDisplayName: 'skill points',
             canAfford() { return this.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
             pay() { },
+            currencyLocation() { return tmp.l.skill_points; },
+            currencyInternalName: 'remaining',
             branches: [31, 32],
             unlocked() { return tmp.a.layerShown; },
         },
@@ -483,6 +509,8 @@ addLayer('l', {
             currencyDisplayName: 'skill points',
             canAfford() { return this.branches().every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
             pay() { },
+            currencyLocation() { return tmp.l.skill_points; },
+            currencyInternalName: 'remaining',
             branches() {
                 let branches = [32];
                 if (!tmp.a.layerShown) branches.push(31);
@@ -512,6 +540,8 @@ addLayer('l', {
             currencyDisplayName: 'skill points',
             canAfford() { return this.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
             pay() { },
+            currencyLocation() { return tmp.l.skill_points; },
+            currencyInternalName: 'remaining',
             branches: [33, 34],
             unlocked() { return hasUpgrade('m', 61); },
         },
@@ -537,6 +567,8 @@ addLayer('l', {
             currencyDisplayName: 'skill points',
             canAfford() { return this.branches.every(id => hasUpgrade('l', id)) && D.gte(tmp.l.skill_points.remaining, tmp[this.layer].upgrades[this.id].cost); },
             pay() { },
+            currencyLocation() { return tmp.l.skill_points; },
+            currencyInternalName: 'remaining',
             branches: [34],
             unlocked() { return tmp.a.layerShown; },
         },
@@ -617,6 +649,8 @@ addLayer('l', {
     },
     automate() {
         // Remove most recent upgrade until we run out
-        if (D.lt(tmp.l.skill_points.total, 0)) player.l.upgrades.pop();
+        if (D.lt(tmp.l.skill_points.remaining, 0)) player.l.upgrades.pop();
     },
+    autoUpgrade() { return inChallenge('b', 51) || (hasChallenge('b', 51) && player.a.automation.l.upgrades); },
+    autoPrestige() { return inChallenge('b', 51) || (hasChallenge('b', 51) && player.a.automation.l.prestige); },
 });
