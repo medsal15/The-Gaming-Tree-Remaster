@@ -472,6 +472,7 @@ addLayer('xp', {
             },
             pay() { },
             unlocked() { return hasChallenge('b', 31); },
+            canAfford() { return D.gte(tmp.xp.kill, tmp[this.layer].upgrades[this.id].cost); },
         },
         42: {
             title: 'Bone Recording',
@@ -491,6 +492,7 @@ addLayer('xp', {
             },
             pay() { },
             unlocked() { return hasChallenge('b', 31); },
+            canAfford() { return D.gte(tmp.xp.kill, tmp[this.layer].upgrades[this.id].cost); },
         },
         43: {
             title: 'Hardness Down',
@@ -510,6 +512,7 @@ addLayer('xp', {
             },
             pay() { },
             unlocked() { return hasChallenge('b', 31); },
+            canAfford() { return D.gte(tmp.xp.kill, tmp[this.layer].upgrades[this.id].cost); },
         },
         51: {
             title: 'Bloodstone',
@@ -535,12 +538,13 @@ addLayer('xp', {
             },
             pay() { },
             unlocked() { return hasChallenge('b', 31); },
+            canAfford() { return D.gte(tmp.xp.kill, tmp[this.layer].upgrades[this.id].cost); },
         },
         52: {
             title: 'Pitfall',
             description: 'Automatically attack all enemies every 4 seconds',
             effect() { return D(.25); },
-            effectDisplay() { return `+ ${formatWhole(D.pow(upgradeEffect(this.layer, this.id), -1))}`; },
+            effectDisplay() { return `+${format(upgradeEffect(this.layer, this.id))}`; },
             cost: D(40),
             currencyDisplayName: 'kills',
             currencyLocation() { return tmp.xp.kill; },
@@ -554,6 +558,7 @@ addLayer('xp', {
             },
             pay() { },
             unlocked() { return hasChallenge('b', 31); },
+            canAfford() { return D.gte(tmp.xp.kill, tmp[this.layer].upgrades[this.id].cost); },
         },
         53: {
             title: 'Deadly Pick',
@@ -579,6 +584,7 @@ addLayer('xp', {
             },
             pay() { },
             unlocked() { return hasChallenge('b', 31); },
+            canAfford() { return D.gte(tmp.xp.kill, tmp[this.layer].upgrades[this.id].cost); },
         },
         61: {
             title: 'Lowered Levels',
@@ -604,6 +610,7 @@ addLayer('xp', {
             },
             pay() { },
             unlocked() { return hasChallenge('b', 31); },
+            canAfford() { return D.gte(tmp.xp.kill, tmp[this.layer].upgrades[this.id].cost); },
         },
         62: {
             title: 'Soft Spot',
@@ -629,6 +636,7 @@ addLayer('xp', {
             },
             pay() { },
             unlocked() { return hasChallenge('b', 31); },
+            canAfford() { return D.gte(tmp.xp.kill, tmp[this.layer].upgrades[this.id].cost); },
         },
         63: {
             title: 'Power in Riches',
@@ -648,6 +656,7 @@ addLayer('xp', {
             },
             pay() { },
             unlocked() { return hasChallenge('b', 31); },
+            canAfford() { return D.gte(tmp.xp.kill, tmp[this.layer].upgrades[this.id].cost); },
         },
     },
     bars: {

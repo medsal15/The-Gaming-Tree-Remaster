@@ -33,9 +33,14 @@ addLayer('dea', {
             content: [
                 ['display-text', () => `You have died ${resourceColor(tmp.dea.color, formatWhole(player.dea.points), 'font-size:1.5em;')} times`],
                 ['display-text', () => {
+                    let karma_gain = shiftDown ? `[${tmp.dea.currencies.karma.formula}]` : formatWhole(tmp.dea.currencies.karma.reset_gain),
+                        souls_gain = shiftDown ? `[${tmp.dea.currencies.souls.formula}]` : formatWhole(tmp.dea.currencies.souls.reset_gain);
+
                     return `You have ${resourceColor(tmp.dea.currencies.karma.color, formatWhole(player.dea.karma), 'font-size:1.5em;')}
+                        (+${resourceColor(tmp.dea.currencies.karma.color, karma_gain)})
                         ${tmp.dea.currencies.karma.name} and
                         ${resourceColor(tmp.dea.currencies.souls.color, formatWhole(player.dea.souls), 'font-size:1.5em;')}
+                        (+${resourceColor(tmp.dea.currencies.souls.color, souls_gain)})
                         ${tmp.dea.currencies.souls.name}`;
                 }],
                 () => { if (D.lte(player.dea.health, 0)) return ['display-text', `You're dead and cannot do anything in row 0`]; },
@@ -552,6 +557,20 @@ addLayer('dea', {
 
                 damage = damage.add(mod.base);
                 damage = damage.times(mod.mult);
+
+                return damage.max(0);
+            },
+        },
+        'golem': {
+            _id: null,
+            get id() { return this._id ??= Object.keys(layers.dea.monsters).find(mon => layers.dea.monsters[mon] == this); },
+            damage() {
+                const mod = tmp.dea.modifiers.damage;
+                let damage = D.add(tmp.xp.monsters[this.id].level, 1);
+
+                damage = damage.add(mod.base);
+                damage = damage.times(mod.mult);
+                damage = damage.pow(1.25);
 
                 return damage.max(0);
             },

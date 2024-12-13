@@ -94,7 +94,7 @@ addLayer('m', {
 
                     const color = tmp.m.modifiers.xp.color,
                         gain = tmp.m.modifiers.xp.gain,
-                        gain_txt = D.gt(gain, 0) ? ` (+ ${resourceColor(color, format(gain))})` : '',
+                        gain_txt = D.gt(gain, 0) ? ` (+${resourceColor(color, format(gain))})` : '',
                         cap = tmp.m.modifiers.xp.cap;
 
                     return `You have ${resourceColor(color, formatWhole(player.m.experience), 'font-size:1.5em')}${gain_txt}\

@@ -344,7 +344,7 @@ addLayer('b', {
             rewardDescription: 'Unlock kill upgrades',
             canComplete() { return D.gte(tmp.xp.kill.total, 500); },
             progress() { return D.div(tmp.xp.kill.total, 500); },
-            display() { return `${formatWhole(tmp.xp.kill.total)} / 500`; },
+            display() { return `${formatWhole(tmp.xp.kill.total)} / 500 kills`; },
             unlocked() { return hasChallenge('b', 21); },
             group: 'relic',
             buttonStyle() {

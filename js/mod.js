@@ -24,7 +24,7 @@ let VERSION = {
 	/**
 	 * The mod's version number, displayed at the top right of the tree tab.
 	 */
-	num: 'R0.3',
+	num: 'R0.3.1',
 	/**
 	 * The version's name, displayed alongside the number in the info tab.
 	 */
@@ -33,6 +33,9 @@ let VERSION = {
 };
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h3>v0.3.1t</h3><br>
+		- Fix golems not dealing damage in Thanatos challenge.<br>
+		- Fix kill upgrades not needing kills.<br>
 	<h3>v0.3: Cast and Wait</h3><br>
 		- Buff levels.<br>
 		- 2 new layers.<br>
