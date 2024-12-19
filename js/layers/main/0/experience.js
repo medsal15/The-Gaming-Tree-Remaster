@@ -552,7 +552,7 @@ addLayer('xp', {
                 return 'Automatically attack all enemies every 4 seconds';
             },
             effect() {
-                if (inChallenge('b', 61)) return d(1.5);
+                if (inChallenge('b', 61)) return D(1.5);
                 return D(.25);
             },
             effectDisplay() {
