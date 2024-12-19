@@ -406,6 +406,8 @@ addLayer('a', {
 
                     if (hasUpgrade('l', 44)) mult = mult.div(upgradeEffect('l', 44));
 
+                    if (hasChallenge('b', 61)) mult = mult.div(2);
+
                     return mult;
                 },
                 total() {
@@ -422,6 +424,7 @@ addLayer('a', {
                 duration = duration.div(tmp.a.spells.speed.effect.cycle_duration);
 
                 if (inChallenge('b', 51)) duration = duration.div(2);
+                if (hasChallenge('b', 61)) duration = duration.div(2);
 
                 return duration;
             },
@@ -431,6 +434,7 @@ addLayer('a', {
                 time = time.times(tmp.a.spells.speed.effect.cycle_time);
 
                 if (inChallenge('b', 51)) time = time.times(2);
+                if (hasChallenge('b', 61)) time = time.times(2);
 
                 return time;
             },
@@ -441,6 +445,8 @@ addLayer('a', {
 
                 if (hasUpgrade('l', 44)) mult = mult.div(upgradeEffect('l', 44));
 
+                if (hasChallenge('b', 61)) mult = mult.div(2);
+
                 return mult;
             },
             duration_mult() {
@@ -448,11 +454,19 @@ addLayer('a', {
 
                 if (hasAchievement('ach', 124)) mult = mult.times(achievementEffect('ach', 124));
 
+                if (hasChallenge('b', 61)) mult = mult.times(2);
+
                 return mult;
             },
         },
         transmute: {
-            arca_cost_mult() { return D.dOne; },
+            arca_cost_mult() {
+                let mult = D.dOne;
+
+                if (hasChallenge('b', 61)) mult = mult.div(2);
+
+                return mult;
+            },
         },
     },
     spells: {

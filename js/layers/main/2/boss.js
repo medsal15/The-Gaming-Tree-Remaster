@@ -459,12 +459,41 @@ addLayer('b', {
                 return 'Mekhane';
             },
             challengeDescription: 'Replace first row automation with multipliers. Disco Ball effect is modified.',
-            //todo
-            goalDescription: '???',
-            rewardDescription: '???',
-            canComplete() { return false; },
-            progress() { return 0; },
-            display() { return ''; },
+            goalDescription: 'Craft an 4 arcane generators, 2 record golems, 1 copper golems',
+            rewardDescription: 'Double factory rate and time. Halve all arca consumption.',
+            canComplete() {
+                /** @type {[items, DecimalSource][]} */
+                const list = [
+                    ['arcane_generator', 4],
+                    ['record_golem', 2],
+                    ['copper_golem', 1],
+                ];
+
+                return list.every(([item, amount]) => D.gte(player.items[item].amount, amount));
+            },
+            progress() {
+                /** @type {[items, DecimalSource][]} */
+                const list = [
+                    ['arcane_generator', 4],
+                    ['record_golem', 2],
+                    ['copper_golem', 1],
+                ];
+
+                return list.map(([item, amount]) => D.min(player.items[item].amount, amount))
+                    .reduce((sum, n) => D.add(sum, n), D.dZero)
+                    .div(7);
+            },
+            display() {
+                /** @type {[items, DecimalSource][]} */
+                const list = [
+                    ['arcane_generator', 4],
+                    ['record_golem', 2],
+                    ['copper_golem', 1],
+                ],
+                    amount = list.map(([item, amount]) => D.min(player.items[item].amount, amount))
+                        .reduce((sum, n) => D.add(sum, n), D.dZero);
+                return `${formatWhole(amount)} / ${formatWhole(7)} items`;
+            },
             unlocked() { return hasChallenge('b', 51); },
             group: 'relic',
             buttonStyle() {

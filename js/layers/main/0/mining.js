@@ -99,9 +99,9 @@ addLayer('m', {
                         cap = tmp.m.modifiers.xp.cap;
 
                     if (D.gt(gain, 1e-3)) {
-                        gain_extra.push(`+${resourceColor(color, gain)}`);
+                        gain_extra.push(`+${resourceColor(color, format(gain))}`);
                         if (D.gt(tmp.m.modifiers.xp.passive, 0)) {
-                            gain_extra.push(`+${resourceColor(color, D.times(gain, tmp.m.modifiers.xp.passive))} /s`);
+                            gain_extra.push(`+${resourceColor(color, format(D.times(gain, tmp.m.modifiers.xp.passive)))} /s`);
                         }
                     }
 
@@ -444,7 +444,7 @@ addLayer('m', {
                 if (!tmp[this.layer].upgrades[this.id].show) return `Buy ${tmp[this.layer].upgrades[this.id - 10].title} to unlock`;
 
                 let text;
-                if (inChallenge('b', 61)) text = 'Multiply damage by 2';
+                if (inChallenge('b', 61)) text = 'Double mining damage';
                 else text = 'Automatically mine current ore once per second';
 
                 if (!hasAchievement('ach', 71)) text += '<br>Unlock the mining handbook';
@@ -1005,12 +1005,12 @@ addLayer('m', {
             description() {
                 if (!tmp[this.layer].upgrades[this.id].show) return `Buy ${tmp[this.layer].upgrades[this.id - 10].title} to unlock`;
 
-                if (inChallenge('b', 61)) return 'Multiply damage by 1.333';
+                if (inChallenge('b', 61)) return '+33% more mining damage';
 
                 return 'Automatically mine current ore once every 3 second';
             },
             effect() {
-                if (inChallenge('b', 61)) return D.div(4 / 3);
+                if (inChallenge('b', 61)) return D.div(4, 3);
                 return D.div(1, 3);
             },
             effectDisplay() {

@@ -306,7 +306,7 @@ addLayer('xp', {
                 if (!tmp[this.layer].upgrades[this.id].show) {
                     return `Unlocked at ${formatWhole(this.kills)} kills`;
                 }
-                if (inChallenge('b', 61)) return 'Multiply damage by 3';
+                if (inChallenge('b', 61)) return 'Triple attack damage';
                 return 'Automatically attack current enemy once per second';
             },
             canAfford() { return tmp[this.layer].upgrades[this.id].show; },
@@ -548,7 +548,7 @@ addLayer('xp', {
         52: {
             title: 'Pitfall',
             description() {
-                if (inChallenge('b', 61)) return 'Multiply damage by 1.5';
+                if (inChallenge('b', 61)) return 'Deal +50% damage, again';
                 return 'Automatically attack all enemies every 4 seconds';
             },
             effect() {

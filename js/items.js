@@ -1647,7 +1647,7 @@ const item_list = {
         name: 'pheromones',
         icon() {
             if (inChallenge('b', 41)) return [14, 15];
-            return [14, 14];
+            return [14, 7];
         },
         row: 1,
         sources: {

@@ -57,6 +57,7 @@ addLayer('c', {
             content: [
                 ['buyable', 11],
                 'blank',
+                ['display-text', () => `You can craft up to ${formatWhole(tmp.c.crafting.max)} items at once`],
                 ['clickable', 'crafting_craftable'],
                 ['microtabs', 'crafting'],
             ],
@@ -86,6 +87,7 @@ addLayer('c', {
                 ['buyable', 21],
                 ['buyables', [3, 4]],
                 'blank',
+                ['display-text', () => `You can craft up to ${formatWhole(tmp.c.crafting.max)} items at once`],
                 ['clickable', 'forge_craftable'],
                 ['microtabs', 'forge'],
             ],
