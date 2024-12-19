@@ -23,3 +23,7 @@ table.layer-table,
     background-color: var(--background, black);
     opacity: 0.75;
 }
+
+.undefined {
+    font-family: 'Courier New', Courier, monospace;
+}

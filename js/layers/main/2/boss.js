@@ -2,7 +2,7 @@
 
 const BOSS_SIZES = {
     width: 5,
-    height: 3,
+    height: 4,
 };
 
 addLayer('b', {
@@ -81,10 +81,10 @@ addLayer('b', {
             },
             unlocked() { return D.gte(tmp.b.groups.boss.completions, 1); },
         },
-        'Relics': {
+        'Gods': {
             content: [
                 ['display-text', () => {
-                    return `You have obtained ${resourceColor(tmp.b.groups.relic.color, formatWhole(tmp.b.groups.relic.completions), 'font-size:1.5em;')} relics`;
+                    return `You have completed ${resourceColor(tmp.b.groups.relic.color, formatWhole(tmp.b.groups.relic.completions), 'font-size:1.5em;')} divine quests`;
                 }],
                 'blank',
                 ['bar', 'progress'],
@@ -298,7 +298,15 @@ addLayer('b', {
                 return { 'backgroundColor': tmp.b.groups[group].color, };
             },
         },
-        //todo 42: ???
+        /**
+         * TODO 42: Alternator
+         *  slime -> ice cube (hp is static, def increases with level)
+         *  skeleton -> ghost (low hp, low damage)
+         *  golem -> puppet (low hp, chance to miss)
+         *  bug -> error (glitchy name, "random" health mult based on killed amount)
+         * goal: ???
+         * reward: ???
+         */
         // Mini
         21: {
             name: 'Slime Monarch',
@@ -409,7 +417,7 @@ addLayer('b', {
                 return text;
             },
             goalDescription: `Deliver all 4 packages`,
-            rewardDescription: `You can buy basic monster drops again, and stone may now drop mud`, //todo is this good enough?
+            rewardDescription: `You can buy basic monster drops again, stone may now drop mud, gain 25% more coins`,
             canComplete() {
                 /** @type {items[]} */
                 const list = ['package_1', 'package_2', 'package_3', 'package_4'],
@@ -445,7 +453,25 @@ addLayer('b', {
             },
             onEnter() { player.wor.position = [12, 12]; },
         },
-        //todo 61: ???
+        61: {
+            name() {
+                if (!hasChallenge(this.layer, this.id)) return 'Strange Cultists';
+                return 'Mekhane';
+            },
+            challengeDescription: 'Replace first row automation with multipliers. Disco Ball effect is modified.',
+            //todo
+            goalDescription: '???',
+            rewardDescription: '???',
+            canComplete() { return false; },
+            progress() { return 0; },
+            display() { return ''; },
+            unlocked() { return hasChallenge('b', 51); },
+            group: 'relic',
+            buttonStyle() {
+                const group = tmp[this.layer].challenges[this.id].group;
+                return { 'backgroundColor': tmp.b.groups[group].color, };
+            },
+        },
         // Dungeon
         71: {
             name: 'The Dungeon',
@@ -646,7 +672,7 @@ addLayer('b', {
                     .reduce((sum, id) => D.add(sum, challengeCompletions('b', id)), D.dZero);
             },
             color: '#55CCCC',
-            rows: [3],
+            rows: [3, 6],
         },
         dungeon: {
             completions() {
@@ -771,7 +797,7 @@ addLayer('b', {
                 Sometimes it turns into an arrow.`,
             challenge: 51,
         },
-        // Relics
+        // Gods
         'thanatos': {
             _id: null,
             get id() { return this._id ??= Object.entries(layers.b.bosses).find(([, r]) => r == this)[0]; },
@@ -793,6 +819,29 @@ addLayer('b', {
                 Your entrepreneurship has inspired him to hire you.<br>
                 It's just a small delivery, how hard could it be?`,
             challenge: 32,
+        },
+        'mekhane': {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.b.bosses).find(([, r]) => r == this)[0]; },
+            unlocked() { return tmp.b.challenges[61].unlocked; },
+            name() {
+                if (!hasChallenge('b', 61)) return 'Strange Cultists';
+                return 'Mekhane';
+            },
+            position() {
+                if (!hasChallenge('b', 61)) return [2, 2];
+                return [2, 3];
+            },
+            lore() {
+                if (!hasChallenge('b', 61)) return `A group of strange cultists who seem to be worshipping an unknown deity.<br>
+                    Their task is surprisingly simple. You can't help but be cautious...<br>
+                    Surely, whatever they want to repair isn't too big, right?`;
+
+                return `An ancient god made of mechanical parts. Some of which you don't even recognize.<br>
+                    Seems to have fought a different deity long ago.<br>
+                    It's as big as a mountain, if not bigger. It's not gonna eat one, is it?`;
+            },
+            challenge: 61,
         },
         // Dungeon
         'dungeon': {

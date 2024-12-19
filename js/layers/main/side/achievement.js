@@ -605,6 +605,7 @@ addLayer('ach', {
             name: 'I Heard You Like Recursion',
             tooltip() {
                 if (player.b.dungeon.max < 1) return 'Kill the ???';
+                if (player.b.dungeon.max >= 3) return 'Kill the Recur<span class="undefined">undefined</span>'
                 return 'Kill the Recurslime';
             },
             done() { return false; },

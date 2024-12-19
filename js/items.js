@@ -3231,12 +3231,15 @@ const item_list = {
             let speed = D.root(x, 2).div(10),
                 cost_div = D.add(x, 1).root(4).pow_base(175);
 
+            if (inChallenge('b', 61)) speed = speed.add(1);
+
             return { speed, cost_div, };
         },
         effectDescription(amount) {
             let speed, cost_div;
             if (shiftDown) {
                 speed = '[2√(amount) / 10]';
+                if (inChallenge('b', 61)) speed = '[2√(amount) / 10 + 1]';
                 cost_div = '[175 ^ 4√(amount + 1)]';
             } else {
                 const x = D(amount ?? player.items[this.id].amount),
@@ -3246,7 +3249,11 @@ const item_list = {
                 cost_div = format(effect.cost_div);
             }
 
-            return `Increases auto mining and attacking speed by ${speed}, and divides silver ingot use costs by ${cost_div}`;
+            let text = '';
+            if (inChallenge('b', 61)) text = `Multiply mining and attacking damage by ${speed}`;
+            else text = `Increases auto mining and attacking speed by ${speed}`;
+
+            return `${text}, and divides silver ingot use costs by ${cost_div}`;
         },
         unlocked() { return tmp.c.forge.unlocked; },
     },

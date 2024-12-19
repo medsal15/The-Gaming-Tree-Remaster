@@ -325,6 +325,7 @@ addLayer('s', {
                 mult = mult.times(item_effect('electrum_coin_mold').coin_mult);
 
                 if (inChallenge('b', 12)) mult = mult.times(tmp.c.chance_multiplier);
+                if (hasChallenge('b', 32)) mult = mult.times(1.25);
 
                 return mult;
             },

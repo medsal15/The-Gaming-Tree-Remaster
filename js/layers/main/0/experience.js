@@ -306,6 +306,7 @@ addLayer('xp', {
                 if (!tmp[this.layer].upgrades[this.id].show) {
                     return `Unlocked at ${formatWhole(this.kills)} kills`;
                 }
+                if (inChallenge('b', 61)) return 'Multiply damage by 3';
                 return 'Automatically attack current enemy once per second';
             },
             canAfford() { return tmp[this.layer].upgrades[this.id].show; },
@@ -319,9 +320,13 @@ addLayer('xp', {
                     };
                 }
             },
-            effect() { return D.dOne; },
+            effect() {
+                if (inChallenge('b', 61)) return D(3);
+                return D.dOne;
+            },
             effectDisplay() {
                 if (!tmp[this.layer].upgrades[this.id].show) return '';
+                if (inChallenge('b', 61)) return `*${formatWhole(upgradeEffect(this.layer, this.id))}`;
                 return `+${formatWhole(upgradeEffect(this.layer, this.id))}`;
             },
         },
@@ -542,9 +547,18 @@ addLayer('xp', {
         },
         52: {
             title: 'Pitfall',
-            description: 'Automatically attack all enemies every 4 seconds',
-            effect() { return D(.25); },
-            effectDisplay() { return `+${format(upgradeEffect(this.layer, this.id))}`; },
+            description() {
+                if (inChallenge('b', 61)) return 'Multiply damage by 1.5';
+                return 'Automatically attack all enemies every 4 seconds';
+            },
+            effect() {
+                if (inChallenge('b', 61)) return d(1.5);
+                return D(.25);
+            },
+            effectDisplay() {
+                if (inChallenge('b', 61)) return `*${format(upgradeEffect(this.layer, this.id))}`;
+                return `+${format(upgradeEffect(this.layer, this.id))}`;
+            },
             cost: D(40),
             currencyDisplayName: 'kills',
             currencyLocation() { return tmp.xp.kill; },
@@ -1525,6 +1539,12 @@ addLayer('xp', {
                 mult = mult.times(item_effect('chrome_coating').damage_mult);
 
                 if (hasChallenge('b', 21)) mult = mult.times(2);
+                if (inChallenge('b', 61)) {
+                    if (hasUpgrade('xp', 22)) mult = mult.times(upgradeEffect('xp', 22));
+                    if (hasUpgrade('xp', 52)) mult = mult.times(upgradeEffect('xp', 52));
+
+                    mult = mult.times(item_effect('disco_ball').speed);
+                }
 
                 if (hasUpgrade('dea', 11)) mult = mult.times(upgradeEffect('dea', 11));
 
@@ -1533,6 +1553,8 @@ addLayer('xp', {
         },
         speed: {
             active() {
+                if (inChallenge('b', 61)) return D.dZero;
+
                 let speed = D.dZero;
 
                 speed = speed.add(item_effect('disco_ball').speed);
@@ -1544,6 +1566,8 @@ addLayer('xp', {
                 return speed;
             },
             passive() {
+                if (inChallenge('b', 61)) return D.dZero;
+
                 let speed = D.dZero;
 
                 if (hasUpgrade('xp', 52)) speed = speed.add(upgradeEffect('xp', 52));

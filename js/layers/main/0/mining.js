@@ -250,6 +250,7 @@ addLayer('m', {
         },
     },
     upgrades: {
+        // Basic
         11: {
             title: 'Stone Pick',
             description: '+1 mining damage',
@@ -442,15 +443,21 @@ addLayer('m', {
             description() {
                 if (!tmp[this.layer].upgrades[this.id].show) return `Buy ${tmp[this.layer].upgrades[this.id - 10].title} to unlock`;
 
-                let text = 'Automatically mine current ore once per second';
+                let text;
+                if (inChallenge('b', 61)) text = 'Multiply damage by 2';
+                else text = 'Automatically mine current ore once per second';
 
                 if (!hasAchievement('ach', 71)) text += '<br>Unlock the mining handbook';
 
                 return text;
             },
-            effect() { return D.dOne; },
+            effect() {
+                if (inChallenge('b', 61)) return D.dTwo;
+                return D.dOne;
+            },
             effectDisplay() {
                 if (!tmp[this.layer].upgrades[this.id].show) return '';
+                if (inChallenge('b', 61)) return `*${formatWhole(upgradeEffect(this.layer, this.id))}`;
                 return `+${formatWhole(upgradeEffect(this.layer, this.id))}`;
             },
             show() { return hasUpgrade(this.layer, this.id - 10) || hasUpgrade(this.layer, this.id) || hasAchievement('ach', 94); },
@@ -807,6 +814,7 @@ addLayer('m', {
             currencyLocation() { return player.items[this.item]; },
             currencyInternalName: 'amount',
         },
+        // Deep
         41: {
             title: 'Densium Pick',
             description: 'Multiply mining damage by amount of ores being mined',
@@ -997,13 +1005,17 @@ addLayer('m', {
             description() {
                 if (!tmp[this.layer].upgrades[this.id].show) return `Buy ${tmp[this.layer].upgrades[this.id - 10].title} to unlock`;
 
-                let text = 'Automatically mine current ore once every 3 second';
+                if (inChallenge('b', 61)) return 'Multiply damage by 1.333';
 
-                return text;
+                return 'Automatically mine current ore once every 3 second';
             },
-            effect() { return D.div(1, 3); },
+            effect() {
+                if (inChallenge('b', 61)) return D.div(4 / 3);
+                return D.div(1, 3);
+            },
             effectDisplay() {
                 if (!tmp[this.layer].upgrades[this.id].show) return '';
+                if (inChallenge('b', 61)) return `*${format(upgradeEffect(this.layer, this.id))}`;
                 return `+${formatWhole(upgradeEffect(this.layer, this.id))}`;
             },
             show() { return hasUpgrade(this.layer, this.id - 10) || hasUpgrade(this.layer, this.id) || hasAchievement('ach', 94); },
@@ -1097,7 +1109,9 @@ addLayer('m', {
             description() {
                 if (!tmp[this.layer].upgrades[this.id].show) return `Buy ${tmp[this.layer].upgrades[this.id - 10].title} to unlock`;
 
-                let text = 'Broken ores increase automatic mining speed';
+                let text;
+                if (inChallenge('b', 61)) text = 'Broken ores increase mining damage';
+                else text = 'Broken ores increase automatic mining speed';
 
                 if (shiftDown) text += '<br>Formula: log16(broken ores + 1) / 10';
 
@@ -1814,6 +1828,10 @@ addLayer('m', {
 
                 if (hasUpgrade('dea', 12)) base = base.add(upgradeEffect('dea', 12));
 
+                if (inChallenge('b', 61)) {
+                    if (hasUpgrade('m', 54)) base = base.add(upgradeEffect('m', 54));
+                }
+
                 return base;
             },
             mult() {
@@ -1830,10 +1848,19 @@ addLayer('m', {
                 mult = mult.times(item_effect('copper_pick').damage);
                 mult = mult.times(item_effect('chrome_coating').damage_mult);
 
+                if (inChallenge('b', 61)) {
+                    if (hasUpgrade('m', 22)) mult = mult.times(upgradeEffect('m', 22));
+                    if (hasUpgrade('m', 52)) mult = mult.times(upgradeEffect('m', 52));
+
+                    mult = mult.times(item_effect('disco_ball').speed);
+                }
+
                 return mult;
             },
             total() { return D.times(tmp.m.modifiers.damage.base, tmp.m.modifiers.damage.mult); },
             speed() {
+                if (inChallenge('b', 61)) return D.dZero;
+
                 let speed = D.dZero;
 
                 speed = speed.add(item_effect('disco_ball').speed);
