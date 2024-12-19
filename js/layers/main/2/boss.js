@@ -123,7 +123,7 @@ addLayer('b', {
                     let lines = '';
                     for (let i = 0; i <= player.b.dungeon.max; i++) {
                         const active = (i <= player.b.dungeon.floor && inChallenge('b', 71)) ? '' : ' <i>(inactive)</i>';
-                        if (lines.length) lines += '<br><br>';
+                        if (lines.length) lines += '<br>';
                         let color = `#${(15 - i).toString(16).repeat(6)}`;
                         lines += `<div style="color:${color}"><b>Floor ${formatWhole(i)}${active}</b><br>\
                             ${run(layers.b.dungeon[i].effectDisplay, layers.b.dungeon[i])}</div>`;
@@ -136,7 +136,7 @@ addLayer('b', {
                     let lines = '';
                     for (let i = 0; i <= player.b.dungeon.max; i++) {
                         const active = (i < player.b.dungeon.max && inChallenge('b', 71)) ? '' : ' <i>(inactive)</i>';
-                        if (lines.length) lines += '<br><br>';
+                        if (lines.length) lines += '<br>';
                         let color = `#${(15 - i).toString(16).repeat(6)}`;
                         lines += `<div style="color:${color}"><b>Floor ${formatWhole(i)}${active}</b><br>\
                             ${run(layers.b.dungeon[i].rewardDisplay, layers.b.dungeon[i])}</div>`;
@@ -594,6 +594,7 @@ addLayer('b', {
             onClick() {
                 player.b.dungeon.floor += 1;
                 doReset('b', true);
+                if (player.b.dungeon.floor > player.b.dungeon.max) player.b.dungeon.max = player.b.dungeon.floor;
             },
             canClick() {
                 return ((player.b.dungeon.floor + 1) in tmp.b.dungeon) &&
@@ -739,6 +740,7 @@ addLayer('b', {
     shouldNotify() {
         const chal = activeChallenge('b');
         if (!chal) return false;
+        if (chal == 71 && player.b.dungeon.max == player.b.dungeon.floor && tmp.b.dungeon[player.b.dungeon.floor].canComplete) return true;
         return canCompleteChallenge('b', chal);
     },
     bosses: {
