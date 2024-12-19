@@ -776,7 +776,62 @@ addLayer('ach', {
             },
             unlocked() { return hasChallenge('b', 41); },
         },
-        //todo boss 61 achievements
+        142: {
+            name: `Broken Trap`,
+            tooltip() { return `Buy a Trap in ${tmp.b.challenges[61].name}`; },
+            done() { return inChallenge('b', 61) && hasUpgrade('xp', 22); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.b.groups.relic.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.b.groups.relic.color;
+
+                return style;
+            },
+            unlocked() { return hasChallenge('b', 51); },
+        },
+        143: {
+            name: `Drillless`,
+            tooltip() { return `Buy a Drill in ${tmp.b.challenges[61].name}`; },
+            done() { return inChallenge('b', 61) && [22, 52, 54, 61].some(id => hasUpgrade('m', id)); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.b.groups.relic.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.b.groups.relic.color;
+
+                return style;
+            },
+            unlocked() { return hasChallenge('b', 51); },
+        },
+        144: {
+            name: `Panic!`,
+            tooltip() { return `Craft a Disco Ball in ${tmp.b.challenges[61].name}`; },
+            done() { return inChallenge('b', 61) && D.gte(player.items.disco_ball.amount, 1); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.b.groups.relic.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.b.groups.relic.color;
+
+                return style;
+            },
+            unlocked() { return hasChallenge('b', 51); },
+        },
+        145: {
+            name: `This One Is Automated`,
+            tooltip() { return `Cast ${tmp.a.spells.drain.name} in ${tmp.b.challenges[61].name}`; },
+            done() { return inChallenge('b', 61) && D.gte(player.a.spells.drain.cast, 1); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.b.groups.relic.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.b.groups.relic.color;
+
+                return style;
+            },
+            unlocked() { return hasChallenge('b', 51); },
+        },
         //#endregion Bonus
         //#region Secret
         21: {

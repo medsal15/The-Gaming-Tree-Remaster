@@ -386,7 +386,7 @@ addLayer('a', {
                                 [D.gt(trecipe.heat, 0) ? 'smelter' : 'combiner', D.dOne],
                             ],
                             upkeep = cost.map(([item, amount]) => D.times(tmp.a.upkeep[item] ?? 0, amount))
-                                .reduce((sum, upkeep) => D.add(sum, upkeep), D.dZero).times(mult);
+                                .reduce((sum, upkeep) => D.add(sum, upkeep), D.dZero);
 
                         base = base.add(upkeep);
                     });

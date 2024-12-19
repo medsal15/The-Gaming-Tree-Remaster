@@ -1257,7 +1257,8 @@ function arcane_show_chain(chain) {
         [D.gt(trecipe.heat, 0) ? 'smelter' : 'combiner', D.dOne],
     ],
         upkeep = cost.map(([item, amount]) => D.times(tmp.a.upkeep[item] ?? 0, amount))
-            .reduce((sum, upkeep) => D.add(sum, upkeep), D.dZero),
+            .reduce((sum, upkeep) => D.add(sum, upkeep), D.dZero)
+            .times(tmp.a.modifiers.arca.loss.mult),
         continuous = thain?.continuous ?? (D.gt(trecipe.heat, 0) || D.lte(trecipe.duration, 0)),
         /** @type {(list: ReturnType<square<['tile', tile]>>) => TabFormatEntries<'a'>} */
         line = list => {
