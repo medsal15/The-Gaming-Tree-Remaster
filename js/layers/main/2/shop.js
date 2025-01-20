@@ -102,6 +102,131 @@ addLayer('s', {
                 ['microtabs', 'buy'],
             ],
         },
+        'Dungeon Workers': {
+            content: [
+                ['display-text', () => {
+                    let list = tmp.s.coins.list
+                        .filter(([item]) => D.gt(player.items[item].amount, 0))
+                        .map(([item]) => item)
+                        .reverse();
+
+                    if (!list.length) list.push('coin_copper');
+
+                    list = list.map((item) => `${resourceColor(tmp.items[item].color, formatWhole(player.items[item].amount), 'font-size:1.5em;')} ${tmp.items[item].name}`);
+
+                    return `You have ${listFormat.format(list)}`;
+                }],
+                () => {
+                    if (inChallenge('b', 71)) return ['display-text', `<span class="warning">\
+                    Due to the Dungeon's pressure,\
+                        worker speed is divided by ${formatWhole(D.pow(tmp.s.modifiers.worker.mult, -1))}\
+                    </span>`];
+                },
+                'blank',
+                ['microtabs', 'workers'],
+            ],
+            unlocked() { return D.gte(player.b.dungeon.max, 3); },
+            buttonStyle: {
+                'borderColor'() { return tmp.b.groups.dungeon.color; },
+            },
+        },
+    },
+    buyables: {
+        // Slime workers
+        11: {
+            title() { return `${formatWhole(getBuyableAmount(this.layer, this.id))} Goo Collectors`; },
+            cost(x) {
+                return D.pow(1.25, x).times(25);
+            },
+            effect(x) {
+                let gain = D.div(x, 2);
+
+                gain = gain.times(item_effect('densium_slime').slime_mult);
+
+                gain = gain.times(tmp.s.modifiers.worker.mult);
+
+                return { 'slime_goo': gain };
+            },
+            display() {
+                const list = value_coin(tmp[this.layer].buyables[this.id].cost);
+                if (list.length > 2) list.length = 2;
+                let cost = shiftDown ? '[25 * 1.25 ^ amount]' : listFormat.format(list.map(([item, amount]) => `${formatWhole(amount)} ${tmp.items[item].name}`)),
+                    effect = shiftDown ? '[amount / 2]' : format(buyableEffect(this.layer, this.id)['slime_goo']);
+
+                return `Collecting ${effect} ${tmp.items.slime_goo.name} per second.<br><br>
+                    Costs: ${cost}`;
+            },
+            canAfford() { return D.gte(tmp.s.coins.total, tmp[this.layer].buyables[this.id].cost); },
+            buy() {
+                if (!D.gte(tmp.s.coins.total, tmp[this.layer].buyables[this.id].cost)) return;
+                spend_coins(tmp[this.layer].buyables[this.id].cost);
+                addBuyables(this.layer, this.id, 1);
+            },
+        },
+        12: {
+            title() { return `${formatWhole(getBuyableAmount(this.layer, this.id))} Core Shard Collectors`; },
+            cost(x) {
+                return D.pow(1.5, x).times(100);
+            },
+            effect(x) {
+                let gain = D.div(x, 7);
+
+                gain = gain.times(item_effect('densium_slime').slime_mult);
+
+                gain = gain.times(tmp.s.modifiers.worker.mult);
+
+                return { 'slime_core_shard': gain };
+            },
+            display() {
+                const list = value_coin(tmp[this.layer].buyables[this.id].cost);
+                if (list.length > 2) list.length = 2;
+                let cost = shiftDown ? '[100 * 1.5 ^ amount]' : listFormat.format(list.map(([item, amount]) => `${formatWhole(amount)} ${tmp.items[item].name}`)),
+                    effect = shiftDown ? '[amount / 7]' : format(buyableEffect(this.layer, this.id)['slime_core_shard']);
+
+                return `Collecting ${effect} ${tmp.items.slime_core_shard.name} per second.<br><br>
+                    Costs: ${cost}`;
+            },
+            canAfford() { return D.gte(tmp.s.coins.total, tmp[this.layer].buyables[this.id].cost); },
+            buy() {
+                if (!D.gte(tmp.s.coins.total, tmp[this.layer].buyables[this.id].cost)) return;
+                spend_coins(tmp[this.layer].buyables[this.id].cost);
+                addBuyables(this.layer, this.id, 1);
+            },
+        },
+        13: {
+            title() { return `${formatWhole(getBuyableAmount(this.layer, this.id))} Core Collectors`; },
+            cost(x) {
+                return D.pow(1.75, x).times(500);
+            },
+            effect(x) {
+                let gain = D.div(x, 24);
+
+                gain = gain.times(item_effect('densium_slime').slime_mult);
+
+                let die_mult = D.add(1, item_effect('slime_die').core_chance);
+                if (inChallenge('b', 41)) die_mult = D.add(die_mult, .5);
+                gain = gain.times(die_mult);
+
+                gain = gain.times(tmp.s.modifiers.worker.mult);
+
+                return { 'slime_core': gain };
+            },
+            display() {
+                const list = value_coin(tmp[this.layer].buyables[this.id].cost);
+                if (list.length > 2) list.length = 2;
+                let cost = shiftDown ? '[500 * 1.75 ^ amount]' : listFormat.format(list.map(([item, amount]) => `${formatWhole(amount)} ${tmp.items[item].name}`)),
+                    effect = shiftDown ? '[amount / 24]' : format(buyableEffect(this.layer, this.id)['slime_core']);
+
+                return `Collecting ${effect} ${tmp.items.slime_core.name} per second.<br><br>
+                    Costs: ${cost}`;
+            },
+            canAfford() { return D.gte(tmp.s.coins.total, tmp[this.layer].buyables[this.id].cost); },
+            buy() {
+                if (!D.gte(tmp.s.coins.total, tmp[this.layer].buyables[this.id].cost)) return;
+                spend_coins(tmp[this.layer].buyables[this.id].cost);
+                addBuyables(this.layer, this.id, 1);
+            },
+        },
     },
     upgrades: {
         11: {
@@ -311,6 +436,16 @@ addLayer('s', {
     microtabs: {
         sell: { ...shop_subtabs_sell(), },
         buy: { ...shop_subtabs_buy(), },
+        workers: {
+            'Gooey': {
+                content: [
+                    ['buyables', [1]],
+                ],
+                buttonStyle: {
+                    'borderColor'() { return tmp.b.groups.dungeon.color; },
+                },
+            },
+        },
     },
     modifiers: {
         coin: {
@@ -344,6 +479,12 @@ addLayer('s', {
 
                 return mult;
             }
+        },
+        worker: {
+            mult() {
+                if (inChallenge('b', 71)) return D.div(1, player.b.dungeon.floor);
+                return D.dOne;
+            },
         },
     },
     coins: {
@@ -420,6 +561,13 @@ addLayer('s', {
         if (D.mod(player.s.sell_amount, 1).neq(0)) {
             player.s.sell_amount = D.round(player.s.sell_amount);
         }
+    },
+    update(diff) {
+        Object.values(tmp.s.buyables)
+            .filter(data => typeof data == 'object' && D.gt(getBuyableAmount('s', data.id), 0))
+            .forEach(data => {
+                Object.entries(data.effect).forEach(([item, gain]) => gain_items(item, D.times(gain, diff)));
+            });
     },
     doReset(layer) {
         if (tmp[layer].row < this.row) return;

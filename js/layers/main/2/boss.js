@@ -106,6 +106,7 @@ addLayer('b', {
                     return `You are on floor ${formatWhole(player.b.dungeon.floor)} floor of the Dungeon`;
                 }],
                 'blank',
+                ['display-text', `<span class="warning">Changing floor will perform a boss reset!</span>`],
                 ['clickables', [2]],
                 ['column', () => {
                     if (player.b.dungeon.floor == player.b.dungeon.max) {
@@ -118,31 +119,8 @@ addLayer('b', {
                 }],
                 ['challenges', () => tmp.b.groups.dungeon.rows],
                 'blank',
-                ['display-text', '<u>Current Dungeon effects:</u>'],
-                ['display-text', () => {
-                    let lines = '';
-                    for (let i = 0; i <= player.b.dungeon.max; i++) {
-                        const active = (i <= player.b.dungeon.floor && inChallenge('b', 71)) ? '' : ' <i>(inactive)</i>';
-                        if (lines.length) lines += '<br>';
-                        let color = `#${(15 - i).toString(16).repeat(6)}`;
-                        lines += `<div style="color:${color}"><b>Floor ${formatWhole(i)}${active}</b><br>\
-                            ${run(layers.b.dungeon[i].effectDisplay, layers.b.dungeon[i])}</div>`;
-                    }
-                    return lines;
-                }],
-                'blank',
-                ['display-text', '<u>Current Dungeon rewards:</u>'],
-                ['display-text', () => {
-                    let lines = '';
-                    for (let i = 0; i <= player.b.dungeon.max; i++) {
-                        const active = (i < player.b.dungeon.max && inChallenge('b', 71)) ? '' : ' <i>(inactive)</i>';
-                        if (lines.length) lines += '<br>';
-                        let color = `#${(15 - i).toString(16).repeat(6)}`;
-                        lines += `<div style="color:${color}"><b>Floor ${formatWhole(i)}${active}</b><br>\
-                            ${run(layers.b.dungeon[i].rewardDisplay, layers.b.dungeon[i])}</div>`;
-                    }
-                    return lines;
-                }],
+                ['infobox', 'dungeff'],
+                ['infobox', 'dungrew'],
             ],
             buttonStyle: {
                 'borderColor'() { return tmp.b.groups.dungeon.color; },
@@ -221,14 +199,39 @@ addLayer('b', {
     challenges: {
         // Main
         11: {
-            name: 'Slime Sovereign',
-            challengeDescription: `Fight the Slime Sovereign and anger the slimes.<br>\
-                Double slime health and experience, slime items effects are boosted.`,
-            goalDescription: 'Kill 490 slimes',
-            rewardDescription: `+50% slime experience, slime items effects boost is kept, unlock a new enemy, and XP upgrades stay unlocked`,
-            canComplete() { return D.gte(tmp.xp.kill.total, 490); },
+            name() {
+                let name = 'Slime Sovereign';
+
+                if (tmp.xp.monsters.slime.disabled) name = name.replaceAll(/slime/ig, _ => UNDEFTXT);
+
+                return name;
+            },
+            challengeDescription() {
+                let text = `Fight the Slime Sovereign and anger the slimes.<br>\
+                    Double slime health and experience, slime items effects are boosted.`
+
+                if (tmp.xp.monsters.slime.disabled) text = text.replaceAll(/slime/ig, _ => UNDEFTXT);
+
+                return text;
+            },
+            goalDescription() {
+                if (tmp.xp.monsters.slime.disabled) return `Kill ${format(NaN)} ${UNDEFTXT}`;
+                return 'Kill 490 slimes';
+            },
+            rewardDescription() {
+                let text = `+50% slime experience, slime items effects boost is kept, unlock a new enemy, and XP upgrades stay unlocked`;
+
+                if (tmp.xp.monsters.slime.disabled) text = text.replaceAll(/slime/ig, _ => UNDEFTXT);
+
+                return text;
+            },
+            canComplete() { return D.gte(tmp.xp.kill.total, 490) || hasAchievement('ach', 132); },
             progress() { return D.div(tmp.xp.kill.total, 490); },
-            display() { return `${formatWhole(tmp.xp.kill.total)} / ${formatWhole(490)} kills`; },
+            display() {
+                let goal = 490;
+                if (tmp.xp.monsters.slime.disabled) goal = NaN;
+                return `${formatWhole(tmp.xp.kill.total)} / ${formatWhole(goal)} kills`;
+            },
             unlocked() { return player.b.shown && player.b.visible_challenges.includes(this.id); },
             onEnter() { player.b.shown = true; },
             group: 'boss',
@@ -327,14 +330,39 @@ addLayer('b', {
         },
         // Mini
         21: {
-            name: 'Slime Monarch',
-            challengeDescription: `Fight the Slime Monarch and anger the slimes, again.<br>\
-                Double slime health and half experience, slime items effects are nerfed.`,
-            goalDescription: 'Kill 360 slimes',
-            rewardDescription: `Double damage, slime die level is increased by 1`,
-            canComplete() { return D.gte(player.xp.monsters.slime.kills, 360); },
+            name() {
+                let name = 'Slime Monarch';
+
+                if (tmp.xp.monsters.slime.disabled) name = name.replaceAll(/slime/ig, _ => UNDEFTXT);
+
+                return name;
+            },
+            challengeDescription() {
+                let text = `Fight the Slime Monarch and anger the slimes, again.<br>\
+                    Double slime health and half experience, slime items effects are nerfed.`
+
+                if (tmp.xp.monsters.slime.disabled) text = text.replaceAll(/slime/ig, _ => UNDEFTXT);
+
+                return text;
+            },
+            goalDescription() {
+                if (tmp.xp.monsters.slime.disabled) return `Kill ${format(NaN)} ${UNDEFTXT}`;
+                return 'Kill 360 slimes';
+            },
+            rewardDescription() {
+                let text = `Double damage, slime die level is increased by 1`;
+
+                if (tmp.xp.monsters.slime.disabled) text = text.replaceAll(/slime/ig, _ => UNDEFTXT);
+
+                return text;
+            },
+            canComplete() { return D.gte(player.xp.monsters.slime.kills, 360) || hasAchievement('ach', 132); },
             progress() { return D.div(player.xp.monsters.slime.kills, 360); },
-            display() { return `${formatWhole(player.xp.monsters.slime.kills)} / ${formatWhole(360)} kills`; },
+            display() {
+                let goal = 360;
+                if (tmp.xp.monsters.slime.disabled) goal = NaN;
+                return `${formatWhole(tmp.xp.kill.total)} / ${formatWhole(goal)} kills`;
+            },
             unlocked() { return hasChallenge('b', 11); },
             group: 'mini',
             buttonStyle() {
@@ -528,7 +556,7 @@ addLayer('b', {
             rewardDescription() { return 'Whatever lies at the bottom of the Dungeon will be yours.'; },
             canComplete() { return false; },
             progress() { return 0; },
-            display() { return `${formatWhole(0)} / ${formatWhole(10)}`; },
+            display() { return `${formatWhole(player.b.dungeon.max)} / ??? floors cleared`; },
             unlocked() { return hasChallenge('b', 41); },
             group: 'dungeon',
             buttonStyle() {
@@ -600,6 +628,7 @@ addLayer('b', {
             },
             onClick() { player.b.dungeon.floor = Math.max(0, player.b.dungeon.floor - 1); },
             canClick() { return (player.b.dungeon.floor - 1) in tmp.b.dungeon && inChallenge('b', 71); },
+            tooltip: 'Go up a floor',
         },
         22: {
             style: {
@@ -621,6 +650,7 @@ addLayer('b', {
                         tmp.b.dungeon[player.b.dungeon.floor].canComplete
                     );
             },
+            tooltip: 'Go down a floor',
         },
     },
     dungeon: {
@@ -669,7 +699,7 @@ addLayer('b', {
                 let xp_health_pow = shiftDown ? '[floor / 5]' : format(effect.xp_health_pow),
                     m_health = shiftDown ? '[floor / 2 + 1]' : format(effect.m_health);
 
-                return `Power enemy health by +^${xp_health_pow} and multiply ore health by ${m_health}`;
+                return `Power enemy health by +^${xp_health_pow}<br>Multiply ore health by ${m_health}`;
             },
             reward() {
                 return {
@@ -681,12 +711,63 @@ addLayer('b', {
                 const reward = tmp.b.dungeon[this.floor].reward;
 
                 let ore_mult = shiftDown ? '[max floor / 4 + 1]' : format(reward.ore_mult),
-                    m_xp_passive = shiftDown ? '[max floor / 100]' : formatWhole(D.times(reward.m_xp_passive, 100)) + '%';
+                    m_xp_passive = shiftDown ? '[max floor / 100]' : `${formatWhole(D.times(reward.m_xp_passive, 100))}%`;
 
-                return `Multiply ore gain by ${ore_mult}, and passively generate ${m_xp_passive} mining experience every second`;
+                return `Multiply ore gain by ${ore_mult}<br>Passively generate ${m_xp_passive} mining experience every second (if unlocked)`;
             },
             canComplete() { return (player.b.dungeon.max > this.floor) || D.gte(tmp.xp.kill.total, 200); },
             requirement() { return `Kill ${formatWhole(tmp.xp.kill.total)} / 200 enemies`; },
+        },
+        2: {
+            _floor: null,
+            get floor() { return this._floor ??= +Object.entries(layers.b.dungeon).find(([, r]) => r == this)[0]; },
+            effect() {
+                return {
+                    l_div: D.div(player.b.dungeon.floor, 10).add(1),
+                    xp_div: D.div(player.b.dungeon.floor, 4).pow_base(2),
+                    r_slime: inChallenge('b', 71) && player.b.dungeon.floor == 2,
+                };
+            },
+            effectDisplay() {
+                const effect = tmp.b.dungeon[this.floor].effect;
+
+                let l_div = shiftDown ? '[floor / 10 + 1]' : format(effect.l_div),
+                    xp_div = shiftDown ? '[2 ^ (floor / 4)]' : format(effect.xp_div);
+
+                return `Divide level costs by ${l_div}<br>
+                    Divide xp gain by ${xp_div}<br>
+                    Unlock the Recurslime`;
+            },
+            reward() {
+                return {
+                    slime_disable: D.gt(player.b.dungeon.max, 2),
+                    slime_kills: D(150),
+                    slime_xp_passive: D.div(player.b.dungeon.max, 20),
+                    slime_levels: D(5),
+                    sp_add: D.sqrt(player.b.dungeon.max),
+                };
+            },
+            rewardDisplay() {
+                const reward = tmp.b.dungeon[this.floor].reward;
+
+                let passive_xp = shiftDown ? '[max floor * 5%]' : `${formatWhole(D.times(reward.slime_xp_passive, tmp.xp.monsters.slime.experience))}`,
+                    sp_add = shiftDown ? '2√(max floor)' : format(reward.sp_add);
+
+                return `Delete slimes<br>
+                    Gain ${formatWhole(reward.slime_kills)} kills<br>
+                    Passively gain ${resourceColor(tmp.xp.color, passive_xp)} XP per second<br>
+                    Gain ${formatWhole(reward.slime_levels)} enemy levels<br>
+                    Gain ${sp_add} skill points<br>
+                    Unlock Dungeon workers`;
+            },
+            canComplete() { return (player.b.dungeon.max > this.floor) || hasAchievement('ach', 132); },
+            requirement() { return `Kill the Recurslime`; },
+        },
+        3: {
+            _floor: null,
+            get floor() { return this._floor ??= +Object.entries(layers.b.dungeon).find(([, r]) => r == this)[0]; },
+            canComplete() { return (player.b.dungeon.max > this.floor) || false; },
+            requirement() { return `???`; },
         },
     },
     complete: {
@@ -732,6 +813,48 @@ addLayer('b', {
             rows: [7],
         },
     },
+    infoboxes: {
+        dungeff: {
+            title: 'Current Dungeon effects',
+            body() {
+                let lines = '';
+                for (let i = 0; i <= player.b.dungeon.max; i++) {
+                    const active = (i <= player.b.dungeon.floor && inChallenge('b', 71)) ? '' : ' <i>(inactive)</i>';
+                    if (lines.length) lines += '<br>';
+                    let color = `#${(15 - i).toString(16).repeat(6)}`;
+                    lines += `<div style="color:${color}"><u><b>Floor ${formatWhole(i)}${active}</b></u><br>\
+                        ${run(layers.b.dungeon[i].effectDisplay, layers.b.dungeon[i])}</div>`;
+                }
+                return lines;
+            },
+            titleStyle: {
+                'backgroundColor'() { return tmp.b.groups.dungeon.color; },
+            },
+            style: {
+                'borderColor'() { return tmp.b.groups.dungeon.color; },
+            },
+        },
+        dungrew: {
+            title: 'Current Dungeon rewards',
+            body() {
+                let lines = '';
+                for (let i = 0; i <= player.b.dungeon.max; i++) {
+                    const active = (i < player.b.dungeon.max && inChallenge('b', 71)) ? '' : ' <i>(inactive)</i>';
+                    if (lines.length) lines += '<br>';
+                    let color = `#${(15 - i).toString(16).repeat(6)}`;
+                    lines += `<div style="color:${color}"><u><b>Floor ${formatWhole(i)}${active}</b></u><br>\
+                        ${run(layers.b.dungeon[i].rewardDisplay, layers.b.dungeon[i])}</div>`;
+                }
+                return lines;
+            },
+            titleStyle: {
+                'backgroundColor'() { return tmp.b.groups.dungeon.color; },
+            },
+            style: {
+                'borderColor'() { return tmp.b.groups.dungeon.color; },
+            },
+        },
+    },
     branches: ['l'],
     nodeStyle: {
         'backgroundColor'() {
@@ -774,12 +897,25 @@ addLayer('b', {
             _id: null,
             get id() { return this._id ??= Object.entries(layers.b.bosses).find(([, r]) => r == this)[0]; },
             unlocked() { return tmp.b.challenges[11].unlocked; },
-            name: 'slime sovereign',
+            name() {
+                let name = 'slime sovereign';
+
+                if (tmp.xp.monsters.slime.disabled) name = name.replaceAll(/slime/ig, _ => UNDEFTXT);
+
+                return name;
+            },
             position: [0, 0],
-            lore: `Most powerful slime in the world, and their leader.<br>
-                Understandably angry considering not even you know how many slimes died by your blade.<br>
-                Sends an army of powerful slimes to defeat you.`,
+            lore() {
+                let lore = `Most powerful slime in the world, and their leader.<br>
+                    Understandably angry considering not even you know how many slimes died by your blade.<br>
+                    Sends an army of powerful slimes to defeat you.`;
+
+                if (tmp.xp.monsters.slime.disabled) lore = lore.replaceAll(/slime/ig, _ => UNDEFTXT);
+
+                return lore;
+            },
             challenge: 11,
+            disabled() { return hasAchievement('ach', 132); },
         },
         'captain_goldtooth': {
             _id: null,
@@ -825,12 +961,25 @@ addLayer('b', {
             _id: null,
             get id() { return this._id ??= Object.entries(layers.b.bosses).find(([, r]) => r == this)[0]; },
             unlocked() { return tmp.b.challenges[21].unlocked; },
-            name: 'slime monarch',
+            name() {
+                let name = 'slime monarch';
+
+                if (tmp.xp.monsters.slime.disabled) name = name.replaceAll(/slime/ig, _ => UNDEFTXT);
+
+                return name;
+            },
             position: [0, 1],
-            lore: `Child of the Slime Sovereign.<br>
+            lore() {
+                let lore = `Child of the Slime Sovereign.<br>
                 Angry that you defeated its parent, it now seeks revenge.<br>
-                Sends its personal guard to defeat you.`,
+                Sends its personal guard to defeat you.`;
+
+                if (tmp.xp.monsters.slime.disabled) lore = lore.replaceAll(/slime/ig, _ => UNDEFTXT);
+
+                return lore;
+            },
             challenge: 21,
+            disabled() { return hasAchievement('ach', 132); },
         },
         'undead_bureaucrat': {
             _id: null,

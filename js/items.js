@@ -1,3 +1,7 @@
+const ITEM_SIZES = {
+    width: 20,
+    height: 16,
+};
 /**
  * @type {{[id in items]: Item<id>}}
  */
@@ -15,21 +19,28 @@ const item_list = {
     // Slime
     'slime_goo': {
         id: null,
-        color() { return tmp.xp.monsters.slime.color; },
-        name: 'slime goo',
+        color() {
+            if (tmp.xp.monsters.slime.disabled) return tmp.b.groups.dungeon.color;
+            return tmp.xp.monsters.slime.color;
+        },
+        name() {
+            if (tmp.xp.monsters.slime.disabled) return 'goo';
+            return 'slime goo';
+        },
         icon() {
             let icon = [0, 0];
 
             if (inChallenge('b', 11)) icon[1] = 4;
             if (inChallenge('b', 21)) icon[1] = 8;
             if (inChallenge('b', 41)) icon[1] = 12;
+            if (tmp.xp.monsters.slime.disabled) icon[1] = 16;
 
             return icon;
         },
         row: 1,
         sources: {
             chance() {
-                if (D.eq(tmp.c.chance_multiplier, 0) || inChallenge('b', 12)) return {};
+                if (D.eq(tmp.c.chance_multiplier, 0) || inChallenge('b', 12) || tmp.xp.monsters.slime.disabled) return {};
 
                 let chance = D(1 / 2);
 
@@ -38,6 +49,8 @@ const item_list = {
 
                 if (inChallenge('b', 41)) chance = chance.div(4);
                 if (inChallenge('b', 42)) chance = chance.div(10);
+
+                if (tmp.b.dungeon[2].effect.r_slime) chance = chance.times(1000);
 
                 return { 'kill:slime': chance };
             },
@@ -49,6 +62,15 @@ const item_list = {
 
                 return other;
             },
+            per_second() {
+                const per_second = {};
+
+                if (player.b.dungeon.max > 2) {
+                    per_second['workers'] = buyableEffect('s', 11)[this.id];
+                }
+
+                return per_second;
+            },
         },
         value: {
             cost() {
@@ -56,6 +78,10 @@ const item_list = {
             },
         },
         lore() {
+            if (tmp.xp.monsters.slime.disabled) return `A chunk of gray goo.<br>
+                Commonly found in the Dungeon.<br>
+                Bland and textureless.`;
+
             if (inChallenge('b', 41)) return `A chunk of somewhat green goo.<br>
                 Feels hard to the touch.<br>
                 Why are you putting it in your mouth?`;
@@ -72,25 +98,38 @@ const item_list = {
                 Feels weird to the touch.<br>
                 Not only does it taste like dirty water, but it's hard to chew.`;
         },
-        categories: ['materials', 'slime'],
+        categories() {
+            /** @type {categories[]} */
+            const cat = ['materials'];
+            if (tmp.xp.monsters.slime.disabled) cat.push('dungeon');
+            else cat.push('slime');
+            return cat;
+        },
     },
     'slime_core_shard': {
         id: null,
-        color() { return tmp.xp.monsters.slime.color; },
-        name: 'slime core shard',
+        color() {
+            if (tmp.xp.monsters.slime.disabled) return tmp.b.groups.dungeon.color;
+            return tmp.xp.monsters.slime.color;
+        },
+        name() {
+            if (tmp.xp.monsters.slime.disabled) return 'core shard';
+            return 'slime core shard';
+        },
         icon() {
             let icon = [0, 1];
 
             if (inChallenge('b', 11)) icon[1] = 5;
             if (inChallenge('b', 21)) icon[1] = 9;
             if (inChallenge('b', 41)) icon[1] = 13;
+            if (tmp.xp.monsters.slime.disabled) icon[1] = 17;
 
             return icon;
         },
         row: 1,
         sources: {
             chance() {
-                if (D.eq(tmp.c.chance_multiplier, 0) || inChallenge('b', 12)) return {};
+                if (D.eq(tmp.c.chance_multiplier, 0) || inChallenge('b', 12) || tmp.xp.monsters.slime.disabled) return {};
 
                 let chance = D(1 / 7);
 
@@ -99,6 +138,8 @@ const item_list = {
 
                 if (inChallenge('b', 41)) chance = chance.times(2);
                 if (inChallenge('b', 42)) chance = chance.div(10);
+
+                if (tmp.b.dungeon[2].effect.r_slime) chance = chance.times(1000);
 
                 return { 'kill:slime': chance };
             },
@@ -110,6 +151,15 @@ const item_list = {
 
                 return other;
             },
+            per_second() {
+                const per_second = {};
+
+                if (player.b.dungeon.max > 2) {
+                    per_second['workers'] = buyableEffect('s', 12)[this.id];
+                }
+
+                return per_second;
+            },
         },
         value: {
             cost() {
@@ -117,6 +167,10 @@ const item_list = {
             },
         },
         lore() {
+            if (tmp.xp.monsters.slime.disabled) return `A solid gray shard.<br>
+                Looks like it was an important part of something.<br>
+                Combining it with goo seems to yield the heart of a creature. What could it have been?`;
+
             if (inChallenge('b', 41)) return `A teal shard.<br>
                 Very solid.<br>
                 Can be recombined into an intact core with a bit of goo.`;
@@ -133,25 +187,38 @@ const item_list = {
                 Surprisingly sharp, so careful when handling.<br>
                 Can be recombined into an intact core with a bit of goo.`;
         },
-        categories: ['materials', 'slime'],
+        categories() {
+            /** @type {categories[]} */
+            const cat = ['materials'];
+            if (tmp.xp.monsters.slime.disabled) cat.push('dungeon');
+            else cat.push('slime');
+            return cat;
+        },
     },
     'slime_core': {
         id: null,
-        color() { return tmp.xp.monsters.slime.color; },
-        name: 'slime core',
+        color() {
+            if (tmp.xp.monsters.slime.disabled) return tmp.b.groups.dungeon.color;
+            return tmp.xp.monsters.slime.color;
+        },
+        name() {
+            if (tmp.xp.monsters.slime.disabled) return 'core';
+            return 'slime core';
+        },
         icon() {
             let icon = [0, 2];
 
             if (inChallenge('b', 11)) icon[1] = 6;
             if (inChallenge('b', 21)) icon[1] = 10;
             if (inChallenge('b', 41)) icon[1] = 14;
+            if (tmp.xp.monsters.slime.disabled) icon[1] = 18;
 
             return icon;
         },
         row: 1,
         sources: {
             chance() {
-                if (D.eq(tmp.c.chance_multiplier, 0) || inChallenge('b', 12)) return {};
+                if (D.eq(tmp.c.chance_multiplier, 0) || inChallenge('b', 12) || tmp.xp.monsters.slime.disabled) return {};
 
                 let chance = D(1 / 24);
 
@@ -165,6 +232,8 @@ const item_list = {
 
                 if (inChallenge('b', 42)) chance = chance.div(10);
 
+                if (tmp.b.dungeon[2].effect.r_slime) chance = chance.times(1000);
+
                 return { 'kill:slime': chance };
             },
             other() {
@@ -175,6 +244,15 @@ const item_list = {
 
                 return other;
             },
+            per_second() {
+                const per_second = {};
+
+                if (player.b.dungeon.max > 2) {
+                    per_second['workers'] = buyableEffect('s', 13)[this.id];
+                }
+
+                return per_second;
+            },
         },
         value: {
             cost() {
@@ -182,6 +260,10 @@ const item_list = {
             },
         },
         lore() {
+            if (tmp.xp.monsters.slime.disabled) return `A solid gray orb.<br>
+                Smooth to the touch and valuable.<br>
+                No matter how much you focus on it, you cannot shake the feeling that you've seen it before...`;
+
             if (inChallenge('b', 41)) return `The very core of a slime golem.<br>
                 A solid source of energy.<br>
                 The most solid part of a slime golem.<br>
@@ -200,18 +282,31 @@ const item_list = {
                 Smooth to the touch and valuable.<br>
                 Fragile! Handle with care.`;
         },
-        categories: ['materials', 'slime'],
+        categories() {
+            /** @type {categories[]} */
+            const cat = ['materials'];
+            if (tmp.xp.monsters.slime.disabled) cat.push('dungeon');
+            else cat.push('slime');
+            return cat;
+        },
     },
     'dense_slime_core': {
         id: null,
-        color() { return tmp.xp.monsters.slime.color; },
-        name: 'dense slime core',
+        color() {
+            if (tmp.xp.monsters.slime.disabled) return tmp.b.groups.dungeon.color;
+            return tmp.xp.monsters.slime.color;
+        },
+        name() {
+            if (tmp.xp.monsters.slime.disabled) return 'dense core';
+            return 'dense slime core';
+        },
         icon() {
             let icon = [0, 3];
 
             if (inChallenge('b', 11)) icon[1] = 7;
             if (inChallenge('b', 21)) icon[1] = 11;
             if (inChallenge('b', 41)) icon[1] = 15;
+            if (tmp.xp.monsters.slime.disabled) icon[1] = 19;
 
             return icon;
         },
@@ -230,6 +325,10 @@ const item_list = {
             },
         },
         lore() {
+            if (tmp.xp.monsters.slime.disabled) return `A strange item of unknown origin.<br>
+                It glows in a clean white light.<br>
+                Memories you<span class="undefined">'ve never had try to</span> flood your mind.`;
+
             if (inChallenge('b', 41)) return `Now we're cooking.<br>
                 It glows in a cold teal light.<br>
                 Inert normally, it starts heating up under the sun.`;
@@ -246,18 +345,31 @@ const item_list = {
                 It glows in a worrying green light.<br>
                 You can feel it pulse in your hands.`;
         },
-        categories: ['materials', 'slime'],
+        categories() {
+            /** @type {categories[]} */
+            const cat = ['materials'];
+            if (tmp.xp.monsters.slime.disabled) cat.push('dungeon');
+            else cat.push('slime');
+            return cat;
+        },
     },
     'slime_crystal': {
         id: null,
-        color() { return tmp.xp.monsters.slime.color; },
-        name: 'slime crystal',
+        color() {
+            if (tmp.xp.monsters.slime.disabled) return tmp.b.groups.dungeon.color;
+            return tmp.xp.monsters.slime.color;
+        },
+        name() {
+            if (tmp.xp.monsters.slime.disabled) return 'XP crystal';
+            return 'slime crystal';
+        },
         icon() {
             let icon = [1, 0];
 
             if (inChallenge('b', 11)) icon[1] = 4;
             if (inChallenge('b', 21)) icon[1] = 8;
             if (inChallenge('b', 41)) icon[1] = 12;
+            if (tmp.xp.monsters.slime.disabled) icon[1] = 16;
 
             return icon;
         },
@@ -271,6 +383,10 @@ const item_list = {
             },
         },
         lore() {
+            if (tmp.xp.monsters.slime.disabled) return `A light gray crystal made of Dungeon materials.<br>
+                Great storage for experience.<br>
+                Sometimes used for lanterns.`;
+
             if (inChallenge('b', 41)) return `A bright teal crystal made of pure slime.<br>
                 A portable energy storage device.<br>
                 Can also store experience.`;
@@ -287,7 +403,13 @@ const item_list = {
                 Can hold experience better than you.<br>
                 A clunky nightlight.`;
         },
-        categories: ['equipment', 'slime'],
+        categories() {
+            /** @type {categories[]} */
+            const cat = ['equipment'];
+            if (tmp.xp.monsters.slime.disabled) cat.push('dungeon');
+            else cat.push('slime');
+            return cat;
+        },
         effect(amount) {
             const x = D(amount ?? player.items[this.id].amount);
 
@@ -332,14 +454,21 @@ const item_list = {
     },
     'slime_knife': {
         id: null,
-        color() { return tmp.xp.monsters.slime.color; },
-        name: 'slime knife',
+        color() {
+            if (tmp.xp.monsters.slime.disabled) return tmp.b.groups.dungeon.color;
+            return tmp.xp.monsters.slime.color;
+        },
+        name() {
+            if (tmp.xp.monsters.slime.disabled) return 'knife';
+            return 'slime knife';
+        },
         icon() {
             let icon = [1, 1];
 
             if (inChallenge('b', 11)) icon[1] = 5;
             if (inChallenge('b', 21)) icon[1] = 9;
             if (inChallenge('b', 41)) icon[1] = 13;
+            if (tmp.xp.monsters.slime.disabled) icon[1] = 17;
 
             return icon;
         },
@@ -353,6 +482,10 @@ const item_list = {
             },
         },
         lore() {
+            if (tmp.xp.monsters.slime.disabled) return `A crude gray weapon.<br>
+                Sharp and cheap.<br>
+                Cooking with it seems to make food lose some of its taste.`;
+
             if (inChallenge('b', 41)) return `A teal weapon.<br>
                 A decent weapon that never breaks.<br>
                 The ease with which you can clean it makes you wonder why cooks don't use it more.`;
@@ -369,7 +502,13 @@ const item_list = {
                 Very sharp, be careful with it.<br>
                 Not recommended for cooking unless you like the taste of slime.`;
         },
-        categories: ['equipment', 'slime'],
+        categories() {
+            /** @type {categories[]} */
+            const cat = ['equipment'];
+            if (tmp.xp.monsters.slime.disabled) cat.push('dungeon');
+            else cat.push('slime');
+            return cat;
+        },
         effect(amount) {
             const x = D(amount ?? player.items[this.id].amount);
 
@@ -407,14 +546,21 @@ const item_list = {
     },
     'slime_injector': {
         id: null,
-        color() { return tmp.xp.monsters.slime.color; },
-        name: 'slime injector',
+        color() {
+            if (tmp.xp.monsters.slime.disabled) return tmp.b.groups.dungeon.color;
+            return tmp.xp.monsters.slime.color;
+        },
+        name() {
+            if (tmp.xp.monsters.slime.disabled) return 'injector';
+            return 'slime injector';
+        },
         icon() {
             let icon = [1, 2];
 
             if (inChallenge('b', 11)) icon[1] = 6;
             if (inChallenge('b', 21)) icon[1] = 10;
             if (inChallenge('b', 41)) icon[1] = 14;
+            if (tmp.xp.monsters.slime.disabled) icon[1] = 18;
 
             return icon;
         },
@@ -428,6 +574,10 @@ const item_list = {
             },
         },
         lore() {
+            if (tmp.xp.monsters.slime.disabled) return `An experimental drug made of strange materials.<br>
+                It makes you feel stronger.<br>
+                Just like many similar things, it's recommended to keep doses low.`;
+
             if (inChallenge('b', 21)) return `This experimental drug breaks golems.<br>
                 You can't feel anything.<br>
                 At all. That can't be good...`;
@@ -444,7 +594,13 @@ const item_list = {
                 It also makes you feel... stronger. Whatever that means.<br>
                 Using too many may have side effects.`;
         },
-        categories: ['equipment', 'slime'],
+        categories() {
+            /** @type {categories[]} */
+            const cat = ['equipment'];
+            if (tmp.xp.monsters.slime.disabled) cat.push('dungeon');
+            else cat.push('slime');
+            return cat;
+        },
         effect(amount) {
             const x = D(amount ?? player.items[this.id].amount);
 
@@ -504,14 +660,21 @@ const item_list = {
     },
     'slime_die': {
         id: null,
-        color() { return tmp.xp.monsters.slime.color; },
-        name: 'slime die',
+        color() {
+            if (tmp.xp.monsters.slime.disabled) return tmp.b.groups.dungeon.color;
+            return tmp.xp.monsters.slime.color;
+        },
+        name() {
+            if (tmp.xp.monsters.slime.disabled) return 'die';
+            return 'slime die';
+        },
         icon() {
             let icon = [1, 3];
 
             if (inChallenge('b', 11)) icon[1] = 7;
             if (inChallenge('b', 21)) icon[1] = 11;
             if (inChallenge('b', 41)) icon[1] = 15;
+            if (tmp.xp.monsters.slime.disabled) icon[1] = 19;
 
             return icon;
         },
@@ -525,6 +688,10 @@ const item_list = {
             },
         },
         lore() {
+            if (tmp.xp.monsters.slime.disabled) return `A light gray die that glows in the dark.<br>
+                It seems to increase your luck.<br>
+                How strange... Holding it gives you a sense of deja-vu...`;
+
             if (inChallenge('b', 21)) return `A dice that glows in a teal light.<br>
                 It feels lucky, somehow.<br>
                 Makes you feel like you can grab more from slimes.`;
@@ -541,7 +708,13 @@ const item_list = {
                 It feels lucky, somehow.<br>
                 Makes you feel like you can get more from slimes.`;
         },
-        categories: ['equipment', 'slime'],
+        categories() {
+            /** @type {categories[]} */
+            const cat = ['equipment'];
+            if (tmp.xp.monsters.slime.disabled) cat.push('dungeon');
+            else cat.push('slime');
+            return cat;
+        },
         effect(amount) {
             let x = D(amount ?? player.items[this.id].amount);
 
@@ -579,7 +752,12 @@ const item_list = {
                 core = formatWhole(effect.core_chance);
             }
 
-            return `Multiply luck by ${luck} and core drop chances by ${core}`;
+            let text = `Multiply luck by ${luck}`;
+
+            if (!tmp.xp.monsters.slime.disabled) text += ` and core drop chances by ${core}`;
+            else text += ` and core gain by +${core}`;
+
+            return text;
         },
     },
     // Skeleton
@@ -715,6 +893,7 @@ const item_list = {
             if (inChallenge('b', 11)) icon[1] = 7;
             if (inChallenge('b', 21)) icon[1] = 11;
             if (inChallenge('b', 41)) icon[1] = 15;
+            if (tmp.xp.monsters.slime.disabled) icon[1] = 19;
 
             return icon;
         },
@@ -793,6 +972,7 @@ const item_list = {
             if (inChallenge('b', 11)) icon[1] = 5;
             if (inChallenge('b', 21)) icon[1] = 9;
             if (inChallenge('b', 41)) icon[1] = 13;
+            if (tmp.xp.monsters.slime.disabled) icon[1] = 17;
 
             return icon;
         },
@@ -806,23 +986,33 @@ const item_list = {
             },
         },
         lore() {
+            if (tmp.xp.monsters.slime.disabled) return `A skull containing some crystallized goo.<br>
+                Somehow, its placement allows for better experience yield and storage.<br>
+                The presence behind its sockets seems familiar...`;
+
             if (inChallenge('b', 41)) return `A skull containing some crystallized slime.<br>
-                Somehow, their placement allows for better experience yield and storage.<br>
+                Somehow, its placement allows for better experience yield and storage.<br>
                 Staring in its eyes, you can almost feel like it's pondering...`;
 
             if (inChallenge('b', 21)) return `A skull containing some crystallized slime.<br>
-                Somehow, their placement allows for better experience yield and storage.<br>
+                Somehow, its placement allows for better experience yield and storage.<br>
                 You try to not look at it, as you feel judged...`;
 
             if (inChallenge('b', 11)) return `A skull containing some crystallized slime.<br>
-                Somehow, their placement allows for better experience yield and storage.<br>
+                Somehow, its placement allows for better experience yield and storage.<br>
                 When you look at its sockets, you can almost feel bloodlust...`;
 
             return `A skull containing some crystallized slime.<br>
-                Somehow, their placement allows for better experience yield and storage.<br>
+                Somehow, its placement allows for better experience yield and storage.<br>
                 Behind its sockets, it almost feels like it's thinking...`;
         },
-        categories: ['equipment', 'skeleton', 'slime'],
+        categories() {
+            /** @type {categories[]} */
+            const cat = ['equipment', 'skeleton'];
+            if (tmp.xp.monsters.slime.disabled) cat.push('dungeon');
+            else cat.push('slime');
+            return cat;
+        },
         effect(amount) {
             const x = D(amount ?? player.items[this.id].amount);
 
@@ -892,6 +1082,7 @@ const item_list = {
         id: null,
         color() { return tmp.xp.monsters.skeleton.color; },
         name() {
+            if (tmp.xp.monsters.slime.disabled) return 'Magic 0 Ball';
             if (inChallenge('b', 41)) return 'Magic 6 Ball';
             if (inChallenge('b', 21)) return 'Magic 10 Ball';
             if (inChallenge('b', 11)) return 'Magic 11 Ball';
@@ -903,6 +1094,7 @@ const item_list = {
             if (inChallenge('b', 11)) icon[1] = 7;
             if (inChallenge('b', 21)) icon[1] = 11;
             if (inChallenge('b', 41)) icon[1] = 15;
+            if (tmp.xp.monsters.slime.disabled) icon[1] = 19;
 
             return icon;
         },
@@ -916,6 +1108,11 @@ const item_list = {
             },
         },
         lore() {
+            if (tmp.xp.monsters.slime.disabled) return `A magic 0 ball that can predict the future!<br>
+                Just ask a simple yes or no question to get an answer.<br>
+                "When will the world end?" <i>"Soon"</i><br>
+                Uh oh!`;
+
             if (inChallenge('b', 41)) return `A magic 6 ball that can predict the future!<br>
                 Just ask a simple yes or no question to get an answer.<br>
                 Looking in the hole, there seems to be a cube inside...`;
@@ -1193,6 +1390,7 @@ const item_list = {
             if (inChallenge('b', 11)) icon[1] = 6;
             if (inChallenge('b', 21)) icon[1] = 7;
             if (inChallenge('b', 41)) icon[1] = 10;
+            if (tmp.xp.monsters.slime.disabled) icon[1] = 11;
 
             return icon;
         },
@@ -2743,6 +2941,7 @@ const item_list = {
             if (inChallenge('b', 11)) icon[1] = 10;
             if (inChallenge('b', 21)) icon[1] = 11;
             if (inChallenge('b', 41)) icon[1] = 12;
+            if (tmp.xp.monsters.slime.disabled) icon[1] = 13;
 
             return icon;
         },
@@ -2862,10 +3061,22 @@ const item_list = {
                 return D(1_000);
             },
         },
-        lore: `An extremely dense slime.<br>
-            Its smaller size hides an extreme weight.<br>
-            Did you know it cannot move on its own?`,
-        categories: ['equipment', 'densium', 'slime',],
+        lore() {
+            if (tmp.xp.monsters.slime.disabled) return `A statue of a fictional "slime".<br>
+                Why not carve it out of stone? Because it wouldn't grant any buff.<br>
+                The shape... feels... very <span class="undefined">un</span>familiar...`;
+
+            return `An extremely dense slime.<br>
+                Its smaller size hides an extreme weight.<br>
+                Did you know it cannot move on its own?`;
+        },
+        categories() {
+            /** @type {categories[]} */
+            const cat = ['equipment', 'densium'];
+            if (tmp.xp.monsters.slime.disabled) cat.push('dungeon');
+            else cat.push('slime');
+            return cat;
+        },
         effect(amount) {
             const x = D(amount ?? player.items[this.id].amount);
 
@@ -2884,6 +3095,7 @@ const item_list = {
                 slime_mult = format(effect.slime_mult);
             }
 
+            if (tmp.xp.monsters.slime.disabled) return `Multiplies goo, core shard, and core gains by ${slime_mult}`;
             return `Multiplies slime health, experience, kills, and drops by ${slime_mult}`;
         },
         unlocked() { return tmp.m.compactor.unlocked || D.gt(player.items[this.id].amount, 0); },
@@ -3610,7 +3822,7 @@ const item_list = {
     },
     'factory_core': {
         color() { return tmp.b.groups.boss.color; },
-        name: 'factory core scaffolding',
+        name: 'factory core',
         icon: [12, 8],
         row: 2,
         sources: {},
@@ -3644,10 +3856,6 @@ const item_list = {
     },
 };
 
-const ITEM_SIZES = {
-    width: 16,
-    height: 16,
-};
 /**
  * @type {{[row in Layer['row']]: items[]}}
  */
@@ -3813,6 +4021,8 @@ function source_name(source) {
         };
         case 'shop':
             return 'shop';
+        case 'workers':
+            return 'workers';
     }
 }
 /**

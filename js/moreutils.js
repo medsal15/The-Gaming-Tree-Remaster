@@ -210,7 +210,7 @@ function hsl_to_rgb(hue, saturation, lightness) {
         // Achromatic
         r = g = b = lightness;
     } else {
-        const q = lightness < .5 ? l * (1 + saturation) : lightness + saturation - lightness * saturation,
+        const q = lightness < .5 ? lightness * (1 + saturation) : lightness + saturation - lightness * saturation,
             p = 2 * lightness - q;
         r = hue_to_rgb(p, q, hue + 1 / 3);
         g = hue_to_rgb(p, q, hue);
@@ -336,7 +336,7 @@ const CATEG_UTILS = {
     unlocked(category) {
         switch (category) {
             case 'slime':
-                return tmp.xp.monsters.slime.unlocked ?? true;
+                return (tmp.xp.monsters.slime.unlocked ?? true) && !tmp.xp.monsters.slime.disabled;
             case 'skeleton':
                 return tmp.xp.monsters.skeleton.unlocked ?? true;
             case 'golem':
@@ -407,6 +407,7 @@ const CATEG_UTILS = {
         'shop': () => tmp.s.color,
     },
 };
+const UNDEFTXT = `<span class="undefined">undefined</span>`;
 
 // Layer methods
 // experience
@@ -427,7 +428,7 @@ function bestiary_content(monster) {
     const lines = [
         [
             'raw-html',
-            `<div style="width: 240px; height: 240px; overflow: hidden">
+            `<div style="width: 240px; height: 240px; overflow: hidden; ${(tmonst.disabled ?? false) ? 'filter:blur(8px);' : ''}">
                 <img src="./resources/images/enemies.png"
                     style="width: ${MONSTER_SIZES.width * 100}%;
                         height: ${MONSTER_SIZES.height * 100}%;
@@ -437,189 +438,198 @@ function bestiary_content(monster) {
             </div>`
         ],
         ['display-text', capitalize(tmonst.name)],
-        'blank',
-        ['display-text', `Level ${resourceColor(tmp.l.color, formatWhole(tmonst.level))}`],
-        ['display-text', `Killed ${resourceColor(tmp.xp.kill.color, formatWhole(player.xp.monsters[monster].kills))} times`],
     ];
 
-    if (D.neq(tmonst.kills, 1)) lines.push(['display-text', `Each kill counts as ${resourceColor(tmp.xp.kill.color, format(tmonst.kills))} kills`]);
+    if (!(tmonst.disabled ?? false)) {
+        lines.push(
+            'blank',
+            ['display-text', `Level ${resourceColor(tmp.l.color, formatWhole(tmonst.level))}`],
+            ['display-text', `Killed ${resourceColor(tmp.xp.kill.color, formatWhole(player.xp.monsters[monster].kills))} times`],
+        );
 
-    lines.push(['display-text', `Gives ${resourceColor(tmp.xp.color, format(tmonst.experience))} XP on kill`]);
+        if (D.neq(tmonst.kills, 1)) lines.push(['display-text', `Each kill counts as ${resourceColor(tmp.xp.kill.color, format(tmonst.kills))} kills`]);
+
+        lines.push(['display-text', `Gives ${resourceColor(tmp.xp.color, format(tmonst.experience))} XP on kill`]);
+    }
     if (D.gt(tmonst.passive_experience, 0)) lines.push(['display-text', `Producing ${resourceColor(tmp.xp.color, format(tmonst.passive_experience))} XP per second`]);
 
-    lines.push(
-        'blank',
-        ['display-text', `Health: ${format(player.xp.monsters[monster].health)} / ${format(tmonst.health)}`],
-    );
-    if (D.gt(tmonst.defense ?? 0, 0)) lines.push(['display-text', `Defense: ${format(tmonst.defense)}`]);
-
-    if (D.gt(tmonst.damage_per_second, 0)) {
-        const att_per_kill = D.div(tmonst.health, tmonst.damage).ceil();
-        let att_per_sec = tmp.xp.modifiers.speed.passive;
-        if (monster == player.xp.selected) att_per_sec = D.add(att_per_sec, tmp.xp.modifiers.speed.active);
-        let kill_per_time = D.div(att_per_sec, att_per_kill),
-            time_unit = 'second';
-        if (kill_per_time.lt(1)) {
-            kill_per_time = kill_per_time.times(60);
-            time_unit = 'minute';
-        }
-        if (kill_per_time.lt(1)) {
-            kill_per_time = kill_per_time.times(60);
-            time_unit = 'hour';
-        }
-
+    if (!(tmonst.disabled ?? false)) {
         lines.push(
-            ['display-text', `Damage per second: ~${format(tmonst.damage_per_second)}`],
-            ['display-text', `Kills per ${time_unit}: ${format(kill_per_time)}`]
+            'blank',
+            ['display-text', `Health: ${format(player.xp.monsters[monster].health)} / ${format(tmonst.health)}`],
         );
-    }
-    if (inChallenge('b', 31)) {
-        lines.push(['display-text', `Damage: ${format(tmp.dea.monsters[monster].damage)}`]);
-    }
+        if (D.gt(tmonst.defense ?? 0, 0)) lines.push(['display-text', `Defense: ${format(tmonst.defense)}`]);
 
-    lines.push('blank');
+        if (D.gt(tmonst.damage_per_second, 0)) {
+            const att_per_kill = D.div(tmonst.health, tmonst.damage).ceil();
+            let att_per_sec = tmp.xp.modifiers.speed.passive;
+            if (monster == player.xp.selected) att_per_sec = D.add(att_per_sec, tmp.xp.modifiers.speed.active);
+            let kill_per_time = D.div(att_per_sec, att_per_kill),
+                time_unit = 'second';
+            if (kill_per_time.lt(1)) {
+                kill_per_time = kill_per_time.times(60);
+                time_unit = 'minute';
+            }
+            if (kill_per_time.lt(1)) {
+                kill_per_time = kill_per_time.times(60);
+                time_unit = 'hour';
+            }
 
-    /** @type {string[]} */
-    const specific_lines = [];
+            lines.push(
+                ['display-text', `Damage per second: ~${format(tmonst.damage_per_second)}`],
+                ['display-text', `Kills per ${time_unit}: ${format(kill_per_time)}`]
+            );
+        }
+        if (inChallenge('b', 31)) {
+            lines.push(['display-text', `Damage: ${format(tmp.dea.monsters[monster].damage)}`]);
+        }
 
-    if (hasUpgrade('l', 31)) specific_lines.push([
-        'display-text',
-        `${resourceColor(tmp.l.skill_points.color, tmp.l.upgrades[31].title)} effect: +${format(upgradeEffect('l', 31)[monster])} damage`,
-    ]);
-    // Monster specific upgrades
-    switch (monster) {
-        case 'slime': {
-            if (inChallenge('b', 11)) {
-                const group = tmp.b.challenges[11].group,
-                    text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[11].name)} active effect:\
+        lines.push('blank');
+
+        /** @type {string[]} */
+        const specific_lines = [];
+
+        if (hasUpgrade('l', 31)) specific_lines.push([
+            'display-text',
+            `${resourceColor(tmp.l.skill_points.color, tmp.l.upgrades[31].title)} effect: +${format(upgradeEffect('l', 31)[monster])} damage`,
+        ]);
+        // Monster specific upgrades
+        switch (monster) {
+            case 'slime': {
+                if (inChallenge('b', 11)) {
+                    const group = tmp.b.challenges[11].group,
+                        text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[11].name)} active effect:\
                     *${formatWhole(2)} health, *${format(1.5)} experience`;
-                specific_lines.push(text);
-            }
-            if (inChallenge('b', 21)) {
-                const group = tmp.b.challenges[21].group,
-                    text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[21].name)} active effect:\
+                    specific_lines.push(text);
+                }
+                if (inChallenge('b', 21)) {
+                    const group = tmp.b.challenges[21].group,
+                        text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[21].name)} active effect:\
                     *${formatWhole(2)} health, /${format(2)} experience`;
-                specific_lines.push(text);
-            }
-            if (inChallenge('b', 41)) {
-                const group = tmp.b.challenges[41].group,
-                    text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[41].name)} active effect:\
+                    specific_lines.push(text);
+                }
+                if (inChallenge('b', 41)) {
+                    const group = tmp.b.challenges[41].group,
+                        text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[41].name)} active effect:\
                     *${formatWhole(5)} health`;
-                specific_lines.push(text);
-            }
-            if (inChallenge('b', 42)) {
-                const group = tmp.b.challenges[42].group,
-                    text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[42].name)} active effect:\
+                    specific_lines.push(text);
+                }
+                if (inChallenge('b', 42)) {
+                    const group = tmp.b.challenges[42].group,
+                        text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[42].name)} active effect:\
                     /${formatWhole(10)} experience, health, and drop chances`;
-                specific_lines.push(text);
-            }
-            if (hasChallenge('b', 11)) {
-                const group = tmp.b.challenges[11].group,
-                    text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[11].name)} reward effect:\
+                    specific_lines.push(text);
+                }
+                if (hasChallenge('b', 11)) {
+                    const group = tmp.b.challenges[11].group,
+                        text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[11].name)} reward effect:\
                     *${format(1.5)} experience`;
-                specific_lines.push(text);
-            }
-            if (D.gt(player.items.densium_slime.amount, 0)) {
-                const itemp = tmp.items.densium_slime,
-                    text = `${resourceColor(itemp.color, capitalize(itemp.name))} effect:\
+                    specific_lines.push(text);
+                }
+                if (D.gt(player.items.densium_slime.amount, 0)) {
+                    const itemp = tmp.items.densium_slime,
+                        text = `${resourceColor(itemp.color, capitalize(itemp.name))} effect:\
                     *${format(itemp.effect.slime_mult)} health, experience, kills, and drops`;
-                specific_lines.push(text);
-            }
-        }; break;
-        case 'skeleton': {
-            if (inChallenge('b', 41)) {
-                const group = tmp.b.challenges[41].group,
-                    text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[41].name)} active effect:\
+                    specific_lines.push(text);
+                }
+            }; break;
+            case 'skeleton': {
+                if (inChallenge('b', 41)) {
+                    const group = tmp.b.challenges[41].group,
+                        text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[41].name)} active effect:\
                     *${formatWhole(4)} health`;
-                specific_lines.push(text);
-            }
-            if (inChallenge('b', 42)) {
-                const group = tmp.b.challenges[42].group,
-                    text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[42].name)} active effect:\
+                    specific_lines.push(text);
+                }
+                if (inChallenge('b', 42)) {
+                    const group = tmp.b.challenges[42].group,
+                        text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[42].name)} active effect:\
                     /${formatWhole(10)} experience, health, and drop chances`;
-                specific_lines.push(text);
-            }
-            if (hasUpgrade('m', 53)) {
-                const text = `${resourceColor(tmp.items.silver_ore, tmp.m.upgrades[53].title)}:\
+                    specific_lines.push(text);
+                }
+                if (hasUpgrade('m', 53)) {
+                    const text = `${resourceColor(tmp.items.silver_ore, tmp.m.upgrades[53].title)}:\
                     *${formatWhole(upgradeEffect('m', 53))} damage`;
-                specific_lines.push(text);
-            }
-            if (D.gt(player.items.lead_coating.amount, 0)) {
-                const itemp = tmp.items.lead_coating,
-                    text = `${resourceColor(itemp.color, capitalize(itemp.name))} effect:\
+                    specific_lines.push(text);
+                }
+                if (D.gt(player.items.lead_coating.amount, 0)) {
+                    const itemp = tmp.items.lead_coating,
+                        text = `${resourceColor(itemp.color, capitalize(itemp.name))} effect:\
                     /${format(itemp.effect.skeleton_damage_div)} damage`;
-                specific_lines.push(text);
-            }
-        }; break;
-        case 'golem': {
-            if (inChallenge('b', 41)) {
-                const group = tmp.b.challenges[41].group,
-                    text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[41].name)} active effect:\
+                    specific_lines.push(text);
+                }
+            }; break;
+            case 'golem': {
+                if (inChallenge('b', 41)) {
+                    const group = tmp.b.challenges[41].group,
+                        text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[41].name)} active effect:\
                     *${formatWhole(3)} health`;
-                specific_lines.push(text);
-            }
-            if (inChallenge('b', 42)) {
-                const group = tmp.b.challenges[42].group,
-                    text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[42].name)} active effect:\
+                    specific_lines.push(text);
+                }
+                if (inChallenge('b', 42)) {
+                    const group = tmp.b.challenges[42].group,
+                        text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[42].name)} active effect:\
                     /${formatWhole(10)} experience, health, and drop chances`;
-                specific_lines.push(text);
-            }
-        }; break;
-        case 'bug': {
-            if (inChallenge('b', 42)) {
-                const group = tmp.b.challenges[42].group,
-                    text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[42].name)} active effect:\
+                    specific_lines.push(text);
+                }
+            }; break;
+            case 'bug': {
+                if (inChallenge('b', 42)) {
+                    const group = tmp.b.challenges[42].group,
+                        text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[42].name)} active effect:\
                     *${formatWhole(2)} experience, level, health, defense, and drop chances`;
-                specific_lines.push(text);
-            }
-        } break;
+                    specific_lines.push(text);
+                }
+            } break;
+        }
+        if (specific_lines.length > 0) lines.push(['display-text', '<u>Specific effects:</u>'], ...specific_lines.map(t => ['display-text', t]), 'blank');
     }
-    if (specific_lines.length > 0) lines.push(['display-text', '<u>Specific effects:</u>'], ...specific_lines.map(t => ['display-text', t]), 'blank');
 
     // Add the lore at the end
     lines.push(['display-text', '<u>Notes:</u>'], ['display-text', tmonst.lore], 'blank');
 
-    /** @type {TabFormatEntries<'xp'>[]} */
-    const drop_lines = [],
-        own_drops = source_drops(`kill:${monster}`),
-        any_drops = source_drops('kill:any'),
-        /** @type {[items, Decimal][]} */
-        chances = [...Object.entries(own_drops.chances), ...Object.entries(any_drops.chances)],
-        /** @type {[items, {min: Decimal, max: Decimal}][]} */
-        ranges = [...Object.entries(own_drops.range), ...Object.entries(any_drops.range)];
-    if (ranges.length > 0) {
-        drop_lines.push(
-            ['display-text', 'Range:'],
-            ['row', ranges.map(([item, range]) => {
-                let tile;
-                if (!(tmp.items[item].unlocked ?? true)) {
-                    tile = item_tile_unknown();
-                } else {
-                    tile = item_tile(item);
-                }
-                tile.text += `<br>${format_range(range)}`;
+    if (!(tmonst.disabled ?? false)) {
+        /** @type {TabFormatEntries<'xp'>[]} */
+        const drop_lines = [],
+            own_drops = source_drops(`kill:${monster}`),
+            any_drops = source_drops('kill:any'),
+            /** @type {[items, Decimal][]} */
+            chances = [...Object.entries(own_drops.chances), ...Object.entries(any_drops.chances)],
+            /** @type {[items, {min: Decimal, max: Decimal}][]} */
+            ranges = [...Object.entries(own_drops.range), ...Object.entries(any_drops.range)];
+        if (ranges.length > 0) {
+            drop_lines.push(
+                ['display-text', 'Range:'],
+                ['row', ranges.map(([item, range]) => {
+                    let tile;
+                    if (!(tmp.items[item].unlocked ?? true)) {
+                        tile = item_tile_unknown();
+                    } else {
+                        tile = item_tile(item);
+                    }
+                    tile.text += `<br>${format_range(range)}`;
 
-                return ['tile', tile];
-            })],
-        );
-    }
-    if (chances.length > 0) {
-        drop_lines.push(
-            ['display-text', 'Chance:'],
-            ['row', chances.map(([item, chance]) => {
-                let tile;
-                if (!(tmp.items[item].unlocked ?? true)) {
-                    tile = item_tile_unknown();
-                } else {
-                    tile = item_tile(item);
-                }
-                tile.text += `<br>${format_chance(chance)}`;
+                    return ['tile', tile];
+                })],
+            );
+        }
+        if (chances.length > 0) {
+            drop_lines.push(
+                ['display-text', 'Chance:'],
+                ['row', chances.map(([item, chance]) => {
+                    let tile;
+                    if (!(tmp.items[item].unlocked ?? true)) {
+                        tile = item_tile_unknown();
+                    } else {
+                        tile = item_tile(item);
+                    }
+                    tile.text += `<br>${format_chance(chance)}`;
 
-                return ['tile', tile];
-            })],
-        );
+                    return ['tile', tile];
+                })],
+            );
+        }
+        if (drop_lines.length > 0) lines.push(['display-text', '<u>Item drops:</u>'], ...drop_lines, 'blank');
     }
-    if (drop_lines.length > 0) lines.push(['display-text', '<u>Item drops:</u>'], ...drop_lines, 'blank');
 
     return lines;
 }
@@ -1103,12 +1113,13 @@ function crafting_subtabs_craft() {
             buttonStyle: { 'border-color': CATEG_UTILS.color[cat], },
             unlocked() {
                 return CATEG_UTILS.unlocked(cat) && Object.values(tmp.c.recipes)
-                    .some(data => D.eq(data.heat, 0) && (data.unlocked ?? true) && data.categories.includes(cat));
+                    .some(data => D.eq(data.heat, 0) && (data.unlocked ?? true) && Array.isArray(data.categories) && data.categories.includes(cat));
             },
             prestigeNotify() {
                 return Object.values(tmp.c.recipes)
                     .some(data => D.eq(data.heat, 0) &&
                         (data.unlocked ?? true) &&
+                        Array.isArray(data.categories) &&
                         data.categories.includes(cat) &&
                         crafting_can(data.id) &&
                         D.lte(player.c.recipes[data.id].time, 0));
@@ -1117,6 +1128,7 @@ function crafting_subtabs_craft() {
                 return Object.values(tmp.c.recipes)
                     .some(data => D.eq(data.heat, 0) &&
                         (data.unlocked ?? true) &&
+                        Array.isArray(data.categories) &&
                         data.categories.includes(cat) &&
                         data.categories.includes('equipment') &&
                         crafting_can(data.id) &&
@@ -1183,7 +1195,7 @@ function crafting_subtabs_inventory() {
             ],
             name: () => capitalize(CATEG_UTILS.names[cat]()),
             buttonStyle: { 'border-color': CATEG_UTILS.color[cat], },
-            unlocked() { return CATEG_UTILS.unlocked(cat) && Object.values(tmp.items).some(item => (item.unlocked ?? true) && item.categories.includes(cat)); },
+            unlocked() { return CATEG_UTILS.unlocked(cat) && Object.values(tmp.items).some(item => (item.unlocked ?? true) && Array.isArray(item.categories) && item.categories.includes(cat)); },
         }];
     }));
 }
@@ -1415,7 +1427,7 @@ function arcane_subtabs_factory() {
         buttonStyle: { 'border-color': CATEG_UTILS.color[cat], },
         unlocked() {
             return CATEG_UTILS.unlocked(cat) && Object.values(tmp.c.recipes)
-                .some(data => (data.unlocked ?? true) && data.categories.includes(cat) && !(data.manual ?? false));
+                .some(data => (data.unlocked ?? true) && Array.isArray(data.categories) && data.categories.includes(cat) && !(data.manual ?? false));
         },
     }]));
 }
@@ -1567,7 +1579,7 @@ function bosstiary_content(boss) {
     const lines = [
         [
             'raw-html',
-            `<div style="width: 240px; height: 240px; overflow: hidden">
+            `<div style="width: 240px; height: 240px; overflow: hidden;${(bosst.disabled ?? false) ? 'filter:blur(8px);' : ''}">
                 <img src="./resources/images/bosses.png"
                     style="width: ${BOSS_SIZES.width * 100}%;
                         height: ${BOSS_SIZES.height * 100}%;
@@ -1716,7 +1728,7 @@ function shop_subtabs_buy() {
                     Object.entries(tmp.s.items).some(/**@param{[items,Layers['s']['items'][items]]}*/([item, trade]) => {
                         if (!('cost' in trade)) return false;
                         const itemp = tmp.items[item];
-                        if (!(itemp.unlocked ?? true) || !itemp.categories.includes(cat)) return false;
+                        if (!(itemp.unlocked ?? true) || !Array.isArray(itemp.categories) || !itemp.categories.includes(cat)) return false;
                         const val = itemp.value;
                         if (!('cost' in val) || D.lte(val.cost, 0)) return false;
                         return true;
@@ -1783,7 +1795,7 @@ function shop_subtabs_sell() {
                     Object.entries(tmp.s.items).some(/**@param{[items,Layers['s']['items'][items]]}*/([item, trade]) => {
                         if (!('value' in trade)) return false;
                         const itemp = tmp.items[item];
-                        if (!(itemp.unlocked ?? true) || !itemp.categories.includes(cat)) return false;
+                        if (!(itemp.unlocked ?? true) || !Array.isArray(itemp.categories) || !itemp.categories.includes(cat)) return false;
                         const val = itemp.value;
                         if (!('value' in val) || D.lte(val.value, 0)) return false;
                         return true;

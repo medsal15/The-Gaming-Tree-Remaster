@@ -4,7 +4,6 @@ const ORE_SIZES = {
     width: 3,
     height: 3,
 };
-//todo rebalance upgrade costs
 addLayer('m', {
     row: 0,
     position: 1,
@@ -1906,6 +1905,8 @@ addLayer('m', {
 
                 if (hasUpgrade('dea', 31)) mult = mult.div(upgradeEffect('dea', 31));
 
+                mult = mult.div(tmp.a.spells.acid.effect.ore_health_div);
+
                 if (inChallenge('b', 71)) {
                     if (player.b.dungeon.floor >= 1) {
                         mult = mult.times(tmp.b.dungeon[1].effect.m_health);
@@ -2135,6 +2136,8 @@ addLayer('m', {
         layerDataReset(this.layer, keep);
 
         player.m.upgrades.push(...upgs);
+
+        setTimeout(() => player.m.health = player.m.targets.map(ore => tmp.m.ores[ore].health).reduce((sum, health) => D.add(sum, health), D.dZero), 10);
     },
     autoUpgrade() { return inChallenge('b', 51) || (hasChallenge('b', 51) && player.a.automation.m.upgrades); },
 });

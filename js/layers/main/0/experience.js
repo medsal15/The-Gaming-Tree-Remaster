@@ -2,7 +2,7 @@
 
 const MONSTER_SIZES = {
     width: 4,
-    height: 4,
+    height: 5,
 };
 addLayer('xp', {
     row: 0,
@@ -12,8 +12,11 @@ addLayer('xp', {
     name: 'experience',
     symbol: 'XP',
     color() {
-        if (player.xp.selected) return tmp.xp.monsters[player.xp.selected].color;
-        else return tmp.xp.monsters.slime.color;
+        let color;
+        if (player.xp.selected) color = tmp.xp.monsters[player.xp.selected].color;
+        else color = tmp.xp.monsters.slime.color;
+        if (typeof color == 'string') color = color.slice(0, 7);
+        return color;
     },
     tooltip() {
         let text = `${formatWhole(player.xp.points)} experience`;
@@ -73,7 +76,7 @@ addLayer('xp', {
                 ['display-text', () => {
                     const selected = player.xp.selected;
                     let kill_txt = '';
-                    if (selected) {
+                    if (selected && !(tmp.xp.monsters[selected].disabled ?? false)) {
                         const current = player.xp.monsters[selected].kills,
                             /** @type {string[]} */
                             kill_ext = [],
@@ -91,7 +94,7 @@ addLayer('xp', {
                 ['display-text', () => {
                     const selected = player.xp.selected;
 
-                    if (!selected) return `You are not fighting`;
+                    if (!selected || (tmp.xp.monsters[selected].disabled ?? false)) return `You are not fighting`;
 
                     return `You are fighting a level ${resourceColor(tmp.l.color, formatWhole(tmp.xp.monsters[selected].level))} ${tmp.xp.monsters[selected].name}`;
                 }],
@@ -100,7 +103,11 @@ addLayer('xp', {
 
                     if (!selected) return `<div style="width: 240px; height: 240px; overflow: hidden"></div>`;
 
-                    let div_style = 'width: 240px; height: 240px; overflow: hidden;',
+                    let div_style = {
+                        'width': '240px',
+                        'height': '240px',
+                        'overflow': 'hidden',
+                    },
                         mon_style = {
                             'width': `${MONSTER_SIZES.width * 100}%`,
                             'height': `${MONSTER_SIZES.height * 100}%`,
@@ -110,12 +117,19 @@ addLayer('xp', {
                         };
 
                     if (inChallenge('b', 42) && selected != 'bug') {
-                        div_style = 'width: 120px; height: 120px; overflow: hidden; margin-top: 60px; margin-bottom: 60px;';
+                        div_style['width'] = '120px';
+                        div_style['height'] = '120px';
+                        div_style['margin-top'] = '60px';
+                        div_style['margin-bottom'] = '60px';
                         mon_style['margin-left'] = `${-120 * tmp.xp.monsters[selected].position[0]}px`;
                         mon_style['margin-top'] = `${-120 * tmp.xp.monsters[selected].position[1]}px`;
                     }
 
-                    return `<div style="${div_style}">
+                    if ((tmp.xp.monsters[selected].disabled ?? false)) {
+                        div_style['filter'] = 'blur(8px)';
+                    }
+
+                    return `<div style="${Object.entries(div_style).map(([k, v]) => `${k}:${v}`).join(';')}">
                             <img src="./resources/images/enemies.png"
                                 style="${Object.entries(mon_style).map(([k, v]) => `${k}:${v}`).join(';')}"/>
                         </div>`;
@@ -136,7 +150,7 @@ addLayer('xp', {
                 'blank',
                 ['display-text', () => {
                     const selected = player.xp.selected;
-                    if (!selected) return;
+                    if (!selected || (tmp.xp.monsters[selected].disabled ?? false)) return;
 
                     const damage = tmp.xp.monsters[selected].damage;
                     return `Attack for ${format(damage)} damage`;
@@ -146,7 +160,7 @@ addLayer('xp', {
                 'blank',
                 ['display-text', () => {
                     const selected = player.xp.selected;
-                    if (D.lte(tmp.c.chance_multiplier, 0) || !selected) return '';
+                    if (D.lte(tmp.c.chance_multiplier, 0) || !selected || (tmp.xp.monsters[selected].disabled ?? false)) return '';
 
                     let drops = 'nothing',
                         count = '';
@@ -699,7 +713,15 @@ addLayer('xp', {
 
                 if (!selected) return;
 
-                return `${format(player.xp.monsters[selected].health)} / ${format(tmp.xp.monsters[selected].health)}`;
+                const mon = tmp.xp.monsters[selected];
+
+                if ((mon.disabled ?? false)) return '';
+
+                let text = `${format(player.xp.monsters[selected].health)} / ${format(mon.health)}`;
+
+                if (D.gt(mon.regen, 0)) text += ` (+${format(mon.regen)} /s)`;
+
+                return text;
             },
             height: 40,
             width: 320,
@@ -856,11 +878,12 @@ addLayer('xp', {
                 if (inChallenge('b', 51)) return false;
                 if (inChallenge('b', 31) && D.lte(player.dea.health, 0)) return false;
 
-                const selected = player.xp.selected;
+                const selected = player.xp.selected,
+                    mon = tmp.xp.monsters[selected];
 
-                if (!selected) return;
+                if (!selected || (mon.disabled ?? false)) return;
 
-                return D.gt(player.xp.monsters[selected].health, 0) && D.gt(tmp.xp.monsters[selected].damage, 0);
+                return D.gt(mon.health, 0) && D.gt(mon.damage, 0);
             },
         },
         13: {
@@ -1045,12 +1068,24 @@ addLayer('xp', {
         let passive_gain = D.times(tmp.xp.modifiers.xp.passive.total, diff)
             .min(tmp.xp.modifiers.cap.gain);
         addPoints('xp', passive_gain);
+
+        // Regen
+        Object.values(tmp.xp.monsters).forEach(data => {
+            if (!(data.unlocked ?? true)) return;
+
+            if (D.gt(data.regen, 0)) {
+                const regen = D.times(data.regen, diff);
+                player.xp.monsters[data.id].health = D.add(player.xp.monsters[data.id].health, regen).min(data.health);
+            }
+        });
     },
     monsters: {
         slime: {
             _id: null,
             get id() { return this._id ??= Object.keys(layers.xp.monsters).find(mon => layers.xp.monsters[mon] == this); },
             color() {
+                if (tmp.xp.monsters[this.id].disabled) return '#77FF0033';
+                if (tmp.b.dungeon[2].effect.r_slime) return '#' + hsl_to_rgb(1 - D.div(player.xp.monsters.slime.health, 1000).toNumber(), .85, .43).map(n => n.toString(16).padStart(2, '0')).join('');
                 if (inChallenge('b', 41)) return '#55AA88';
                 if (inChallenge('b', 21)) return '#AAFFDD';
                 if (inChallenge('b', 11)) return '#FF6600';
@@ -1058,6 +1093,8 @@ addLayer('xp', {
                 return '#55CC11';
             },
             name() {
+                if (tmp.xp.monsters[this.id].disabled) return '<span class="undefined">undefined</span>';
+                if (tmp.b.dungeon[2].effect.r_slime) return 'recurslime';
                 if (inChallenge('b', 41)) return 'slime golem';
                 return 'slime';
             },
@@ -1067,6 +1104,7 @@ addLayer('xp', {
                 if (inChallenge('b', 11)) i = 1;
                 if (inChallenge('b', 21)) i = 2;
                 if (inChallenge('b', 41)) i = 3;
+                if (tmp.b.dungeon[2].effect.r_slime) i = 4;
 
                 return [0, i];
             },
@@ -1077,10 +1115,23 @@ addLayer('xp', {
 
                 let level = k.div(mod.base).pow(mod.exp).times(mod.mult);
 
+                if (player.b.dungeon.max > 2) {
+                    level = level.add(tmp.b.dungeon[2].reward.slime_levels);
+                }
+                if (tmp.b.dungeon[2].effect.r_slime) {
+                    level = k;
+                }
+
                 return level.floor().add(1);
             },
             health(level) {
                 let l = D(level ?? tmp?.xp?.monsters[this.id].level);
+
+                if (inChallenge('b', 71)) {
+                    if (player.b.dungeon.floor >= 2) {
+                        return D.pow(1000, l);
+                    }
+                }
 
                 const level_mult = D.minus(l, 1).pow_base(1.5);
 
@@ -1096,6 +1147,16 @@ addLayer('xp', {
 
                 return health;
             },
+            regen(level) {
+                let l = D(level ?? tmp?.xp?.monsters[this.id].level);
+
+                if (tmp.b.dungeon[2].effect.r_slime) {
+                    const maxhp = this.health(l),
+                        frac = D.div(player.xp.monsters[this.id].health, maxhp).pow(-1),
+                        regen = frac.minus(1).pow_base(2);
+                    return regen.min(maxhp);
+                }
+            },
             defense(level) {
                 if (inChallenge('b', 41)) {
                     let l = D(level ?? tmp?.xp?.monsters[this.id].level),
@@ -1108,6 +1169,12 @@ addLayer('xp', {
             },
             experience(level) {
                 const l = D(level ?? tmp.xp.monsters[this.id].level);
+
+                if (inChallenge('b', 71)) {
+                    if (player.b.dungeon.floor >= 2 && !tmp.b.dungeon[2].reward.slime_disable) {
+                        return tmp.xp.modifiers.cap.total;
+                    }
+                }
 
                 let xp = D.times(l, tmp.xp.modifiers.xp.mult);
 
@@ -1122,10 +1189,15 @@ addLayer('xp', {
                 return xp;
             },
             passive_experience(level) {
+                if (tmp.b.dungeon[2].effect.r_slime) return D.dZero;
+
                 let mult = D.dZero;
 
                 mult = mult.add(tmp.xp.modifiers.xp.passive.passive);
                 if (this.id == player.xp.selected) mult = mult.add(tmp.xp.modifiers.xp.passive.active);
+                if (player.b.dungeon.max > 2) {
+                    mult = mult.add(tmp.b.dungeon[2].reward.slime_xp_passive);
+                }
 
                 if (mult.lte(0)) return D.dZero;
 
@@ -1160,6 +1232,13 @@ addLayer('xp', {
                 return D.times(mult, tmp.xp.monsters[this.id].damage);
             },
             lore() {
+                if (tmp.xp.monsters[this.id].disabled) return 'Stop staring into the void, there is nothing there.';
+                if (tmp.b.dungeon[2].effect.r_slime) {
+                    return `A slime whose core is a smaller slime.<br>
+                        That slime's core? An even smaller slime.<br>
+                        <i>That</i> slime's core? An even <i>smaller</i> slime.<br>
+                        It's slimes all the way down...`;
+                }
                 if (inChallenge('b', 41)) {
                     return `A crude ball made of water and leaves.<br>\
                         Hard, harmless, and cold; almost like a chunk of ice.<br>
@@ -1183,6 +1262,7 @@ addLayer('xp', {
                     Diet consists of grass, insects, and water.<br>\
                     Tastes like dirty water.`;
             },
+            disabled() { return hasAchievement('ach', 132); },
         },
         skeleton: {
             _id: null,
@@ -1519,7 +1599,13 @@ addLayer('xp', {
                     return sum;
                 }, D.dZero);
 
-            return sum.minus(spent);
+            let kills = sum.minus(spent);
+
+            if (player.b.dungeon.max > 2) {
+                kills = kills.add(tmp.b.dungeon[2].reward.slime_kills);
+            }
+
+            return kills;
         },
     },
     level: {
@@ -1630,6 +1716,12 @@ addLayer('xp', {
                 mult = mult.times(item_effect('crystal_skull').xp_mult);
 
                 if (hasAchievement('ach', 14)) mult = mult.times(achievementEffect('ach', 14));
+
+                if (inChallenge('b', 71)) {
+                    if (player.b.dungeon.floor >= 2) {
+                        mult = mult.div(tmp.b.dungeon[2].effect.xp_div);
+                    }
+                }
 
                 if (player.b.dungeon.max > 0) {
                     mult = mult.times(tmp.b.dungeon[0].reward.xp_mult);
@@ -1777,7 +1869,7 @@ addLayer('xp', {
         player.xp.upgrades.push(...upgs);
 
         // Correctly reset health
-        Object.values(layers.xp.monsters).forEach(data => player.xp.monsters[data.id].health = data.health(data.level(1)));
+        setTimeout(() => Object.values(layers.xp.monsters).forEach(data => player.xp.monsters[data.id].health = data.health(data.level(1))), 10);
     },
     autoUpgrade() { return inChallenge('b', 51); },
 });

@@ -35,7 +35,7 @@ let VERSION = {
 let changelog = `<h1>Changelog:</h1><br>
 	<h3>v0.4: Going Down</h4><br>
 		- Added the Dungeon.<br>
-		- Update endgame: Beat floor 3<br>
+		- Update endgame: Beat floor 2<br>
 	<h3>v0.3.1t</h3><br>
 		- Fix golems not dealing damage in Thanatos challenge.<br>
 		- Fix kill upgrades not needing kills.<br>
@@ -101,13 +101,17 @@ var displayThings = [
 		const chaltemp = tmp.b.challenges[chal],
 			color = tmp.b.groups[chaltemp.group].color;
 
-		return `You are in ${tmp.b.name} challenge ${resourceColor(color, chaltemp.name)}`;
+		let text = `You are in ${tmp.b.name} challenge ${resourceColor(color, chaltemp.name)}`;
+
+		if (chal == 71) text += ` (floor ${resourceColor(color, formatWhole(player.b.dungeon.floor))})`;
+
+		return text;
 	},
 ];
 
 // Determines when the game "ends"
 function isEndgame() {
-	return inChallenge('b', 41);
+	return D.gt(player.b.dungeon.max, 2);
 }
 
 

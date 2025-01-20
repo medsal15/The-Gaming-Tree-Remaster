@@ -1,6 +1,5 @@
 'use strict';
 
-//todo rebalance mining items costs
 //todo option to display crafting as buyables
 addLayer('c', {
     name: 'crafting',
@@ -717,7 +716,13 @@ addLayer('c', {
                     'slime_core': 'count',
                 },
             },
-            categories: ['materials', 'slime',],
+            categories() {
+                /** @type {categories[]} */
+                const cat = ['materials'];
+                if (tmp.xp.monsters.slime.disabled) cat.push('dungeon');
+                else cat.push('slime');
+                return cat;
+            },
         },
         dense_slime_core: {
             _id: null,
@@ -759,7 +764,13 @@ addLayer('c', {
                 },
                 duration: '10 seconds',
             },
-            categories: ['materials', 'slime',],
+            categories() {
+                /** @type {categories[]} */
+                const cat = ['materials'];
+                if (tmp.xp.monsters.slime.disabled) cat.push('dungeon');
+                else cat.push('slime');
+                return cat;
+            },
         },
         skull: {
             _id: null,
@@ -836,7 +847,13 @@ addLayer('c', {
                 },
                 duration: '15 seconds',
             },
-            categories: ['materials', 'skeleton', 'slime',],
+            categories() {
+                /** @type {categories[]} */
+                const cat = ['materials', 'skeleton'];
+                if (tmp.xp.monsters.slime.disabled) cat.push('dungeon');
+                else cat.push('slime');
+                return cat;
+            },
             unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
         },
         golem_core: {
@@ -1829,7 +1846,13 @@ addLayer('c', {
                 },
                 duration: '(crafting * 2 + crafted) * 5 + 10 seconds',
             },
-            categories: ['equipment', 'slime',],
+            categories() {
+                /** @type {categories[]} */
+                const cat = ['equipment'];
+                if (tmp.xp.monsters.slime.disabled) cat.push('dungeon');
+                else cat.push('slime');
+                return cat;
+            },
             static: true,
         },
         slime_knife: {
@@ -1873,7 +1896,13 @@ addLayer('c', {
                 },
                 duration: '(crafting * 2 + crafted) * 10 seconds',
             },
-            categories: ['equipment', 'slime',],
+            categories() {
+                /** @type {categories[]} */
+                const cat = ['equipment'];
+                if (tmp.xp.monsters.slime.disabled) cat.push('dungeon');
+                else cat.push('slime');
+                return cat;
+            },
             static: true,
         },
         slime_injector: {
@@ -1919,7 +1948,13 @@ addLayer('c', {
                 },
                 duration: '(crafting * 2 + crafted) * 10 + 15 seconds',
             },
-            categories: ['equipment', 'slime',],
+            categories() {
+                /** @type {categories[]} */
+                const cat = ['equipment'];
+                if (tmp.xp.monsters.slime.disabled) cat.push('dungeon');
+                else cat.push('slime');
+                return cat;
+            },
             static: true,
         },
         slime_die: {
@@ -1965,7 +2000,13 @@ addLayer('c', {
                 },
                 duration: '(crafting * 4 + crafted) * 5 + 20 seconds',
             },
-            categories: ['equipment', 'slime',],
+            categories() {
+                /** @type {categories[]} */
+                const cat = ['equipment'];
+                if (tmp.xp.monsters.slime.disabled) cat.push('dungeon');
+                else cat.push('slime');
+                return cat;
+            },
             static: true,
         },
         // Skeleton
@@ -2053,7 +2094,13 @@ addLayer('c', {
                 },
                 duration: '(crafting + crafted) * 30 seconds',
             },
-            categories: ['equipment', 'skeleton', 'slime',],
+            categories() {
+                /** @type {categories[]} */
+                const cat = ['equipment', 'skeleton'];
+                if (tmp.xp.monsters.slime.disabled) cat.push('dungeon');
+                else cat.push('slime');
+                return cat;
+            },
             static: true,
             unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
         },
@@ -2143,7 +2190,13 @@ addLayer('c', {
                 },
                 duration: '(crafting + crafted) * 5 + 30 seconds',
             },
-            categories: ['equipment', 'skeleton', 'slime',],
+            categories() {
+                /** @type {categories[]} */
+                const cat = ['equipment', 'skeleton'];
+                if (tmp.xp.monsters.slime.disabled) cat.push('dungeon');
+                else cat.push('slime');
+                return cat;
+            },
             static: true,
             unlocked() { return tmp.xp.monsters.skeleton.unlocked; },
         },
@@ -3285,7 +3338,13 @@ addLayer('c', {
                 },
                 duration: '30 seconds',
             },
-            categories: ['equipment', 'densium', 'slime',],
+            categories() {
+                /** @type {categories[]} */
+                const cat = ['equipment', 'densium'];
+                if (tmp.xp.monsters.slime.disabled) cat.push('dungeon');
+                else cat.push('slime');
+                return cat;
+            },
             static: true,
             unlocked() { return tmp.m.compactor.unlocked; },
         },

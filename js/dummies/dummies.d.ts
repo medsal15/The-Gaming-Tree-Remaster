@@ -1518,8 +1518,8 @@ type monsters = 'slime' | 'skeleton' | 'golem' | 'bug';
 type ores = 'stone' | 'copper' | 'tin' |
     'coal' | 'iron' | 'silver';
 
-type drop_sources = `kill:${monsters}` | 'kill:any' | 'crafting' | 'forge' | `mining:${ores}` | 'mining:any' | 'mining:compactor' | 'shop';
-type drop_types = 'kill' | 'crafting' | 'forge' | 'mining' | 'shop';
+type drop_sources = `kill:${monsters}` | 'kill:any' | 'crafting' | 'forge' | `mining:${ores}` | 'mining:any' | 'mining:compactor' | 'shop' | 'workers';
+type drop_types = 'kill' | 'crafting' | 'forge' | 'mining' | 'shop' | 'workers';
 type categories = 'materials' | 'equipment' | 'craftable' |
     'mining' | 'densium' | 'deep_mining' |
     'forge' | 'shop' | 'arca' | 'boss' | 'dungeon' |
@@ -1674,6 +1674,8 @@ type Layers = {
             level(kills?: DecimalSource): Decimal
             /** Maximum health of the monster at a given level */
             health(level?: DecimalSource): Decimal
+            /** Health regained every second for a monster */
+            regen(level?: DecimalSource): Decimal
             /** Damage reduction */
             defense?(level?: DecimalSource): Decimal
             /** XP gained on kill */
@@ -1688,6 +1690,8 @@ type Layers = {
             damage_per_second(): Decimal
             lore: Computable<string>
             unlocked?(): boolean
+            /** If true, the enemy data will be hidden and its images blurry */
+            disabled?(): boolean
         } }
         list(): monsters[]
         kill: {
@@ -2096,6 +2100,8 @@ type Layers = {
                 lore: Computable<string>
                 /** Linked challenge */
                 challenge: string
+                /** If true, its images will be blurry */
+                disabled?(): boolean
             }
         }
         list(): string[]
@@ -2110,6 +2116,9 @@ type Layers = {
                 buy_mult(): Decimal
                 /** Multiplier to selling gains */
                 sell_mult(): Decimal
+            }
+            worker: {
+                mult(): Decimal
             }
         }
         coins: {

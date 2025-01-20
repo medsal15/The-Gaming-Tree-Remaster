@@ -605,10 +605,27 @@ addLayer('ach', {
             name: 'I Heard You Like Recursion',
             tooltip() {
                 if (player.b.dungeon.max < 1) return 'Kill the ???';
-                if (player.b.dungeon.max >= 3) return 'Kill the Recur<span class="undefined">undefined</span>'
+                if (!hasAchievement(this.layer, this.id)) return `Kill the Recur${UNDEFTXT}`;
                 return 'Kill the Recurslime';
             },
-            done() { return false; },
+            done() { return player.b.dungeon.floor == 2 && D.gte(player.xp.monsters.slime.kills, 1); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.b.groups.dungeon.color); },
+            style() {
+                let style = {};
+
+                if (hasAchievement(this.layer, this.id)) style['background-color'] = tmp.b.groups.dungeon.color;
+
+                return style;
+            },
+            unlocked() { return tmp.b.challenges[71].unlocked; },
+        },
+        133: {
+            name: 'Dusk of the Dead',
+            tooltip() {
+                if (player.b.dungeon.max < 4) return 'Destroy the ???';
+                return 'Destroy the ???';
+            },
+            done() { return player.b.dungeon.floor == 5 && false; },
             onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Achievement Completed!', 3, tmp.b.groups.dungeon.color); },
             style() {
                 let style = {};

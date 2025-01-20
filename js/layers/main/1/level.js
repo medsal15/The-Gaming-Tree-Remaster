@@ -645,6 +645,12 @@ addLayer('l', {
         mult = mult.div(item_effect('tin_cache').level);
         mult = mult.div(item_effect('bug_pheromones').level_div);
 
+        if (inChallenge('b', 71)) {
+            if (player.b.dungeon.floor >= 2) {
+                mult = mult.times(tmp.b.dungeon[2].effect.l_div);
+            }
+        }
+
         return mult;
     },
     automate() {
