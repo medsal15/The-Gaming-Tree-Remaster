@@ -177,6 +177,9 @@ addLayer('b', {
                 if (!tmp.b.challenges[41].unlocked) {
                     return D.div(player.items.arcane_generator.amount, 1);
                 }
+                if (!tmp.b.challenges[42].unlocked) {
+                    return D.div(player.items.bug_pheromones.amount, 3);
+                }
                 return D.dZero;
             },
             display() {
@@ -190,9 +193,17 @@ addLayer('b', {
                     const name = (tmp.items.gold_nugget.unlocked ?? true) ? tmp.items.gold_nugget.name : 'unknown';
                     return `Mine ${formatWhole(player.items.gold_nugget.amount)} / ${formatWhole(1)} ${name}`;
                 }
-                if (!tmp.b.challenges[12].unlocked) {
+                if (!tmp.b.challenges[41].unlocked) {
                     const name = (tmp.items.arcane_generator.unlocked ?? true) ? tmp.items.arcane_generator.name : 'unknown';
                     return `Craft ${formatWhole(player.items.arcane_generator.amount)} / ${formatWhole(1)} ${name}`;
+                }
+                if (!tmp.b.challenges[42].unlocked) {
+                    const bp_name = (tmp.items.bug_pheromones.unlocked ?? true) ? tmp.items.bug_pheromones.name : 'unknown',
+                        cc_name = (tmp.items.chrome_coating.unlocked ?? true) ? tmp.items.chrome_coating.name : 'unknown';
+                    let text = `Craft ${formatWhole(player.items.bug_collector.amount)} / ${formatWhole(3)} ${bp_name}
+                        or ${formatWhole(player.items.chrome_coating.amount)} / ${formatWhole(1)} ${cc_name}`;
+
+                    return text;
                 }
                 return 'Not fighting a boss';
             },
@@ -298,15 +309,21 @@ addLayer('b', {
                 return { 'backgroundColor': tmp.b.groups[group].color, };
             },
         },
-        /**
-         * TODO 42: Alternator
-         *  slime -> ice cube (hp is static, def increases with level)
-         *  skeleton -> ghost (low hp, low damage)
-         *  golem -> puppet (low hp, chance to miss)
-         *  bug -> error (glitchy name, "random" health mult based on killed amount)
-         * goal: ???
-         * reward: ???
-         */
+        42: {
+            name: '???',
+            challengeDescription: `???`,
+            goalDescription: '???',
+            rewardDescription: '???',
+            canComplete() { return false; },
+            progress() { return 0; },
+            display() { return ''; },
+            unlocked() { return player.b.shown && player.b.visible_challenges.includes(this.id); },
+            group: 'boss',
+            buttonStyle() {
+                const group = tmp[this.layer].challenges[this.id].group
+                return { 'backgroundColor': tmp.b.groups[group].color, };
+            },
+        },
         // Mini
         21: {
             name: 'Slime Monarch',
@@ -735,6 +752,13 @@ addLayer('b', {
             player.b.visible_challenges.push('41');
             doPopup('none', `${tmp.b.challenges[41].name}`, 'Boss unlocked', 5, tmp.b.color);
         }
+        if (!player.b.visible_challenges.includes('42') && (
+            D.gte(player.items.bug_pheromones.amount, 3) ||
+            D.gte(player.items.chrome_coating.amount, 1)
+        )) {
+            player.b.visible_challenges.push('42');
+            doPopup('none', `${tmp.b.challenges[42].name}`, 'Boss unlocked', 5, tmp.b.color);
+        }
     },
     prestigeNotify() { return !activeChallenge('b') && [11].some(id => tmp.b.challenges[id].unlocked && !hasChallenge('b', id)); },
     shouldNotify() {
@@ -784,6 +808,7 @@ addLayer('b', {
             },
             challenge: 41,
         },
+        //todo 42
         // Mini
         'slime_monarch': {
             _id: null,
