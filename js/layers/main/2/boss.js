@@ -310,13 +310,14 @@ addLayer('b', {
             },
         },
         42: {
-            name: '???',
-            challengeDescription: `???`,
-            goalDescription: '???',
-            rewardDescription: '???',
-            canComplete() { return false; },
-            progress() { return 0; },
-            display() { return ''; },
+            name: 'Swarm',
+            challengeDescription: `Divide enemy health, experience, and drop chances by 10.<br>
+                Except insects, whose health, level, experience, drop chances and defense are multiplied by 2.`,
+            goalDescription: 'Kill 100 insects',
+            rewardDescription: 'Double insect drop chances, and divide enemy defense by 2.',
+            canComplete() { return D.gte(player.xp.monsters.bug.kills, 100); },
+            progress() { return D.div(player.xp.monsters.bug.kills, 100); },
+            display() { return `${formatWhole(player.xp.monsters.bug.kills)} / 100 insects killed`; },
             unlocked() { return player.b.shown && player.b.visible_challenges.includes(this.id); },
             group: 'boss',
             buttonStyle() {
@@ -808,7 +809,17 @@ addLayer('b', {
             },
             challenge: 41,
         },
-        //todo 42
+        'swarm': {
+            _id: null,
+            get id() { return this._id ??= Object.entries(layers.b.bosses).find(([, r]) => r == this)[0]; },
+            unlocked() { return tmp.b.challenges[42].unlocked; },
+            name: 'swarm',
+            position: [3, 0],
+            lore: `A large quantity of insects. Seemingly endless...<br>
+                A danger to all, and even more to farmers. How could the kingdom continue to exist without them.<br>
+                Are they getting bigger?`,
+            challenge: 42,
+        },
         // Mini
         'slime_monarch': {
             _id: null,

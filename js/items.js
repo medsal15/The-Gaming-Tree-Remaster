@@ -37,6 +37,7 @@ const item_list = {
                 chance = chance.times(tmp.xp.modifiers.drops.mult);
 
                 if (inChallenge('b', 41)) chance = chance.div(4);
+                if (inChallenge('b', 42)) chance = chance.div(10);
 
                 return { 'kill:slime': chance };
             },
@@ -97,6 +98,7 @@ const item_list = {
                 chance = chance.times(tmp.xp.modifiers.drops.mult);
 
                 if (inChallenge('b', 41)) chance = chance.times(2);
+                if (inChallenge('b', 42)) chance = chance.div(10);
 
                 return { 'kill:slime': chance };
             },
@@ -158,7 +160,10 @@ const item_list = {
 
                 let die_mult = item_effect('slime_die').core_chance;
                 if (inChallenge('b', 41)) die_mult = D.add(die_mult, .5);
+
                 chance = chance.times(die_mult);
+
+                if (inChallenge('b', 42)) chance = chance.div(10);
 
                 return { 'kill:slime': chance };
             },
@@ -594,6 +599,7 @@ const item_list = {
                 chance = chance.times(tmp.xp.modifiers.drops.mult);
 
                 if (inChallenge('b', 41)) chance = chance.times(2);
+                if (inChallenge('b', 42)) chance = chance.div(10);
 
                 return { 'kill:skeleton': chance };
             },
@@ -633,6 +639,7 @@ const item_list = {
                 chance = chance.times(tmp.xp.modifiers.drops.mult);
 
                 if (inChallenge('b', 41)) chance = chance.times(3);
+                if (inChallenge('b', 42)) chance = chance.div(10);
 
                 return { 'kill:skeleton': chance };
             },
@@ -674,6 +681,7 @@ const item_list = {
                 chance = chance.times(item_effect('magic_slime_ball').skull_chance);
 
                 if (inChallenge('b', 41)) chance = chance.div(2);
+                if (inChallenge('b', 42)) chance = chance.div(10);
 
                 return { 'kill:skeleton': chance };
             },
@@ -978,6 +986,8 @@ const item_list = {
 
                 chance = chance.times(item_effect('bug_collector').mud_mult);
 
+                if (inChallenge('b', 42)) chance = chance.div(10);
+
                 const chances = {};
 
                 if (inChallenge('b', 41)) {
@@ -1065,6 +1075,8 @@ const item_list = {
                 chance = chance.times(tmp.c.chance_multiplier);
                 chance = chance.times(tmp.xp.modifiers.drops.mult);
 
+                if (inChallenge('b', 42)) chance = chance.div(10);
+
                 return { 'kill:golem': chance };
             },
             other() {
@@ -1103,6 +1115,8 @@ const item_list = {
                 chance = chance.times(tmp.xp.modifiers.drops.mult);
 
                 chance = chance.times(item_effect('record_golem').core_chance);
+
+                if (inChallenge('b', 42)) chance = chance.div(10);
 
                 return { 'kill:golem': chance };
             },
@@ -1327,6 +1341,9 @@ const item_list = {
                 chance = chance.times(tmp.c.chance_multiplier);
                 chance = chance.times(tmp.xp.modifiers.drops.mult);
 
+                if (inChallenge('b', 42)) chance = chance.times(2);
+                if (hasChallenge('b', 42)) chance = chance.times(2);
+
                 return { 'kill:bug': chance };
             },
             other() {
@@ -1368,6 +1385,8 @@ const item_list = {
                 chance = chance.times(tmp.xp.modifiers.drops.mult);
 
                 if (inChallenge('b', 41)) chance = chance.div(2);
+                if (inChallenge('b', 42)) chance = chance.times(2);
+                if (hasChallenge('b', 42)) chance = chance.times(2);
 
                 return { 'kill:bug': chance };
             },
@@ -1412,6 +1431,8 @@ const item_list = {
                 chance = chance.times(item_effect('bug_pheromones').exoskeleton_chance);
 
                 if (inChallenge('b', 41)) chance = chance.times(2);
+                if (inChallenge('b', 42)) chance = chance.times(2);
+                if (hasChallenge('b', 42)) chance = chance.times(2);
 
                 return { 'kill:bug': chance };
             },
@@ -1477,6 +1498,9 @@ const item_list = {
 
                 chance = chance.times(tmp.c.chance_multiplier);
                 chance = chance.times(tmp.xp.modifiers.drops.mult);
+
+                if (inChallenge('b', 42)) chance = chance.times(2);
+                if (hasChallenge('b', 42)) chance = chance.times(2);
 
                 return { 'kill:bug': chance };
             },
@@ -1883,6 +1907,8 @@ const item_list = {
                     chance = chance.times(tmp.c.chance_multiplier);
                     chance = chance.times(tmp.xp.modifiers.drops.mult);
 
+                    if (inChallenge('b', 42)) chance = chance.div(10);
+
                     chances['kill:golem'] = chance;
                 }
                 return chances;
@@ -1921,6 +1947,8 @@ const item_list = {
 
                 chance = chance.div(item_effect('gold_nugget'));
                 chance = chance.times(item_effect('gold_ingot'));
+
+                if (inChallenge('b', 42)) chance = chance.div(10);
 
                 if (hasChallenge('b', 12)) skeleton_chance = D.div(chance, 10);
 
@@ -3371,6 +3399,11 @@ const item_list = {
 
                     min = min.times(tmp.s.modifiers.coin.mult);
                     max = max.times(tmp.s.modifiers.coin.mult);
+
+                    if (inChallenge('b', 42)) {
+                        min = min.div(10);
+                        max = max.div(10);
+                    }
 
                     return {
                         'kill:slime': { min, max, },

@@ -100,13 +100,24 @@ addLayer('xp', {
 
                     if (!selected) return `<div style="width: 240px; height: 240px; overflow: hidden"></div>`;
 
-                    return `<div style="width: 240px; height: 240px; overflow: hidden">
+                    let div_style = 'width: 240px; height: 240px; overflow: hidden;',
+                        mon_style = {
+                            'width': `${MONSTER_SIZES.width * 100}%`,
+                            'height': `${MONSTER_SIZES.height * 100}%`,
+                            'margin-left': `${-240 * tmp.xp.monsters[selected].position[0]}px`,
+                            'margin-top': `${-240 * tmp.xp.monsters[selected].position[1]}px`,
+                            'image-rendering': `pixelated`,
+                        };
+
+                    if (inChallenge('b', 42) && selected != 'bug') {
+                        div_style = 'width: 120px; height: 120px; overflow: hidden; margin-top: 60px; margin-bottom: 60px;';
+                        mon_style['margin-left'] = `${-120 * tmp.xp.monsters[selected].position[0]}px`;
+                        mon_style['margin-top'] = `${-120 * tmp.xp.monsters[selected].position[1]}px`;
+                    }
+
+                    return `<div style="${div_style}">
                             <img src="./resources/images/enemies.png"
-                                style="width: ${MONSTER_SIZES.width * 100}%;
-                                    height: ${MONSTER_SIZES.height * 100}%;
-                                    margin-left: ${-240 * tmp.xp.monsters[selected].position[0]}px;
-                                    margin-top: ${-240 * tmp.xp.monsters[selected].position[1]}px;
-                                    image-rendering: pixelated;"/>
+                                style="${Object.entries(mon_style).map(([k, v]) => `${k}:${v}`).join(';')}"/>
                         </div>`;
                 }],
                 ['bar', 'health'],
@@ -1064,7 +1075,9 @@ addLayer('xp', {
 
                 const mod = tmp.xp.modifiers.level;
 
-                return k.div(mod.base).pow(mod.exp).times(mod.mult).floor().add(1);
+                let level = k.div(mod.base).pow(mod.exp).times(mod.mult);
+
+                return level.floor().add(1);
             },
             health(level) {
                 let l = D(level ?? tmp?.xp?.monsters[this.id].level);
@@ -1192,7 +1205,9 @@ addLayer('xp', {
 
                 const mod = tmp.xp.modifiers.level;
 
-                return k.div(mod.base).pow(mod.exp).times(mod.mult).floor().add(1);
+                let level = k.div(mod.base).pow(mod.exp).times(mod.mult);
+
+                return level.floor().add(1);
             },
             health(level) {
                 let l = D(level ?? tmp?.xp?.monsters[this.id].level);
@@ -1300,7 +1315,9 @@ addLayer('xp', {
 
                 const mod = tmp.xp.modifiers.level;
 
-                return k.div(mod.base).pow(mod.exp).times(mod.mult).floor().add(1);
+                let level = k.div(mod.base).pow(mod.exp).times(mod.mult);
+
+                return level.floor().add(1);
             },
             health(level) {
                 let l = D(level ?? tmp?.xp?.monsters[this.id].level);
@@ -1403,7 +1420,11 @@ addLayer('xp', {
 
                 const mod = tmp.xp.modifiers.level;
 
-                return k.div(mod.base).pow(mod.exp).times(mod.mult).floor().add(1);
+                let level = k.div(mod.base).pow(mod.exp).times(mod.mult);
+
+                if (inChallenge('b', 42)) level = level.times(2);
+
+                return level.floor().add(1);
             },
             health(level) {
                 let l = D(level ?? tmp?.xp?.monsters[this.id].level);
@@ -1413,6 +1434,7 @@ addLayer('xp', {
                 let health = D.times(level_mult, 20).times(tmp.xp?.modifiers.health.mult ?? 1);
 
                 if (inChallenge('b', 41)) health = health.times(3);
+                if (inChallenge('b', 42)) health = health.times(20);
 
                 health = D.pow(health, tmp.xp.modifiers.health.exp);
 
@@ -1426,6 +1448,7 @@ addLayer('xp', {
                 let defense = D.pow(1.5, l).minus(.5);
 
                 defense = defense.times(tmp.xp.modifiers.defense.mult);
+                if (inChallenge('b', 42)) defense = defense.times(2);
 
                 return defense;
             },
@@ -1433,6 +1456,8 @@ addLayer('xp', {
                 const l = D(level ?? tmp.xp.monsters[this.id].level);
 
                 let xp = D.times(l, tmp.xp.modifiers.xp.mult).times(8);
+
+                if (inChallenge('b', 42)) xp = xp.times(20);
 
                 xp = xp.pow(1.75);
 
@@ -1612,6 +1637,8 @@ addLayer('xp', {
 
                 mult = mult.times(buyableEffect('dea', 23));
 
+                if (inChallenge('b', 42)) mult = mult.div(10);
+
                 return mult;
             },
             exp() {
@@ -1668,6 +1695,8 @@ addLayer('xp', {
 
                 if (hasUpgrade('dea', 21)) mult = mult.div(upgradeEffect('dea', 21));
 
+                if (inChallenge('b', 42)) mult = mult.div(10);
+
                 return mult;
             },
             exp() {
@@ -1715,6 +1744,8 @@ addLayer('xp', {
                 mult = mult.div(tmp.a.spells.acid.effect.def_div);
 
                 mult = mult.div(item_effect('bug_armor').defense_div);
+
+                if (hasChallenge('b', 42)) mult = mult.div(2);
 
                 return mult;
             },

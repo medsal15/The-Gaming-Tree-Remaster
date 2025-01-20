@@ -507,6 +507,12 @@ function bestiary_content(monster) {
                     *${formatWhole(5)} health`;
                 specific_lines.push(text);
             }
+            if (inChallenge('b', 42)) {
+                const group = tmp.b.challenges[42].group,
+                    text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[42].name)} active effect:\
+                    /${formatWhole(10)} experience, health, and drop chances`;
+                specific_lines.push(text);
+            }
             if (hasChallenge('b', 11)) {
                 const group = tmp.b.challenges[11].group,
                     text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[11].name)} reward effect:\
@@ -525,6 +531,12 @@ function bestiary_content(monster) {
                 const group = tmp.b.challenges[41].group,
                     text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[41].name)} active effect:\
                     *${formatWhole(4)} health`;
+                specific_lines.push(text);
+            }
+            if (inChallenge('b', 42)) {
+                const group = tmp.b.challenges[42].group,
+                    text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[42].name)} active effect:\
+                    /${formatWhole(10)} experience, health, and drop chances`;
                 specific_lines.push(text);
             }
             if (hasUpgrade('m', 53)) {
@@ -546,7 +558,21 @@ function bestiary_content(monster) {
                     *${formatWhole(3)} health`;
                 specific_lines.push(text);
             }
+            if (inChallenge('b', 42)) {
+                const group = tmp.b.challenges[42].group,
+                    text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[42].name)} active effect:\
+                    /${formatWhole(10)} experience, health, and drop chances`;
+                specific_lines.push(text);
+            }
         }; break;
+        case 'bug': {
+            if (inChallenge('b', 42)) {
+                const group = tmp.b.challenges[42].group,
+                    text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[42].name)} active effect:\
+                    *${formatWhole(2)} experience, level, health, defense, and drop chances`;
+                specific_lines.push(text);
+            }
+        } break;
     }
     if (specific_lines.length > 0) lines.push(['display-text', '<u>Specific effects:</u>'], ...specific_lines.map(t => ['display-text', t]), 'blank');
 
