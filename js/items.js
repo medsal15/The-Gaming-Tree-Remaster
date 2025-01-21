@@ -1539,7 +1539,7 @@ const item_list = {
                 chance = chance.times(tmp.c.chance_multiplier);
                 chance = chance.times(tmp.xp.modifiers.drops.mult);
 
-                if (inChallenge('b', 42)) chance = chance.times(2);
+                if (inChallenge('b', 42)) chance = chance.times(3);
                 if (hasChallenge('b', 42)) chance = chance.times(2);
 
                 return { 'kill:bug': chance };
@@ -1583,7 +1583,7 @@ const item_list = {
                 chance = chance.times(tmp.xp.modifiers.drops.mult);
 
                 if (inChallenge('b', 41)) chance = chance.div(2);
-                if (inChallenge('b', 42)) chance = chance.times(2);
+                if (inChallenge('b', 42)) chance = chance.times(3);
                 if (hasChallenge('b', 42)) chance = chance.times(2);
 
                 return { 'kill:bug': chance };
@@ -1629,7 +1629,7 @@ const item_list = {
                 chance = chance.times(item_effect('bug_pheromones').exoskeleton_chance);
 
                 if (inChallenge('b', 41)) chance = chance.times(2);
-                if (inChallenge('b', 42)) chance = chance.times(2);
+                if (inChallenge('b', 42)) chance = chance.times(3);
                 if (hasChallenge('b', 42)) chance = chance.times(2);
 
                 return { 'kill:bug': chance };
@@ -1697,7 +1697,7 @@ const item_list = {
                 chance = chance.times(tmp.c.chance_multiplier);
                 chance = chance.times(tmp.xp.modifiers.drops.mult);
 
-                if (inChallenge('b', 42)) chance = chance.times(2);
+                if (inChallenge('b', 42)) chance = chance.times(3);
                 if (hasChallenge('b', 42)) chance = chance.times(2);
 
                 return { 'kill:bug': chance };

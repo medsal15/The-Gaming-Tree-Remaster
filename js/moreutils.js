@@ -489,10 +489,7 @@ function bestiary_content(monster) {
         /** @type {string[]} */
         const specific_lines = [];
 
-        if (hasUpgrade('l', 31)) specific_lines.push([
-            'display-text',
-            `${resourceColor(tmp.l.skill_points.color, tmp.l.upgrades[31].title)} effect: +${format(upgradeEffect('l', 31)[monster])} damage`,
-        ]);
+        if (hasUpgrade('l', 31)) specific_lines.push(`${resourceColor(tmp.l.skill_points.color, tmp.l.upgrades[31].title)} effect: +${format(upgradeEffect('l', 31)[monster])} damage`);
         // Monster specific upgrades
         switch (monster) {
             case 'slime': {
@@ -576,7 +573,7 @@ function bestiary_content(monster) {
                 if (inChallenge('b', 42)) {
                     const group = tmp.b.challenges[42].group,
                         text = `${resourceColor(tmp.b.groups[group].color, tmp.b.challenges[42].name)} active effect:\
-                    *${formatWhole(2)} experience, level, health, defense, and drop chances`;
+                    *${formatWhole(3)} experience, level, health, defense, and drop chances`;
                     specific_lines.push(text);
                 }
             } break;

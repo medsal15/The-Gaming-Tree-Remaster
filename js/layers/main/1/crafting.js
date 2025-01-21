@@ -218,7 +218,7 @@ addLayer('c', {
             title() { return `${formatWhole(player.items.stone_wall.amount)} ${capitalize_words(tmp.items.stone_wall.name)}`; },
             display() {
                 const cost = tmp[this.layer].buyables[this.id].cost;
-                let stone_cost = shiftDown ? '[amount * 5 + 5]' : format(cost);
+                let stone_cost = shiftDown ? '[amount * 2 + 5]' : format(cost);
 
                 return item_list.stone_wall.effectDescription() + `<br>
                     First purchase replaces stone costs with stone bricks<br><br>
@@ -227,7 +227,7 @@ addLayer('c', {
             cost(x) {
                 if (tmp[this.layer].deactivated) x = D.dZero;
 
-                let cost = D.times(x, 5).add(5);
+                let cost = D.times(x, 2).add(5);
 
                 return cost;
             },
@@ -260,7 +260,7 @@ addLayer('c', {
             title() { return `${formatWhole(player.items.copper_golem.amount)} ${capitalize_words(tmp.items.copper_golem.name)}`; },
             display() {
                 const cost = tmp[this.layer].buyables[this.id].cost;
-                let copper_cost = shiftDown ? '[amount * 5 + 5]' : format(cost);
+                let copper_cost = shiftDown ? '[amount * 2 + 5]' : format(cost);
 
                 return item_list.copper_golem.effectDescription() + `<br>
                     First purchase replaces copper ore costs with copper ingots<br><br>
@@ -269,7 +269,7 @@ addLayer('c', {
             cost(x) {
                 if (tmp[this.layer].deactivated) x = D.dZero;
 
-                let cost = D.times(x, 5).add(5);
+                let cost = D.times(x, 2).add(5);
 
                 return cost;
             },
@@ -302,7 +302,7 @@ addLayer('c', {
             title() { return `${formatWhole(player.items.tin_ring.amount)} ${capitalize_words(tmp.items.tin_ring.name)}`; },
             display() {
                 const cost = tmp[this.layer].buyables[this.id].cost;
-                let tin_cost = shiftDown ? '[amount * 5 + 5]' : format(cost);
+                let tin_cost = shiftDown ? '[amount * 2 + 5]' : format(cost);
 
                 return item_list.tin_ring.effectDescription() + `<br>
                     First purchase replaces tin ore costs with tin ingots<br><br>
@@ -311,7 +311,7 @@ addLayer('c', {
             cost(x) {
                 if (tmp[this.layer].deactivated) x = D.dZero;
 
-                let cost = D.times(x, 5).add(5);
+                let cost = D.times(x, 2).add(5);
 
                 return cost;
             },
@@ -344,7 +344,7 @@ addLayer('c', {
             title() { return `${formatWhole(player.items.bronze_mold.amount)} ${capitalize_words(tmp.items.bronze_mold.name)}`; },
             display() {
                 const cost = tmp[this.layer].buyables[this.id].cost;
-                let bronze_cost = shiftDown ? '[amount * 5 + 5]' : format(cost);
+                let bronze_cost = shiftDown ? '[amount * 2 + 5]' : format(cost);
 
                 return item_list.bronze_mold.effectDescription() + `<br>
                     First purchase replaces bronze blend costs with bronze ingots<br><br>
@@ -353,7 +353,7 @@ addLayer('c', {
             cost(x) {
                 if (tmp[this.layer].deactivated) x = D.dZero;
 
-                let cost = D.times(x, 5).add(5);
+                let cost = D.times(x, 2).add(5);
 
                 return cost;
             },
@@ -428,7 +428,7 @@ addLayer('c', {
             title() { return `${formatWhole(player.items.iron_heataxe.amount)} ${capitalize_words(tmp.items.iron_heataxe.name)}`; },
             display() {
                 const cost = tmp[this.layer].buyables[this.id].cost;
-                let iron_cost = shiftDown ? '[amount * 5 + 5]' : format(cost);
+                let iron_cost = shiftDown ? '[amount * 2 + 5]' : format(cost);
 
                 return item_list.iron_heataxe.effectDescription() + `<br>
                     First purchase replaces iron ore costs with iron ingots<br><br>
@@ -437,7 +437,7 @@ addLayer('c', {
             cost(x) {
                 if (tmp[this.layer].deactivated) x = D.dZero;
 
-                let cost = D.times(x, 5).add(5);
+                let cost = D.times(x, 2).add(5);
 
                 return cost;
             },
@@ -470,7 +470,7 @@ addLayer('c', {
             title() { return `${formatWhole(player.items.disco_ball.amount)} ${capitalize_words(tmp.items.disco_ball.name)}`; },
             display() {
                 const cost = tmp[this.layer].buyables[this.id].cost;
-                let silver_cost = shiftDown ? '[amount * 5 + 5]' : format(cost);
+                let silver_cost = shiftDown ? '[amount * 2 + 5]' : format(cost);
 
                 return item_list.disco_ball.effectDescription() + `<br>
                     First purchase replaces silver ore costs with silver ingots<br><br>
@@ -479,7 +479,7 @@ addLayer('c', {
             cost(x) {
                 if (tmp[this.layer].deactivated) x = D.dZero;
 
-                let cost = D.times(x, 5).add(5);
+                let cost = D.times(x, 2).add(5);
 
                 return cost;
             },
@@ -512,7 +512,7 @@ addLayer('c', {
             title() { return `${formatWhole(player.items.electrum_package.amount)} ${capitalize_words(tmp.items.electrum_package.name)}`; },
             display() {
                 const cost = tmp[this.layer].buyables[this.id].cost;
-                let electrum_cost = shiftDown ? '[amount * 5 + 5]' : format(cost);
+                let electrum_cost = shiftDown ? '[amount * 2 + 5]' : format(cost);
 
                 return item_list.electrum_package.effectDescription() + `<br>
                     First purchase replaces electrum blend costs with electrum ingots<br><br>
@@ -521,7 +521,7 @@ addLayer('c', {
             cost(x) {
                 if (tmp[this.layer].deactivated) x = D.dZero;
 
-                let cost = D.times(x, 5).add(5);
+                let cost = D.times(x, 2).add(5);
 
                 return cost;
             },

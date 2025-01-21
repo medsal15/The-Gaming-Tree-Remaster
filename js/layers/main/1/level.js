@@ -1,5 +1,12 @@
 'use strict';
 
+/**
+ * TODO limit break buyable
+ *  needs all upgrades
+ *  resets upgrades
+ *  buff upgrade effects
+ *  increase upgrade costs
+ */
 addLayer('l', {
     name: 'level',
     startData() {

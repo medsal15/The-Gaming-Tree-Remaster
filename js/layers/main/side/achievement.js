@@ -942,6 +942,21 @@ addLayer('ach', {
             },
             unlocked() { return hasAchievement(this.layer, this.id); },
         },
+        151: {
+            name: 'Challengeless',
+            tooltip: 'Enter a challenge after erasing it',
+            done() { return hasAchievement('ach', 132) && (inChallenge('b', 11) || inChallenge('b', 21)); },
+            onComplete() { doPopup('achievement', tmp[this.layer].achievements[this.id].name, 'Secret Completed!', 3, tmp.ach.categories.secret.color); },
+            style() {
+                let style = {};
+
+                style['background-color'] = tmp.b.groups.boss.color;
+                style['border'] = `solid 3px ${tmp.ach.categories.secret.color}`;
+
+                return style;
+            },
+            unlocked() { return hasAchievement(this.layer, this.id); },
+        },
         //#endregion Secret
     },
     achievementPopups: false, // This is done manually
@@ -965,7 +980,7 @@ addLayer('ach', {
             owned() { return player.ach.achievements.filter(id => this.rows.includes(Math.floor(id / 10))); },
         },
         secret: {
-            rows: [6, 2, 10],
+            rows: [6, 2, 15, 10],
             color: '#FF0077',
             visible() {
                 return Object.values(tmp.ach.achievements)

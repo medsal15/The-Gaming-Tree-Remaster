@@ -315,7 +315,7 @@ addLayer('b', {
         42: {
             name: 'Swarm',
             challengeDescription: `Divide enemy health, experience, and drop chances by 10.<br>
-                Except insects, whose health, level, experience, drop chances and defense are multiplied by 2.`,
+                Except insects, whose health, level, experience, drop chances and defense are multiplied by 3.`,
             goalDescription: 'Kill 100 insects',
             rewardDescription: 'Double insect drop chances, and divide enemy defense by 2.',
             canComplete() { return D.gte(player.xp.monsters.bug.kills, 100); },
@@ -505,14 +505,14 @@ addLayer('b', {
                 return 'Mekhane';
             },
             challengeDescription: 'Replace first row automation with multipliers. Disco Ball effect is modified.',
-            goalDescription: 'Craft an 4 arcane generators, 2 record golems, 1 copper golems',
+            goalDescription: 'Craft an 4 arcane generators, 8 record golems, 2 copper golems',
             rewardDescription: 'Double factory rate and time. Halve all arca consumption.',
             canComplete() {
                 /** @type {[items, DecimalSource][]} */
                 const list = [
                     ['arcane_generator', 4],
-                    ['record_golem', 2],
-                    ['copper_golem', 1],
+                    ['record_golem', 8],
+                    ['copper_golem', 2],
                 ];
 
                 return list.every(([item, amount]) => D.gte(player.items[item].amount, amount));
@@ -521,8 +521,8 @@ addLayer('b', {
                 /** @type {[items, DecimalSource][]} */
                 const list = [
                     ['arcane_generator', 4],
-                    ['record_golem', 2],
-                    ['copper_golem', 1],
+                    ['record_golem', 8],
+                    ['copper_golem', 2],
                 ];
 
                 return list.map(([item, amount]) => D.min(player.items[item].amount, amount))
@@ -533,8 +533,8 @@ addLayer('b', {
                 /** @type {[items, DecimalSource][]} */
                 const list = [
                     ['arcane_generator', 4],
-                    ['record_golem', 2],
-                    ['copper_golem', 1],
+                    ['record_golem', 8],
+                    ['copper_golem', 2],
                 ],
                     amount = list.map(([item, amount]) => D.min(player.items[item].amount, amount))
                         .reduce((sum, n) => D.add(sum, n), D.dZero);

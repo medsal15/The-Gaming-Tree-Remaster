@@ -1502,7 +1502,7 @@ addLayer('xp', {
 
                 let level = k.div(mod.base).pow(mod.exp).times(mod.mult);
 
-                if (inChallenge('b', 42)) level = level.times(2);
+                if (inChallenge('b', 42)) level = level.times(3);
 
                 return level.floor().add(1);
             },
@@ -1514,7 +1514,7 @@ addLayer('xp', {
                 let health = D.times(level_mult, 20).times(tmp.xp?.modifiers.health.mult ?? 1);
 
                 if (inChallenge('b', 41)) health = health.times(3);
-                if (inChallenge('b', 42)) health = health.times(20);
+                if (inChallenge('b', 42)) health = health.times(3 * 10);
 
                 health = D.pow(health, tmp.xp.modifiers.health.exp);
 
@@ -1528,7 +1528,7 @@ addLayer('xp', {
                 let defense = D.pow(1.5, l).minus(.5);
 
                 defense = defense.times(tmp.xp.modifiers.defense.mult);
-                if (inChallenge('b', 42)) defense = defense.times(2);
+                if (inChallenge('b', 42)) defense = defense.times(3);
 
                 return defense;
             },
@@ -1537,7 +1537,7 @@ addLayer('xp', {
 
                 let xp = D.times(l, tmp.xp.modifiers.xp.mult).times(8);
 
-                if (inChallenge('b', 42)) xp = xp.times(20);
+                if (inChallenge('b', 42)) xp = xp.times(3 * 10);
 
                 xp = xp.pow(1.75);
 
